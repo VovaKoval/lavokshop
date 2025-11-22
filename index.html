@@ -290,11 +290,7 @@
                 if (!file) return;
 
                 // Перевірка формату файлу
-                if (!file.name.toLowerCase().endsWith('.xml')) {
-                    alert('❌ Помилка: Обери XML файл');
-                    e.target.value = '';
-                    return;
-                }
+                /* removed extension check for iPhone */
 
                 setLoading(true);
                 const reader = new FileReader();
