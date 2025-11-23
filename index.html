@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+            const updateProduct = (productId, updates) => {
+                setProducts(products.map(p => p.id === productId ? { ...p, ...updates } : p));
+            };<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -397,21 +399,22 @@
                 e.target.value = '';
             };
 
-            const updateProduct = (productId, updates) => {
-                setProducts(products.map(p => p.id === productId ? { ...p, ...updates } : p));
+            const calculateRRP = (basePrice, markup = priceMarkup) => {
+                const base = parseFloat(basePrice) || 0;
+                const markupPercent = parseFloat(markup) || 0;
+                return Math.round(base * (1 + markupPercent / 100) * 100) / 100;
             };
 
             const applyMarkupToAll = (newMarkup) => {
-                const updated = products.map(p => ({
-                    ...p,
-                    rrp: Math.round(p.basePrice * (1 + newMarkup / 100) * 100) / 100
-                }));
+                const updated = products.map(p => {
+                    const base = parseFloat(p.basePrice) || 0;
+                    return {
+                        ...p,
+                        rrp: Math.round(base * (1 + newMarkup / 100) * 100) / 100
+                    };
+                });
                 setProducts(updated);
                 setPriceMarkup(newMarkup);
-            };
-
-            const calculateRRP = (basePrice, markup = priceMarkup) => {
-                return Math.round(basePrice * (1 + markup / 100) * 100) / 100;
             };
 
             const deleteProduct = (productId) => {
@@ -680,7 +683,9 @@ ${hashtags[platform]}`;
                                 ) : (
                                     <div className="space-y-3">
                                         {filteredProducts.map(product => {
-                                            const displayRRP = product.rrp || calculateRRP(product.basePrice);
+                                            const basePrice = parseFloat(product.basePrice) || 0;
+                                            const currentRRP = parseFloat(product.rrp) || 0;
+                                            const displayRRP = currentRRP > 0 ? currentRRP : calculateRRP(basePrice);
                                             
                                             return (
                                             <div key={product.id} className="bg-white rounded-lg shadow-sm p-3">
@@ -721,7 +726,7 @@ ${hashtags[platform]}`;
                                                 <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded p-3 text-center border border-green-200">
                                                     <div className="text-xs text-gray-600 mb-1">РРЦ</div>
                                                     <div className="text-2xl font-bold text-green-600">
-                                                        {displayRRP} ₴
+                                                        {displayRRP.toFixed(2)} ₴
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-1 mt-2">
@@ -731,7 +736,7 @@ ${hashtags[platform]}`;
                                                     <button onClick={() => { setSelectedProduct({...product, rrp: displayRRP}); setShowPostModal(true); }} className="bg-purple-600 text-white py-2 rounded text-xs">
                                                         Пости
                                                     </button>
-                                                    <button onClick={() => createOrder({...product, rrp: displayRRP})} className="bg-green-600 text-white py-2 rounded text-xs">
+                                                    <button onClick={() => createOrder({...product, rrp: displayRRP, basePrice: basePrice})} className="bg-green-600 text-white py-2 rounded text-xs">
                                                         Замовити
                                                     </button>
                                                 </div>
