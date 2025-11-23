@@ -683,22 +683,13 @@ ${hashtags[platform]}`;
                                 ) : (
                                     <div className="space-y-3">
                                         {filteredProducts.map(product => {
-                                            // Отримуємо ціни з перевіркою
-                                            const basePrice = parseFloat(product.basePrice);
-                                            const productRRP = parseFloat(product.rrp);
+                                            // Базова ціна з XML (незмінна)
+                                            const basePrice = parseFloat(product.basePrice) || 0;
                                             
-                                            // Якщо RRP вже встановлена - використовуємо її
-                                            // Якщо ні - розраховуємо від basePrice
-                                            let displayRRP = 0;
-                                            if (!isNaN(productRRP) && productRRP > 0) {
-                                                displayRRP = productRRP;
-                                            } else if (!isNaN(basePrice) && basePrice > 0) {
-                                                displayRRP = calculateRRP(basePrice);
-                                            } else {
-                                                displayRRP = 0;
-                                            }
-                                            
-                                            console.log(`Товар ${product.myCode}: basePrice=${basePrice}, productRRP=${productRRP}, displayRRP=${displayRRP}`);
+                                            // РРЦ - якщо встановлена вручну, використовуємо її
+                                            // Якщо ні - розраховуємо від базової + наценка
+                                            const manualRRP = parseFloat(product.rrp) || 0;
+                                            const displayRRP = manualRRP > 0 ? manualRRP : calculateRRP(basePrice);
                                             
                                             return (
                                             <div key={product.id} className="bg-white rounded-lg shadow-sm p-3">
@@ -739,7 +730,10 @@ ${hashtags[platform]}`;
                                                 <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded p-3 text-center border border-green-200">
                                                     <div className="text-xs text-gray-600 mb-1">РРЦ</div>
                                                     <div className="text-2xl font-bold text-green-600">
-                                                        {displayRRP > 0 ? displayRRP.toFixed(2) : '0.00'} ₴
+                                                        {displayRRP > 0 ? displayRRP.toFixed(2) : basePrice.toFixed(2)} ₴
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        Базова: {basePrice.toFixed(2)}₴ {manualRRP === 0 && priceMarkup > 0 && `+${priceMarkup}%`}
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-1 mt-2">
