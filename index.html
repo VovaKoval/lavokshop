@@ -408,10 +408,14 @@
             const applyMarkupToAll = (newMarkup) => {
                 const updated = products.map(p => {
                     const base = parseFloat(p.basePrice) || 0;
-                    return {
-                        ...p,
-                        rrp: Math.round(base * (1 + newMarkup / 100) * 100) / 100
-                    };
+                    // Якщо ціна НЕ встановлена вручну - застосувати наценку
+                    if (!p.customPrice) {
+                        return {
+                            ...p,
+                            rrp: Math.round(base * (1 + newMarkup / 100) * 100) / 100
+                        };
+                    }
+                    return p; // Якщо вручну - не чіпаємо
                 });
                 setProducts(updated);
                 setPriceMarkup(newMarkup);
@@ -444,7 +448,8 @@ ${hashtags[platform]}`;
             };
 
             const createOrder = (product) => {
-                const finalRRP = product.rrp || calculateRRP(product.basePrice);
+                const finalRRP = parseFloat(product.rrp) || parseFloat(product.basePrice) || 0;
+                const finalBase = parseFloat(product.basePrice) || 0;
                 setNewOrder({
                     id: Date.now().toString(),
                     productId: product.id,
@@ -453,7 +458,7 @@ ${hashtags[platform]}`;
                     customerPhone: '',
                     deliveryAddress: '',
                     price: finalRRP,
-                    cost: product.basePrice,
+                    cost: finalBase,
                     ttn: '',
                     status: 'new',
                     createdAt: new Date().toISOString()
@@ -683,13 +688,8 @@ ${hashtags[platform]}`;
                                 ) : (
                                     <div className="space-y-3">
                                         {filteredProducts.map(product => {
-                                            // Базова ціна з XML (незмінна)
                                             const basePrice = parseFloat(product.basePrice) || 0;
-                                            
-                                            // РРЦ - якщо встановлена вручну, використовуємо її
-                                            // Якщо ні - розраховуємо від базової + наценка
-                                            const manualRRP = parseFloat(product.rrp) || 0;
-                                            const displayRRP = manualRRP > 0 ? manualRRP : calculateRRP(basePrice);
+                                            const displayRRP = parseFloat(product.rrp) || basePrice;
                                             
                                             return (
                                             <div key={product.id} className="bg-white rounded-lg shadow-sm p-3">
@@ -724,26 +724,28 @@ ${hashtags[platform]}`;
                                                             <span className={`px-2 py-0.5 rounded text-xs ${product.published ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
                                                                 {product.published ? '📱' : '⏸️'}
                                                             </span>
+                                                            {product.customPrice && (
+                                                                <span className="px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-800">
+                                                                    ✏️
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded p-3 text-center border border-green-200">
                                                     <div className="text-xs text-gray-600 mb-1">РРЦ</div>
                                                     <div className="text-2xl font-bold text-green-600">
-                                                        {displayRRP > 0 ? displayRRP.toFixed(2) : basePrice.toFixed(2)} ₴
-                                                    </div>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        Базова: {basePrice.toFixed(2)}₴ {manualRRP === 0 && priceMarkup > 0 && `+${priceMarkup}%`}
+                                                        {displayRRP.toFixed(2)} ₴
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-1 mt-2">
-                                                    <button onClick={() => { setEditingProduct({...product, rrp: displayRRP}); setShowEditModal(true); }} className="bg-blue-600 text-white py-2 rounded text-xs">
+                                                    <button onClick={() => { setEditingProduct({...product}); setShowEditModal(true); }} className="bg-blue-600 text-white py-2 rounded text-xs">
                                                         Змінити
                                                     </button>
-                                                    <button onClick={() => { setSelectedProduct({...product, rrp: displayRRP}); setShowPostModal(true); }} className="bg-purple-600 text-white py-2 rounded text-xs">
+                                                    <button onClick={() => { setSelectedProduct(product); setShowPostModal(true); }} className="bg-purple-600 text-white py-2 rounded text-xs">
                                                         Пости
                                                     </button>
-                                                    <button onClick={() => createOrder({...product, rrp: displayRRP, basePrice: basePrice})} className="bg-green-600 text-white py-2 rounded text-xs">
+                                                    <button onClick={() => createOrder(product)} className="bg-green-600 text-white py-2 rounded text-xs">
                                                         Замовити
                                                     </button>
                                                 </div>
@@ -971,12 +973,24 @@ ${hashtags[platform]}`;
                                             💰 РРЦ (ціна продажу)
                                         </label>
                                         <input type="number" value={editingProduct.rrp || ''} 
-                                            onChange={(e) => setEditingProduct({...editingProduct, rrp: parseFloat(e.target.value) || 0})}
+                                            onChange={(e) => setEditingProduct({...editingProduct, rrp: parseFloat(e.target.value) || 0, customPrice: true})}
                                             className="w-full px-4 py-3 border-2 border-green-300 rounded-lg text-xl font-bold text-center" 
                                             placeholder="0" />
                                         <p className="text-xs text-gray-600 mt-2 text-center">
                                             💡 Базова ціна з XML: {editingProduct.basePrice}₴
                                         </p>
+                                        {editingProduct.customPrice && (
+                                            <button
+                                                onClick={() => setEditingProduct({
+                                                    ...editingProduct, 
+                                                    rrp: calculateRRP(editingProduct.basePrice),
+                                                    customPrice: false
+                                                })}
+                                                className="w-full mt-2 bg-gray-200 text-gray-700 py-2 rounded text-sm"
+                                            >
+                                                🔄 Скинути на автоматичну ({calculateRRP(editingProduct.basePrice).toFixed(2)}₴)
+                                            </button>
+                                        )}
                                     </div>
                                     <label className="flex items-center gap-3 p-3 border rounded cursor-pointer">
                                         <input type="checkbox" checked={editingProduct.available}
