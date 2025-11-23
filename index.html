@@ -53,6 +53,7 @@
             const [suppliers, setSuppliers] = useState([]);
             const [dailyTasks, setDailyTasks] = useState([]);
             const [weeklyGoals, setWeeklyGoals] = useState([]);
+            const [priceMarkup, setPriceMarkup] = useState(50); // % наценки за замовчуванням
             
             // Фільтри
             const [searchTerm, setSearchTerm] = useState('');
@@ -86,12 +87,14 @@
                     const supps = localStorage.getItem('crm-suppliers');
                     const tasks = localStorage.getItem('daily-tasks');
                     const goals = localStorage.getItem('weekly-goals');
+                    const markup = localStorage.getItem('price-markup');
                     
                     if (prods) setProducts(JSON.parse(prods));
                     if (ords) setOrders(JSON.parse(ords));
                     if (supps) setSuppliers(JSON.parse(supps));
                     if (tasks) setDailyTasks(JSON.parse(tasks));
                     if (goals) setWeeklyGoals(JSON.parse(goals));
+                    if (markup) setPriceMarkup(parseInt(markup));
                 } catch (e) {
                     console.error('Помилка завантаження:', e);
                 }
@@ -103,11 +106,12 @@
                 localStorage.setItem('crm-suppliers', JSON.stringify(suppliers));
                 localStorage.setItem('daily-tasks', JSON.stringify(dailyTasks));
                 localStorage.setItem('weekly-goals', JSON.stringify(weeklyGoals));
+                localStorage.setItem('price-markup', priceMarkup.toString());
             };
 
             useEffect(() => {
                 saveAllData();
-            }, [products, orders, suppliers, dailyTasks, weeklyGoals]);
+            }, [products, orders, suppliers, dailyTasks, weeklyGoals, priceMarkup]);
 
             const initializeDailyTasks = () => {
                 const today = new Date().toDateString();
@@ -239,16 +243,16 @@
                             id: `${Date.now()}-${i}`,
                             myCode: generateMyCode(supplierName),
                             supplierCode: String(supplierCode),
-                            name: name.trim().substring(0, 150), // Обмежуємо довжину
+                            name: name.trim().substring(0, 150),
                             supplier: supplierName,
-                            supplierUrl: url.substring(0, 200), // Обмежуємо URL
-                            dropPrice: Math.round(price * 100) / 100, // Округлюємо
-                            rrp: 0,
+                            supplierUrl: url.substring(0, 200),
+                            basePrice: Math.round(price * 100) / 100, // Базова ціна з XML (РРЦ)
+                            rrp: 0, // Буде розраховано автоматично
                             available: available,
                             published: false,
-                            vendor: vendor.trim().substring(0, 50), // Обмежуємо
-                            image: image.substring(0, 200), // Обмежуємо URL картинки
-                            addedDate: new Date().toISOString().split('T')[0] // Тільки дата
+                            vendor: vendor.trim().substring(0, 50),
+                            image: image.substring(0, 200),
+                            addedDate: new Date().toISOString().split('T')[0]
                         });
                         
                         successCount++;
@@ -397,6 +401,19 @@
                 setProducts(products.map(p => p.id === productId ? { ...p, ...updates } : p));
             };
 
+            const applyMarkupToAll = (newMarkup) => {
+                const updated = products.map(p => ({
+                    ...p,
+                    rrp: Math.round(p.basePrice * (1 + newMarkup / 100) * 100) / 100
+                }));
+                setProducts(updated);
+                setPriceMarkup(newMarkup);
+            };
+
+            const calculateRRP = (basePrice, markup = priceMarkup) => {
+                return Math.round(basePrice * (1 + markup / 100) * 100) / 100;
+            };
+
             const deleteProduct = (productId) => {
                 if (!confirm('Видалити цей товар?')) return;
                 setProducts(products.filter(p => p.id !== productId));
@@ -424,6 +441,7 @@ ${hashtags[platform]}`;
             };
 
             const createOrder = (product) => {
+                const finalRRP = product.rrp || calculateRRP(product.basePrice);
                 setNewOrder({
                     id: Date.now().toString(),
                     productId: product.id,
@@ -431,8 +449,8 @@ ${hashtags[platform]}`;
                     customerName: '',
                     customerPhone: '',
                     deliveryAddress: '',
-                    price: product.rrp || product.dropPrice,
-                    cost: product.dropPrice,
+                    price: finalRRP,
+                    cost: product.basePrice,
                     ttn: '',
                     status: 'new',
                     createdAt: new Date().toISOString()
@@ -584,6 +602,42 @@ ${hashtags[platform]}`;
                                         </button>
                                     </div>
                                     
+                                    {/* Контроль наценки */}
+                                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-3 mb-3 border border-green-200">
+                                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                            💰 Наценка на всі товари: {priceMarkup}%
+                                        </label>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="200"
+                                                step="5"
+                                                value={priceMarkup}
+                                                onChange={(e) => {
+                                                    const newMarkup = parseInt(e.target.value);
+                                                    applyMarkupToAll(newMarkup);
+                                                }}
+                                                className="flex-1"
+                                            />
+                                            <input
+                                                type="number"
+                                                value={priceMarkup}
+                                                onChange={(e) => {
+                                                    const newMarkup = parseInt(e.target.value) || 0;
+                                                    if (newMarkup >= 0 && newMarkup <= 500) {
+                                                        applyMarkupToAll(newMarkup);
+                                                    }
+                                                }}
+                                                className="w-16 px-2 py-1 border rounded text-center"
+                                            />
+                                            <span className="text-xs text-gray-600">%</span>
+                                        </div>
+                                        <p className="text-xs text-gray-600 mt-2">
+                                            💡 Наприклад: 100₴ + {priceMarkup}% = {calculateRRP(100)}₴
+                                        </p>
+                                    </div>
+                                    
                                     <div className="relative mb-3">
                                         <SearchIcon size={20} className="absolute left-3 top-3 text-gray-400" />
                                         <input
@@ -625,7 +679,12 @@ ${hashtags[platform]}`;
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
-                                        {filteredProducts.map(product => (
+                                        {filteredProducts.map(product => {
+                                            const displayRRP = product.rrp || calculateRRP(product.basePrice);
+                                            const profit = displayRRP - product.basePrice;
+                                            const profitPercent = Math.round((profit / product.basePrice) * 100);
+                                            
+                                            return (
                                             <div key={product.id} className="bg-white rounded-lg shadow-sm p-3">
                                                 <div className="flex gap-3 mb-2">
                                                     {product.image ? (
@@ -636,8 +695,21 @@ ${hashtags[platform]}`;
                                                         </div>
                                                     )}
                                                     <div className="flex-1 min-w-0">
-                                                        <h3 className="font-bold text-sm truncate">{product.name}</h3>
-                                                        <p className="text-xs text-gray-500 mb-1">Код: {product.myCode}</p>
+                                                        {product.supplierUrl ? (
+                                                            <a 
+                                                                href={product.supplierUrl} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="font-bold text-sm text-blue-600 hover:underline block truncate"
+                                                            >
+                                                                {product.name}
+                                                            </a>
+                                                        ) : (
+                                                            <h3 className="font-bold text-sm truncate">{product.name}</h3>
+                                                        )}
+                                                        <p className="text-xs text-gray-500 mb-1">
+                                                            🔢 Мій: {product.myCode} | Постач: {product.supplierCode}
+                                                        </p>
                                                         <div className="flex gap-1">
                                                             <span className={`px-2 py-0.5 rounded text-xs ${product.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                                                 {product.available ? '✅' : '❌'}
@@ -650,33 +722,31 @@ ${hashtags[platform]}`;
                                                 </div>
                                                 <div className="bg-gray-50 rounded p-2 mb-2 text-xs space-y-1">
                                                     <div className="flex justify-between">
-                                                        <span>Дроп:</span>
-                                                        <span className="font-semibold">{product.dropPrice}₴</span>
+                                                        <span>Базова ціна (РРЦ):</span>
+                                                        <span className="font-semibold">{product.basePrice}₴</span>
                                                     </div>
                                                     <div className="flex justify-between">
-                                                        <span>РРЦ:</span>
-                                                        <span className="font-semibold text-green-600">{product.rrp || 0}₴</span>
+                                                        <span>Твоя ціна (+{profitPercent}%):</span>
+                                                        <span className="font-semibold text-green-600">{displayRRP}₴</span>
                                                     </div>
-                                                    {product.rrp > 0 && (
-                                                        <div className="flex justify-between">
-                                                            <span>Маржа:</span>
-                                                            <span className="font-bold text-blue-600">{product.rrp - product.dropPrice}₴</span>
-                                                        </div>
-                                                    )}
+                                                    <div className="flex justify-between border-t pt-1">
+                                                        <span>Прибуток:</span>
+                                                        <span className="font-bold text-blue-600">{profit}₴</span>
+                                                    </div>
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-1">
-                                                    <button onClick={() => { setEditingProduct({...product}); setShowEditModal(true); }} className="bg-blue-600 text-white py-2 rounded text-xs">
+                                                    <button onClick={() => { setEditingProduct({...product, rrp: displayRRP}); setShowEditModal(true); }} className="bg-blue-600 text-white py-2 rounded text-xs">
                                                         Змінити
                                                     </button>
-                                                    <button onClick={() => { setSelectedProduct(product); setShowPostModal(true); }} className="bg-purple-600 text-white py-2 rounded text-xs">
+                                                    <button onClick={() => { setSelectedProduct({...product, rrp: displayRRP}); setShowPostModal(true); }} className="bg-purple-600 text-white py-2 rounded text-xs">
                                                         Пости
                                                     </button>
-                                                    <button onClick={() => createOrder(product)} className="bg-green-600 text-white py-2 rounded text-xs">
+                                                    <button onClick={() => createOrder({...product, rrp: displayRRP})} className="bg-green-600 text-white py-2 rounded text-xs">
                                                         Замовити
                                                     </button>
                                                 </div>
                                             </div>
-                                        ))}
+                                        )})}
                                     </div>
                                 )}
                             </>
@@ -884,6 +954,7 @@ ${hashtags[platform]}`;
                                     )}
                                     <div className="bg-blue-50 rounded p-2 text-xs">
                                         <div className="mb-1">Мій код: <strong>{editingProduct.myCode}</strong></div>
+                                        <div className="mb-1">Код постачальника: <strong>{editingProduct.supplierCode}</strong></div>
                                         <div>Постачальник: <strong>{editingProduct.supplier}</strong></div>
                                     </div>
                                     <input type="text" value={editingProduct.name} 
@@ -892,18 +963,25 @@ ${hashtags[platform]}`;
                                     <input type="url" value={editingProduct.supplierUrl || ''} 
                                         onChange={(e) => setEditingProduct({...editingProduct, supplierUrl: e.target.value})}
                                         className="w-full px-4 py-3 border rounded-lg" placeholder="Посилання на товар" />
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <input type="number" value={editingProduct.dropPrice} disabled
-                                            className="px-4 py-3 bg-gray-100 border rounded-lg" />
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                                            Базова ціна (РРЦ): {editingProduct.basePrice}₴
+                                        </label>
+                                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                                            Твоя ціна продажу, ₴
+                                        </label>
                                         <input type="number" value={editingProduct.rrp || ''} 
                                             onChange={(e) => setEditingProduct({...editingProduct, rrp: parseFloat(e.target.value) || 0})}
-                                            className="px-4 py-3 border rounded-lg" placeholder="РРЦ" />
+                                            className="w-full px-4 py-3 border rounded-lg" placeholder="0" />
                                     </div>
                                     {editingProduct.rrp > 0 && (
                                         <div className="bg-green-50 rounded p-3 text-center">
-                                            <span className="text-sm">Маржа:</span>
+                                            <span className="text-sm">Прибуток:</span>
                                             <span className="text-xl font-bold text-green-600 ml-2">
-                                                {editingProduct.rrp - editingProduct.dropPrice} ₴
+                                                {editingProduct.rrp - editingProduct.basePrice} ₴
+                                            </span>
+                                            <span className="text-sm text-gray-600 ml-2">
+                                                (+{Math.round(((editingProduct.rrp - editingProduct.basePrice) / editingProduct.basePrice) * 100)}%)
                                             </span>
                                         </div>
                                     )}
