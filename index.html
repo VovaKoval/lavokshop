@@ -152,7 +152,7 @@
                 return `${prefix}-${random}`;
             };
 
-            const parseXML = (xmlText, supplierName) => {
+            const parseXML = (xmlText, supplierName, options = {}) => {
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
                 
@@ -167,7 +167,6 @@
                 let offers = xmlDoc.getElementsByTagName('offer');
                 
                 if (offers.length === 0) {
-                    // Альтернативні варіанти
                     offers = xmlDoc.getElementsByTagName('item');
                 }
                 if (offers.length === 0) {
@@ -177,109 +176,93 @@
                 console.log(`Знайдено елементів для парсингу: ${offers.length}`);
                 
                 if (offers.length === 0) {
-                    throw new Error('В XML файлі не знайдено товарів (тег <offer>). Перевір формат файлу.');
+                    throw new Error('В XML файлі не знайдено товарів (тег <offer>)');
                 }
                 
                 const newProducts = [];
                 let successCount = 0;
                 let errorCount = 0;
+                let skippedCount = 0;
+                
+                // Ліміт товарів для запобігання переповнення
+                const maxProducts = options.maxProducts || 500;
+                const minPrice = options.minPrice || 0;
+                const maxPrice = options.maxPrice || 999999;
 
-                for (let i = 0; i < offers.length; i++) {
+                for (let i = 0; i < offers.length && successCount < maxProducts; i++) {
                     const offer = offers[i];
                     
                     try {
                         // ID товару
-                        const supplierCode = offer.getAttribute('id') || 
-                                           offer.getAttribute('code') || 
-                                           offer.getElementsByTagName('id')[0]?.textContent ||
-                                           `ID-${i}`;
+                        const supplierCode = offer.getAttribute('id') || `ID-${i}`;
                         
                         // Назва
-                        const name = offer.getElementsByTagName('name')[0]?.textContent || 
-                                   offer.getElementsByTagName('title')[0]?.textContent ||
-                                   offer.getElementsByTagName('model')[0]?.textContent || 
-                                   'Товар без назви';
+                        const name = offer.getElementsByTagName('name')[0]?.textContent || '';
                         
-                        // Ціна - більш гнучка обробка
+                        // Ціна
                         let price = 0;
-                        const priceElement = offer.getElementsByTagName('price')[0] || 
-                                           offer.getElementsByTagName('Price')[0] ||
-                                           offer.getElementsByTagName('price_wholesale')[0];
-                        
+                        const priceElement = offer.getElementsByTagName('price')[0];
                         if (priceElement) {
                             const priceText = priceElement.textContent || '0';
-                            // Видаляємо всі нецифрові символи крім крапки
                             price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
+                        }
+                        
+                        // Фільтри
+                        if (!name || name === 'Товар без назви') {
+                            skippedCount++;
+                            continue;
+                        }
+                        
+                        if (price === 0 || price < minPrice || price > maxPrice) {
+                            skippedCount++;
+                            continue;
                         }
                         
                         // Наявність
                         const availableAttr = offer.getAttribute('available');
-                        const availableElement = offer.getElementsByTagName('available')[0];
-                        const availableText = availableElement?.textContent;
-                        
-                        let available = true; // За замовчуванням доступний
+                        let available = true;
                         if (availableAttr === 'false' || availableAttr === '0') available = false;
-                        if (availableText === 'false' || availableText === '0') available = false;
                         
-                        // Бренд/Виробник
-                        const vendor = offer.getElementsByTagName('vendor')[0]?.textContent || 
-                                     offer.getElementsByTagName('brand')[0]?.textContent ||
-                                     offer.getElementsByTagName('manufacturer')[0]?.textContent || '';
+                        // Бренд/Виробник (скорочена версія)
+                        const vendor = offer.getElementsByTagName('vendor')[0]?.textContent || '';
                         
-                        // Картинка - може бути кілька
-                        let image = '';
-                        const pictureElement = offer.getElementsByTagName('picture')[0] || 
-                                             offer.getElementsByTagName('image')[0] ||
-                                             offer.getElementsByTagName('image_url')[0];
-                        if (pictureElement) {
-                            image = pictureElement.textContent || '';
-                        }
+                        // Картинка (тільки перша)
+                        const pictureElement = offer.getElementsByTagName('picture')[0];
+                        const image = pictureElement?.textContent || '';
                         
                         // URL товару
-                        const urlElement = offer.getElementsByTagName('url')[0] || 
-                                         offer.getElementsByTagName('link')[0];
+                        const urlElement = offer.getElementsByTagName('url')[0];
                         const url = offer.getAttribute('url') || urlElement?.textContent || '';
-                        
-                        // Категорія
-                        const categoryId = offer.getElementsByTagName('categoryId')[0]?.textContent || '';
 
-                        // Пропускаємо товари без назви або з нульовою ціною
-                        if (!name || name === 'Товар без назви' || price === 0) {
-                            console.warn(`Пропущено товар ${i}: немає назви або ціни`);
-                            errorCount++;
-                            continue;
-                        }
-
+                        // ОПТИМІЗАЦІЯ: зберігаємо тільки необхідні дані
                         newProducts.push({
-                            id: `${Date.now()}-${i}-${Math.random().toString(36).substr(2, 9)}`,
+                            id: `${Date.now()}-${i}`,
                             myCode: generateMyCode(supplierName),
                             supplierCode: String(supplierCode),
-                            name: name.trim(),
+                            name: name.trim().substring(0, 150), // Обмежуємо довжину
                             supplier: supplierName,
-                            supplierUrl: url,
-                            dropPrice: price,
+                            supplierUrl: url.substring(0, 200), // Обмежуємо URL
+                            dropPrice: Math.round(price * 100) / 100, // Округлюємо
                             rrp: 0,
                             available: available,
                             published: false,
-                            vendor: vendor.trim(),
-                            image: image,
-                            categoryId: categoryId,
-                            addedDate: new Date().toISOString()
+                            vendor: vendor.trim().substring(0, 50), // Обмежуємо
+                            image: image.substring(0, 200), // Обмежуємо URL картинки
+                            addedDate: new Date().toISOString().split('T')[0] // Тільки дата
                         });
                         
                         successCount++;
                         
                     } catch (itemError) {
-                        console.warn(`Помилка обробки товару ${i}:`, itemError);
+                        console.warn(`Помилка товару ${i}:`, itemError);
                         errorCount++;
-                        // Пропускаємо проблемний товар і продовжуємо
                     }
                 }
 
-                console.log(`Успішно оброблено: ${successCount}, помилок: ${errorCount}`);
+                console.log(`Успішно: ${successCount}, пропущено: ${skippedCount}, помилок: ${errorCount}`);
 
                 if (newProducts.length === 0) {
-                    throw new Error(`Не вдалося обробити жодного товару з XML.\n\nПеревірено елементів: ${offers.length}\nПомилок: ${errorCount}`);
+                    throw new Error(`Не вдалося обробити товари.\n\nПеревірено: ${offers.length}\nПомилок: ${errorCount}`);
                 }
 
                 return newProducts;
@@ -287,54 +270,125 @@
 
             const handleFileUpload = (e) => {
                 const file = e.target.files[0];
-                if (!file) return;
+                if (!file) {
+                    alert('❌ Файл не обрано');
+                    return;
+                }
 
-                // Перевірка формату файлу
-                /* removed extension check for iPhone */
+                console.log('Файл обрано:', file.name, 'Розмір:', file.size, 'байт');
+
+                if (!file.name.toLowerCase().endsWith('.xml')) {
+                    alert('❌ Помилка: Обери XML файл!\n\nОбраний файл: ' + file.name);
+                    e.target.value = '';
+                    return;
+                }
 
                 setLoading(true);
                 const reader = new FileReader();
 
                 reader.onload = (event) => {
+                    console.log('Файл прочитано');
+                    
                     try {
                         const xmlText = event.target.result;
+                        console.log('Розмір XML:', Math.round(xmlText.length / 1024), 'KB');
                         
                         if (!xmlText || xmlText.trim() === '') {
                             throw new Error('XML файл порожній');
                         }
                         
-                        const supplierName = prompt('Введи назву постачальника:', 'Постачальник');
+                        const supplierName = prompt('Введи назву постачальника:', 'ITSellOpt');
                         
                         if (!supplierName || supplierName.trim() === '') {
+                            console.log('Скасовано');
                             setLoading(false);
                             return;
                         }
+                        
+                        // ВАЖЛИВО: Запитуємо скільки товарів завантажити
+                        const maxProductsInput = prompt(
+                            '⚠️ ОБМЕЖЕННЯ ПРИСТРОЮ\n\n' +
+                            'Скільки товарів завантажити?\n\n' +
+                            'Рекомендовано:\n' +
+                            '• iPhone/Android: 300-500\n' +
+                            '• ПК: 1000+\n\n' +
+                            'Введи кількість:', 
+                            '500'
+                        );
+                        
+                        const maxProducts = parseInt(maxProductsInput) || 500;
+                        console.log('Ліміт товарів:', maxProducts);
 
-                        console.log('Починаю парсинг XML...');
-                        const newProducts = parseXML(xmlText, supplierName.trim());
-                        console.log('Розпарсено товарів:', newProducts.length);
+                        console.log('⏳ Починаю парсинг XML...');
                         
-                        const filtered = products.filter(p => p.supplier !== supplierName.trim());
-                        const updated = [...filtered, ...newProducts];
-                        const updatedSupps = [...new Set([...suppliers, supplierName.trim()])];
+                        try {
+                            const newProducts = parseXML(xmlText, supplierName.trim(), { 
+                                maxProducts: maxProducts,
+                                minPrice: 1 // Пропускаємо товари без ціни
+                            });
+                            
+                            console.log('✅ Розпарсено товарів:', newProducts.length);
+                            
+                            if (newProducts.length === 0) {
+                                alert('⚠️ XML завантажено, але товарів не знайдено.\n\nПеревір формат файлу.');
+                                setLoading(false);
+                                return;
+                            }
+                            
+                            const filtered = products.filter(p => p.supplier !== supplierName.trim());
+                            const updated = [...filtered, ...newProducts];
+                            const updatedSupps = [...new Set([...suppliers, supplierName.trim()])];
+                            
+                            console.log('Збереження...');
+                            
+                            // Перевіряємо розмір перед збереженням
+                            const dataSize = JSON.stringify(updated).length;
+                            console.log('Розмір даних:', Math.round(dataSize / 1024), 'KB');
+                            
+                            if (dataSize > 4 * 1024 * 1024) { // 4 MB ліміт
+                                throw new Error('Занадто багато даних для збереження!\n\nЗменш кількість товарів до ' + Math.floor(maxProducts * 0.7));
+                            }
+                            
+                            setProducts(updated);
+                            setSuppliers(updatedSupps);
+                            
+                            setTimeout(() => {
+                                const saved = localStorage.getItem('crm-products');
+                                if (saved) {
+                                    console.log('✅ Збережено успішно');
+                                    alert(`✅ УСПІХ!\n\n📦 Завантажено: ${newProducts.length} товарів\n🏢 Постачальник: ${supplierName}\n💾 Всього: ${updated.length}\n\n💡 Товари збережено на твоєму пристрої!`);
+                                } else {
+                                    console.error('❌ Не збережено');
+                                    alert('⚠️ Товари завантажені, але не збережено!\n\nСпробуй зменшити кількість товарів.');
+                                }
+                                setLoading(false);
+                            }, 500);
+                            
+                        } catch (parseErr) {
+                            console.error('❌ Помилка парсингу:', parseErr);
+                            
+                            if (parseErr.message.includes('quota') || parseErr.message.includes('exceeded')) {
+                                alert(`❌ ПЕРЕПОВНЕНО ПАМ'ЯТЬ!\n\n📱 Твій пристрій не може зберегти стільки товарів.\n\n✅ Рішення:\n1. Завантаж менше товарів (спробуй 200-300)\n2. Видали старі товари\n3. Очисти дані браузера`);
+                            } else {
+                                alert(`❌ Помилка:\n\n${parseErr.message}`);
+                            }
+                            setLoading(false);
+                        }
                         
-                        setProducts(updated);
-                        setSuppliers(updatedSupps);
-                        
-                        alert(`✅ Успішно завантажено!\n\nТоварів: ${newProducts.length}\nПостачальник: ${supplierName}`);
                     } catch (err) {
-                        console.error('Помилка завантаження XML:', err);
-                        alert(`❌ Помилка завантаження XML:\n\n${err.message}\n\nПеревір формат файлу або спробуй інший XML.`);
+                        console.error('❌ Помилка:', err);
+                        alert(`❌ Помилка:\n\n${err.message}`);
+                        setLoading(false);
                     }
-                    setLoading(false);
                 };
 
                 reader.onerror = (error) => {
-                    console.error('Помилка читання файлу:', error);
-                    alert('❌ Помилка читання файлу. Спробуй ще раз.');
+                    console.error('❌ Помилка читання:', error);
+                    alert('❌ Помилка читання файлу!');
                     setLoading(false);
                 };
 
+                console.log('⏳ Читання файлу...');
                 reader.readAsText(file, 'UTF-8');
                 e.target.value = '';
             };
