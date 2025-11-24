@@ -9,10 +9,158 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>🚀 CRM Дропшипінг Pro</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js">
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js">
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js">
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
+    <script src="https://cdn.tailwindcss.com">
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
     <style>
         * { -webkit-tap-highlight-color: transparent; }
         body { overscroll-behavior: contain; }
@@ -638,33 +786,7 @@ ${hashtags[platform]}`;
                         {activeTab === 'products' && (
                             <>
                                 <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-                                    
-<button
-    onClick={() => {
-        setEditingProduct({
-            id: Date.now().toString(),
-            myCode: 'MAN-' + Math.floor(Math.random()*9999),
-            supplierCode: '',
-            supplier: 'Manual',
-            supplierUrl: '',
-            name: '',
-            basePrice: 0,
-            rrp: 0,
-            available: true,
-            published: false,
-            vendor: '',
-            image: '',
-            addedDate: new Date().toISOString().split('T')[0],
-            customPrice: false
-        });
-        setShowEditModal(true);
-    }}
-    className="w-full mb-3 bg-green-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 shadow-sm"
->
-    <PlusIcon size={20} />
-    Додати товар вручну
-</button>
-<div className="flex gap-2 mb-3">
+                                    <div className="flex gap-2 mb-3">
                                         <label className="flex-1 bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 cursor-pointer">
                                             <UploadIcon size={20} />
                                             {loading ? 'Завантаження...' : 'XML'}
@@ -742,30 +864,6 @@ ${hashtags[platform]}`;
                                             <option value="no">⏸️ Не опубл.</option>
                                         </select>
                                     </div>
-<button 
-    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)} 
-    className="w-full mt-2 bg-gray-200 py-2 rounded-lg text-sm"
->
-    {showAdvancedFilters ? '▲ Сховати фільтри' : '▼ Більше фільтрів'}
-</button>
-
-{showAdvancedFilters && (
-    <div className="mt-3 space-y-2">
-        <input type="number" value={filterPriceMin} onChange={(e)=>setFilterPriceMin(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Мінімальна ціна" />
-        <input type="number" value={filterPriceMax} onChange={(e)=>setFilterPriceMax(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Максимальна ціна" />
-        <input type="text" value={filterBrand} onChange={(e)=>setFilterBrand(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Бренд / Vendor" />
-        <select value={sortBy} onChange={(e)=>setSortBy(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm">
-            <option value="date">🕒 Нові → старі</option>
-            <option value="name">🔤 За назвою</option>
-            <option value="price-asc">⬆️ Ціна: дешевші</option>
-            <option value="price-desc">⬇️ Ціна: дорожчі</option>
-        </select>
-        <button onClick={resetFilters} className="w-full bg-red-100 text-red-700 py-2 rounded-lg text-sm">
-            🔄 Скинути всі фільтри
-        </button>
-    </div>
-)}
-
                                 </div>
 
                                 {loading ? (
@@ -1101,16 +1199,7 @@ ${hashtags[platform]}`;
                                         <button onClick={() => setShowEditModal(false)} className="flex-1 bg-gray-200 py-3 rounded-lg">
                                             Скасувати
                                         </button>
-                                        <button onClick={() => {
-        if (!editingProduct.name.trim()) { alert('⚠️ Введи назву товару'); return; }
-        if (!products.find(p => p.id === editingProduct.id)) {
-            setProducts([...products, editingProduct]);
-        } else {
-            updateProduct(editingProduct.id, editingProduct);
-        }
-        setShowEditModal(false);
-        alert('✅ Збережено!');
-    } setShowEditModal(false); alert('✅ Збережено!'); }}
+                                        <button onClick={() => { updateProduct(editingProduct.id, editingProduct); setShowEditModal(false); alert('✅ Збережено!'); }}
                                             className="flex-1 bg-blue-600 text-white py-3 rounded-lg">
                                             Зберегти
                                         </button>
@@ -1299,6 +1388,43 @@ ${hashtags[platform]}`;
         }
 
         ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
+    
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
 </body>
 </html>
