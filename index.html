@@ -1,14 +1,172 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CRM Дропшипінг — покращена версія</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<style>body{ -webkit-tap-highlight-color:transparent; } .modal-bg{background:rgba(0,0,0,0.45);}</style>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🚀 CRM Дропшипінг Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js">
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js">
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js">
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
+    <script src="https://cdn.tailwindcss.com">
+// === CATEGORY EXTRACTION LOGIC ===
+const [xmlCategories, setXmlCategories] = React.useState([]);
+const [selectedXmlCategories, setSelectedXmlCategories] = React.useState([]);
+
+function toggleXmlCategory(cat) {
+    if (selectedXmlCategories.includes(cat)) {
+        setSelectedXmlCategories(selectedXmlCategories.filter(c => c !== cat));
+    } else {
+        setSelectedXmlCategories([...selectedXmlCategories, cat]);
+    }
+}
+
+// Wrap original XML import to detect categories
+const originalParseXml = parseXML;
+parseXML = (xml) => {
+    const data = originalParseXml(xml);
+
+    // Extract categories
+    const found = new Set();
+    data.forEach(p => {
+        if (p.category) found.add(p.category);
+        if (p.vendor) found.add(p.vendor);
+    });
+
+    const arr = Array.from(found);
+    setXmlCategories(arr);
+    setSelectedXmlCategories(arr); // default: all selected
+
+    // Filter ON IMPORT
+    return data.filter(item => 
+        selectedXmlCategories.length === 0 ||
+        selectedXmlCategories.includes(item.category) ||
+        selectedXmlCategories.includes(item.vendor)
+    );
+};
+
+</script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { overscroll-behavior: contain; }
+        .modal-overlay { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    </style>
 </head>
 <body>
 <div id="root"></div>
