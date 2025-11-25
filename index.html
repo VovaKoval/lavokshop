@@ -2,217 +2,1432 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Панель</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@heroicons/react/24/outline/index.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🚀 CRM Дропшипінг Pro LaVok SHOP by Koval</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            overscroll-behavior: contain;
+        }
+
+        .modal-overlay {
+            animation: fadeIn 0.18s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            animation: slideUp 0.22s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body>
     <div id="root"></div>
-    <script type="text/javascript">
+
+    <script type="text/babel">
         const { useState, useEffect } = React;
-        const {
-            PackageIcon, ShoppingBagIcon, CheckSquareIcon, BarChartIcon,
-            XIcon, CopyIcon, DownloadIcon, TruckIcon
-        } = HeroIcons;
 
-        // ===== Helper Functions =====
-        const generatePost = (product, platform) => {
-            return `Товар: ${product.name}\nЦіна: ${product.rrp || product.dropPrice}₴\nПлатформа: ${platform}`;
-        };
+        // Іконки
+        const PackageIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>;
+        const ShoppingBagIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>;
+        const CheckSquareIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>;
+        const MessageSquareIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>;
+        const BarChartIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>;
+        const SearchIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>;
+        const UploadIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>;
+        const Edit2Icon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
+        const Trash2Icon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
+        const ShareIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>;
+        const XIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+        const CopyIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>;
+        const CheckIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>;
+        const DownloadIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>;
+        const TruckIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>;
+        const PlusIcon = ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 
-        const calculateRRP = (basePrice) => parseFloat((basePrice * 1.3).toFixed(2));
-
-        // ===== Main App =====
         function App() {
             const [activeTab, setActiveTab] = useState('products');
+
+            // Дані
             const [products, setProducts] = useState([]);
             const [orders, setOrders] = useState([]);
+            const [suppliers, setSuppliers] = useState([]);
             const [dailyTasks, setDailyTasks] = useState([]);
             const [weeklyGoals, setWeeklyGoals] = useState([]);
-            const [stats, setStats] = useState({
-                totalProducts: 0, availableProducts: 0, publishedProducts: 0,
-                totalOrders: 0, newOrders: 0, completedOrders: 0, totalProfit: 0,
-                tasksCompleted: 0, tasksTotal: 0
-            });
+            const [priceMarkup, setPriceMarkup] = useState(50); // % наценки за замовчуванням
 
+            // Фільтри / пошук
+            const [searchTerm, setSearchTerm] = useState('');
+            const [filterSupplier, setFilterSupplier] = useState('all');
+            const [filterAvailable, setFilterAvailable] = useState('all');
+            const [filterPublished, setFilterPublished] = useState('all');
+            const [filterPriceMin, setFilterPriceMin] = useState('');
+            const [filterPriceMax, setFilterPriceMax] = useState('');
+            const [filterBrand, setFilterBrand] = useState('');
+            const [sortBy, setSortBy] = useState('date'); // date, name, price-asc, price-desc
+            const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+            // Категорії з XML / вибір
+            const [xmlImportPreview, setXmlImportPreview] = useState([]); // товари з останнього парсингу перед імпортом
+            const [xmlCategories, setXmlCategories] = useState([]);
+            const [selectedXmlCategories, setSelectedXmlCategories] = useState([]);
+            const [showXmlImportModal, setShowXmlImportModal] = useState(false);
+            const [xmlSupplierName, setXmlSupplierName] = useState(''); // зберігаємо ім'я постачальника при парсингу
+
+            // Режим імпорту: 'all' або 'onlyNew'
+            const [xmlImportMode, setXmlImportMode] = useState('all');
+
+            // Модалки
             const [showEditModal, setShowEditModal] = useState(false);
-            const [editingProduct, setEditingProduct] = useState(null);
             const [showPostModal, setShowPostModal] = useState(false);
-            const [selectedProduct, setSelectedProduct] = useState(null);
             const [showOrderModal, setShowOrderModal] = useState(false);
-            const [newOrder, setNewOrder] = useState({});
             const [showTemplatesModal, setShowTemplatesModal] = useState(false);
             const [showAddProductModal, setShowAddProductModal] = useState(false);
-            const [newProduct, setNewProduct] = useState({});
-            const [searchQuery, setSearchQuery] = useState('');
-            const [filters, setFilters] = useState({ priceMin: '', priceMax: '', available: null, published: null });
-            const [categories, setCategories] = useState([]);
-            const [selectedCategories, setSelectedCategories] = useState([]);
 
-            // ===== Effect: Автоматичне оновлення статусу замовлень =====
+            // Поточні об'єкти
+            const [editingProduct, setEditingProduct] = useState(null);
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const [newOrder, setNewOrder] = useState(null);
+            const [loading, setLoading] = useState(false);
+
+            // Новий товар для ручного додавання
+            const [manualProduct, setManualProduct] = useState({
+                name: '', supplier: '', supplierCode: '', basePrice: '', rrp: '', image: '', vendor: '', category: '', available: true, published: false, customPrice: false
+            });
+
+            useEffect(() => {
+                loadAllData();
+                initializeDailyTasks();
+                initializeWeeklyGoals();
+            }, []);
+
+            // --- Автооновлення статусів замовлень (new -> sent) кожні 30 секунд
             useEffect(() => {
                 const interval = setInterval(() => {
-                    setOrders(prev => prev.map(order => {
-                        if (order.status === 'new') {
-                            return { ...order, status: 'sent' };
+                    setOrders(prevOrders => prevOrders.map(o => {
+                        if (o.status === 'new') {
+                            return {...o, status: 'sent'};
                         }
-                        return order;
+                        return o;
                     }));
                 }, 30000); // 30 секунд
+
                 return () => clearInterval(interval);
             }, []);
 
-            // ===== Функції для замовлень =====
-            const updateOrderStatus = (id, status) => {
-                setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-            };
-            const updateOrderTTN = (id, ttn) => {
-                setOrders(prev => prev.map(o => o.id === id ? { ...o, ttn } : o));
-            };
-            const saveOrder = () => {
-                setOrders([...orders, { ...newOrder, id: Date.now() }]);
-                setNewOrder({});
-                setShowOrderModal(false);
+            const loadAllData = () => {
+                try {
+                    const prods = localStorage.getItem('crm-products');
+                    const ords = localStorage.getItem('crm-orders');
+                    const supps = localStorage.getItem('crm-suppliers');
+                    const tasks = localStorage.getItem('daily-tasks');
+                    const goals = localStorage.getItem('weekly-goals');
+                    const markup = localStorage.getItem('price-markup');
+
+                    if (prods) setProducts(JSON.parse(prods));
+                    if (ords) setOrders(JSON.parse(ords));
+                    if (supps) setSuppliers(JSON.parse(supps));
+                    if (tasks) setDailyTasks(JSON.parse(tasks));
+                    if (goals) setWeeklyGoals(JSON.parse(goals));
+                    if (markup) setPriceMarkup(parseInt(markup));
+                } catch (e) {
+                    console.error('Помилка завантаження:', e);
+                }
             };
 
-            // ===== Фільтри =====
+            const saveAllData = () => {
+                localStorage.setItem('crm-products', JSON.stringify(products));
+                localStorage.setItem('crm-orders', JSON.stringify(orders));
+                localStorage.setItem('crm-suppliers', JSON.stringify(suppliers));
+                localStorage.setItem('daily-tasks', JSON.stringify(dailyTasks));
+                localStorage.setItem('weekly-goals', JSON.stringify(weeklyGoals));
+                localStorage.setItem('price-markup', priceMarkup.toString());
+            };
+
+            useEffect(() => {
+                saveAllData();
+            }, [products, orders, suppliers, dailyTasks, weeklyGoals, priceMarkup]);
+
+            const initializeDailyTasks = () => {
+                const today = new Date().toDateString();
+                const saved = localStorage.getItem('daily-tasks-date');
+
+                if (saved !== today) {
+                    const defaultTasks = [
+                        { id: 1, title: '☕ Перевірити нові повідомлення', done: false },
+                        { id: 2, title: '📱 Відповісти на коментарі', done: false },
+                        { id: 3, title: '📦 Перевірити замовлення в CRM', done: false },
+                        { id: 4, title: '🔄 Оновити товари на OLX', done: false },
+                        { id: 5, title: '🏪 Оновити Prom.ua', done: false },
+                        { id: 6, title: '🎬 Зробити 3-5 Stories', done: false },
+                        { id: 7, title: '📹 Опублікувати Reels/TikTok', done: false },
+                        { id: 8, title: '🛒 Оформити нові замовлення', done: false },
+                        { id: 9, title: '📞 Зв\'язатись з постачальниками', done: false },
+                        { id: 10, title: '🚚 Відправити ТТН клієнтам', done: false },
+                        { id: 11, title: '📊 Подивитись статистику', done: false },
+                        { id: 12, title: '📝 Запланувати контент', done: false }
+                    ];
+                    setDailyTasks(defaultTasks);
+                    localStorage.setItem('daily-tasks-date', today);
+                }
+            };
+
+            const initializeWeeklyGoals = () => {
+                const saved = localStorage.getItem('weekly-goals');
+                if (!saved || JSON.parse(saved).length === 0) {
+                    const defaultGoals = [
+                        { id: 1, title: '📹 Зробити 7 Reels/TikTok', current: 0, target: 7 },
+                        { id: 2, title: '📖 Опублікувати 21 Stories', current: 0, target: 21 },
+                        { id: 3, title: '🛒 Отримати 15+ замовлень', current: 0, target: 15 },
+                        { id: 4, title: '👥 +20 нових підписників', current: 0, target: 20 }
+                    ];
+                    setWeeklyGoals(defaultGoals);
+                }
+            };
+
+            const generateMyCode = (supplierName) => {
+                const prefix = (supplierName || 'SUP').substring(0, 3).toUpperCase();
+                const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                return `${prefix}-${random}`;
+            };
+
+            // Парсер XML, повертає {products, categories}
+            const parseXML = (xmlText, supplierName, options = {}) => {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+                // Перевірка на помилки парсингу
+                const parseError = xmlDoc.getElementsByTagName('parsererror');
+                if (parseError.length > 0) {
+                    console.error('Помилка парсингу XML:', parseError[0].textContent);
+                    throw new Error('XML файл пошкоджений або має неправильний формат');
+                }
+
+                // Шукаємо товари
+                let offers = xmlDoc.getElementsByTagName('offer');
+                if (offers.length === 0) offers = xmlDoc.getElementsByTagName('item');
+                if (offers.length === 0) offers = xmlDoc.getElementsByTagName('product');
+
+                if (offers.length === 0) {
+                    throw new Error('В XML файлі не знайдено товарів (тег <offer>/<item>/<product>)');
+                }
+
+                const newProducts = [];
+                const categoriesSet = new Set();
+
+                const maxProducts = options.maxProducts || 500;
+                const minPrice = options.minPrice || 0;
+                const maxPrice = options.maxPrice || 999999;
+
+                for (let i = 0; i < offers.length && newProducts.length < maxProducts; i++) {
+                    const offer = offers[i];
+                    try {
+                        const supplierCode = offer.getAttribute('id') || `ID-${i}`;
+                        const name = offer.getElementsByTagName('name')[0]?.textContent || offer.getElementsByTagName('title')[0]?.textContent || '';
+
+                        // Ціна
+                        let price = 0;
+                        const priceElement = offer.getElementsByTagName('price')[0] || offer.getElementsByTagName('cost')[0];
+                        if (priceElement) {
+                            const priceText = priceElement.textContent || '0';
+                            price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
+                        }
+
+                        // Спроба знайти категорію
+                        let category = '';
+                        const c1 = offer.getElementsByTagName('categoryId')[0]?.textContent;
+                        const c2 = offer.getElementsByTagName('category')[0]?.textContent;
+                        const c3 = offer.getElementsByTagName('typePrefix')[0]?.textContent;
+                        const c4 = offer.getElementsByTagName('group')[0]?.textContent;
+                        if (c2) category = c2;
+                        else if (c1) category = c1;
+                        else if (c3) category = c3;
+                        else if (c4) category = c4;
+                        else {
+                            const params = offer.getElementsByTagName('param');
+                            for (let pi = 0; pi < params.length; pi++) {
+                                const pname = params[pi].getAttribute('name') || params[pi].getAttribute('назва') || '';
+                                if (/(категор|category|group)/i.test(pname) && params[pi].textContent) {
+                                    category = params[pi].textContent;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Пропуски
+                        if (!name || name.trim() === '') continue;
+                        if (price === 0 || price < minPrice || price > maxPrice) continue;
+
+                        const availableAttr = offer.getAttribute('available');
+                        let available = true;
+                        if (availableAttr === 'false' || availableAttr === '0') available = false;
+
+                        const vendor = offer.getElementsByTagName('vendor')[0]?.textContent || '';
+                        const pictureElement = offer.getElementsByTagName('picture')[0];
+                        const image = pictureElement?.textContent || '';
+                        const urlElement = offer.getElementsByTagName('url')[0];
+                        const url = offer.getAttribute('url') || urlElement?.textContent || '';
+
+                        const product = {
+                            id: `${Date.now()}-${i}`,
+                            myCode: generateMyCode(supplierName || 'SUP'),
+                            supplierCode: String(supplierCode),
+                            name: name.trim().substring(0, 200),
+                            supplier: supplierName || '',
+                            supplierUrl: String(url).substring(0, 200),
+                            basePrice: Math.round(price * 100) / 100,
+                            rrp: Math.round(price * (1 + priceMarkup/100) * 100) / 100,
+                            available,
+                            published: false,
+                            vendor: vendor.trim().substring(0, 100),
+                            image: image.substring(0, 400),
+                            addedDate: new Date().toISOString().split('T')[0],
+                            category: category ? category.toString().substring(0, 100) : ''
+                        };
+
+                        if (product.category) categoriesSet.add(product.category);
+                        newProducts.push(product);
+
+                    } catch (errItem) {
+                        console.warn('Помилка товару при парсингу', errItem);
+                    }
+                }
+
+                return { products: newProducts, categories: Array.from(categoriesSet) };
+            };
+
+            // Обробка файлу XML: показує попередній перегляд категорій і дає вибір
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) {
+                    alert('❌ Файл не обрано');
+                    return;
+                }
+                if (!file.name.toLowerCase().endsWith('.xml')) {
+                    alert('❌ Помилка: обери XML файл');
+                    e.target.value = '';
+                    return;
+                }
+
+                setLoading(true);
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const xmlText = event.target.result;
+                        if (!xmlText || xmlText.trim() === '') throw new Error('XML файл порожній');
+
+                        const supplierName = prompt('Введи назву постачальника (для збереження):', 'ITSellOpt');
+                        if (!supplierName) { setLoading(false); e.target.value = ''; return; }
+                        setXmlSupplierName(supplierName.trim());
+
+                        const maxProductsInput = prompt('Скільки товарів підготувати для імпорту? (наприклад 500)', '500');
+                        const maxProducts = parseInt(maxProductsInput) || 500;
+
+                        const result = parseXML(xmlText, supplierName.trim(), { maxProducts, minPrice: 1 });
+                        // result: {products, categories}
+                        setXmlImportPreview(result.products);
+                        setXmlCategories(result.categories);
+                        setSelectedXmlCategories([]); // за замовчуванням - нічого не обрано
+                        setXmlImportMode('all'); // за замовчуванням імпортуємо все
+                        setShowXmlImportModal(true);
+                        setLoading(false);
+                        e.target.value = '';
+                    } catch (err) {
+                        console.error(err);
+                        alert('❌ Помилка при читанні XML:\n' + (err.message || err));
+                        setLoading(false);
+                        e.target.value = '';
+                    }
+                };
+                reader.onerror = (err) => {
+                    console.error('Файл не прочитано', err);
+                    alert('❌ Помилка читання файлу');
+                    setLoading(false);
+                    e.target.value = '';
+                };
+                reader.readAsText(file, 'UTF-8');
+            };
+
+            // Імпорт після вибору категорій та режиму імпорту
+            const importSelectedXml = () => {
+                if (!xmlImportPreview || xmlImportPreview.length === 0) {
+                    alert('⚠️ Немає готових товарів для імпорту.');
+                    return;
+                }
+
+                // спочатку фільтруємо по вибраних категоріях (якщо вибрано)
+                let candidate = (selectedXmlCategories.length === 0)
+                    ? xmlImportPreview.slice()
+                    : xmlImportPreview.filter(p => selectedXmlCategories.includes(p.category));
+
+                if (candidate.length === 0) {
+                    alert('⚠️ Нічого не імпортується за обраними категоріями');
+                    return;
+                }
+
+                if (xmlImportMode === 'onlyNew') {
+                    // Імпортуємо тільки товари, які не мають дублю по supplierCode
+                    const existingSupplierCodes = new Set(products.map(p => String(p.supplierCode)));
+                    const onlyNew = candidate.filter(p => !existingSupplierCodes.has(String(p.supplierCode)));
+                    if (onlyNew.length === 0) {
+                        alert('ℹ️ Не знайдено нових товарів для імпорту (усі supplierCode вже в CRM).');
+                        return;
+                    }
+                    // У режимі onlyNew — не видаляємо існуючі товари постачальника, просто додаємо нові
+                    const updated = [...products, ...onlyNew];
+                    setProducts(updated);
+                    // Додаємо постачальника, якщо потрібно
+                    if (xmlSupplierName) setSuppliers(prev => Array.from(new Set([xmlSupplierName, ...prev])));
+                    setShowXmlImportModal(false);
+                    setXmlImportPreview([]);
+                    setXmlCategories([]);
+                    alert(`✅ Імпортовано ${onlyNew.length} нових товарів (без дублів).`);
+                    return;
+                }
+
+                // Якщо режим 'all' — стара поведінка: видаляємо поточні товари цього постачальника і додаємо всі
+                const supplier = xmlSupplierName || (candidate[0] && candidate[0].supplier) || '';
+                const filtered = products.filter(p => p.supplier !== supplier);
+                const updated = [...filtered, ...candidate];
+                setProducts(updated);
+                if (supplier) setSuppliers(prev => Array.from(new Set([supplier, ...prev])));
+                setShowXmlImportModal(false);
+                setXmlImportPreview([]);
+                setXmlCategories([]);
+                alert(`✅ Імпортовано ${candidate.length} товарів (${xmlImportMode === 'all' ? 'всі' : 'фільтровані'}).`);
+            };
+
+            const calculateRRP = (basePrice, markup = priceMarkup) => {
+                const base = parseFloat(basePrice) || 0;
+                const markupPercent = parseFloat(markup) || 0;
+                return Math.round(base * (1 + markupPercent / 100) * 100) / 100;
+            };
+
+            const applyMarkupToAll = (newMarkup) => {
+                const updated = products.map(p => {
+                    const base = parseFloat(p.basePrice) || 0;
+                    if (!p.customPrice) {
+                        return {
+                            ...p,
+                            rrp: Math.round(base * (1 + newMarkup / 100) * 100) / 100
+                        };
+                    }
+                    return p;
+                });
+                setProducts(updated);
+                setPriceMarkup(newMarkup);
+            };
+
+            const updateProduct = (productId, updates) => {
+                setProducts(products.map(p => p.id === productId ? { ...p, ...updates } : p));
+            };
+
+            const deleteProduct = (productId) => {
+                if (!confirm('Видалити цей товар?')) return;
+                setProducts(products.filter(p => p.id !== productId));
+            };
+
+            const generatePost = (product, platform) => {
+                const emojis = { instagram: '✨', facebook: '🔥', tiktok: '🎉' };
+                const hashtags = {
+                    instagram: '#shop #shopping #ukraine #онлайншоп #аксесуари #гаджети #київ #доставка',
+                    facebook: '#інтернетмагазин #україна #аксесуари #новапошта',
+                    tiktok: '#шопінг #ukraine #гаджети #fyp #viral'
+                };
+
+                return `${emojis[platform]} ${product.name}
+
+${product.vendor ? `Бренд: ${product.vendor}\n` : ''}💰 Ціна: ${product.rrp || product.dropPrice} ₴
+${product.available ? '✅ Є в наявності' : '⚠️ Під замовлення'}
+
+📦 Доставка Новою Поштою
+💳 Оплата: На вибір
+
+Замовляй в Direct! 📲
+
+${hashtags[platform]}`;
+            };
+
+            const createOrder = (product) => {
+                const finalRRP = parseFloat(product.rrp) || parseFloat(product.basePrice) || 0;
+                const finalBase = parseFloat(product.basePrice) || 0;
+                setNewOrder({
+                    id: Date.now().toString(),
+                    productId: product.id,
+                    productName: product.name,
+                    customerName: '',
+                    customerPhone: '',
+                    deliveryAddress: '',
+                    price: finalRRP,
+                    cost: finalBase,
+                    ttn: '',
+                    status: 'new',
+                    createdAt: new Date().toISOString()
+                });
+                setShowOrderModal(true);
+            };
+
+            const saveOrder = () => {
+                if (!newOrder.customerName || !newOrder.customerPhone) {
+                    alert('⚠️ Заповни ім\'я та телефон');
+                    return;
+                }
+                if (!newOrder.productName) {
+                    alert('⚠️ Заповни назву товару');
+                    return;
+                }
+                setOrders([...orders, newOrder]);
+                setShowOrderModal(false);
+                setNewOrder(null);
+                alert('✅ Замовлення створено!');
+            };
+
+            const updateOrderStatus = (orderId, status) => {
+                setOrders(orders.map(o => o.id === orderId ? {...o, status} : o));
+            };
+
+            const updateOrderTTN = (orderId, ttn) => {
+                setOrders(orders.map(o => o.id === orderId ? {...o, ttn} : o));
+            };
+
+            const exportBackup = () => {
+                const backup = {
+                    products,
+                    orders,
+                    suppliers,
+                    dailyTasks,
+                    weeklyGoals,
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const dataStr = JSON.stringify(backup, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                alert('✅ Бекап створено та завантажено!');
+            };
+
+            const importBackup = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const backup = JSON.parse(event.target.result);
+
+                        if (confirm(`Відновити дані від ${new Date(backup.exportDate).toLocaleDateString('uk-UA')}?\n\nУВАГА: Поточні дані будуть замінені!`)) {
+                            setProducts(backup.products || []);
+                            setOrders(backup.orders || []);
+                            setSuppliers(backup.suppliers || []);
+                            setDailyTasks(backup.dailyTasks || []);
+                            setWeeklyGoals(backup.weeklyGoals || []);
+                            alert('✅ Дані відновлено!');
+                        }
+                    } catch (err) {
+                        alert('❌ Помилка читання файлу!');
+                        console.error(err);
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            };
+
+            // Фільтрація товарів (розширена)
             const filteredProducts = products.filter(p => {
-                const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchesPriceMin = filters.priceMin === '' || p.rrp >= parseFloat(filters.priceMin);
-                const matchesPriceMax = filters.priceMax === '' || p.rrp <= parseFloat(filters.priceMax);
-                const matchesAvailable = filters.available === null || p.available === filters.available;
-                const matchesPublished = filters.published === null || p.published === filters.published;
-                const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(p.category);
-                return matchesSearch && matchesPriceMin && matchesPriceMax && matchesAvailable && matchesPublished && matchesCategory;
+                const term = searchTerm.toLowerCase();
+                const matchSearch =
+                    p.name.toLowerCase().includes(term) ||
+                    (p.myCode && p.myCode.toLowerCase().includes(term)) ||
+                    (p.supplierCode && p.supplierCode.toLowerCase().includes(term));
+
+                const matchSupplier = filterSupplier === 'all' || p.supplier === filterSupplier;
+                const matchAvailable = filterAvailable === 'all' ||
+                    (filterAvailable === 'yes' && p.available) ||
+                    (filterAvailable === 'no' && !p.available);
+                const matchPublished = filterPublished === 'all' ||
+                    (filterPublished === 'yes' && p.published) ||
+                    (filterPublished === 'no' && !p.published);
+
+                const price = parseFloat(p.rrp) || parseFloat(p.basePrice) || 0;
+                const minPrice = parseFloat(filterPriceMin) || 0;
+                const maxPrice = parseFloat(filterPriceMax) || 999999;
+                const matchPrice = price >= minPrice && price <= maxPrice;
+
+                const matchBrand = !filterBrand || (p.vendor && p.vendor.toLowerCase().includes(filterBrand.toLowerCase()));
+
+                return matchSearch && matchSupplier && matchAvailable && matchPublished && matchPrice && matchBrand;
             });
 
-            // ===== Додавання та редагування товару =====
-            const updateProduct = (id, updated) => {
-                setProducts(products.map(p => p.id === id ? updated : p));
-            };
-            const addProduct = () => {
-                setProducts([...products, { ...newProduct, id: Date.now() }]);
-                setNewProduct({});
-                setShowAddProductModal(false);
+            // Сортування
+            const sortedProducts = [...filteredProducts].sort((a, b) => {
+                const priceA = parseFloat(a.rrp) || parseFloat(a.basePrice) || 0;
+                const priceB = parseFloat(b.rrp) || parseFloat(b.basePrice) || 0;
+
+                switch(sortBy) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'price-asc':
+                        return priceA - priceB;
+                    case 'price-desc':
+                        return priceB - priceA;
+                    case 'date':
+                    default:
+                        return new Date(b.addedDate) - new Date(a.addedDate);
+                }
+            });
+
+            const resetFilters = () => {
+                setSearchTerm('');
+                setFilterSupplier('all');
+                setFilterAvailable('all');
+                setFilterPublished('all');
+                setFilterPriceMin('');
+                setFilterPriceMax('');
+                setFilterBrand('');
+                setSortBy('date');
             };
 
-            // ===== Обновлення статистики =====
-            useEffect(() => {
-                const totalProfit = orders.reduce((sum, o) => sum + ((o.price || 0) - (o.cost || 0)), 0);
-                setStats(prev => ({
-                    ...prev,
-                    totalProducts: products.length,
-                    availableProducts: products.filter(p => p.available).length,
-                    publishedProducts: products.filter(p => p.published).length,
-                    totalOrders: orders.length,
-                    newOrders: orders.filter(o => o.status === 'new').length,
-                    completedOrders: orders.filter(o => o.status === 'completed').length,
-                    totalProfit
-                }));
-            }, [products, orders]);
+            const stats = {
+                totalProducts: products.length,
+                availableProducts: products.filter(p => p.available).length,
+                publishedProducts: products.filter(p => p.published).length,
+                totalOrders: orders.length,
+                newOrders: orders.filter(o => o.status === 'new').length,
+                completedOrders: orders.filter(o => o.status === 'completed').length,
+                totalProfit: orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + (o.price - o.cost), 0),
+                tasksCompleted: dailyTasks.filter(t => t.done).length,
+                tasksTotal: dailyTasks.length
+            };
+
+            // Унікальні бренди та категорії з наявних товарів
+            const uniqueBrands = [...new Set(products.map(p => p.vendor).filter(Boolean))].sort();
+            const uniqueCategoriesFromProducts = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
+
+            // Додавання товару вручну (поля як у XML)
+            const addManualProduct = () => {
+                const mp = {...manualProduct};
+                mp.id = `${Date.now()}-manual`;
+                if (!mp.myCode) mp.myCode = generateMyCode(mp.supplier || 'MAN');
+                if (!mp.rrp || mp.rrp === '') {
+                    mp.rrp = calculateRRP(mp.basePrice || 0);
+                }
+                setProducts(prev => [mp, ...prev]);
+                if (mp.supplier) setSuppliers(prev => Array.from(new Set([mp.supplier, ...prev])));
+                setManualProduct({
+                    name: '', supplier: '', supplierCode: '', basePrice: '', rrp: '', image: '', vendor: '', category: '', available: true, published: false, customPrice: false
+                });
+                setShowAddProductModal(false);
+                alert('✅ Товар додано вручну');
+            };
 
             return (
-                <div className="pb-24">
-                    {/* Пошук та Фільтри */}
-                    {activeTab === 'products' && (
-                        <div className="p-3 bg-white mb-3 rounded shadow-sm">
-                            <input type="text" placeholder="Пошук товару..." value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
-                                className="w-full px-3 py-2 border rounded mb-2" />
-                            <div className="flex gap-2 flex-wrap text-xs">
-                                <input type="number" placeholder="Ціна min" value={filters.priceMin}
-                                    onChange={e => setFilters({ ...filters, priceMin: e.target.value })}
-                                    className="px-2 py-1 border rounded w-24" />
-                                <input type="number" placeholder="Ціна max" value={filters.priceMax}
-                                    onChange={e => setFilters({ ...filters, priceMax: e.target.value })}
-                                    className="px-2 py-1 border rounded w-24" />
-                                <select value={filters.available === null ? '' : filters.available}
-                                    onChange={e => setFilters({ ...filters, available: e.target.value === '' ? null : e.target.value === 'true' })}
-                                    className="px-2 py-1 border rounded">
-                                    <option value="">Всі</option>
-                                    <option value="true">В наявності</option>
-                                    <option value="false">Немає</option>
-                                </select>
-                                <select value={filters.published === null ? '' : filters.published}
-                                    onChange={e => setFilters({ ...filters, published: e.target.value === '' ? null : e.target.value === 'true' })}
-                                    className="px-2 py-1 border rounded">
-                                    <option value="">Всі</option>
-                                    <option value="true">Опубліковано</option>
-                                    <option value="false">Не опубліковано</option>
-                                </select>
-                                <select multiple value={selectedCategories}
-                                    onChange={e => setSelectedCategories([...e.target.selectedOptions].map(o => o.value))}
-                                    className="px-2 py-1 border rounded">
-                                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                                <button onClick={() => setShowAddProductModal(true)} className="bg-green-600 text-white px-3 py-1 rounded">
-                                    ➕ Додати товар
+                <div className="min-h-screen bg-gray-50 pb-24">
+                    {/* Верхня панель зі статистикою */}
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 sticky top-0 z-40 shadow-lg">
+                        <h1 className="text-xl font-bold mb-3">🚀 CRM Дропшипінг Pro LaVok SHOP by Koval</h1>
+                        <div className="grid grid-cols-4 gap-2 text-center">
+                            <div className="bg-white/20 backdrop-blur rounded-lg p-2">
+                                <div className="text-xs opacity-90">Товарів</div>
+                                <div className="text-lg font-bold">{stats.totalProducts}</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur rounded-lg p-2">
+                                <div className="text-xs opacity-90">Замовлень</div>
+                                <div className="text-lg font-bold">{stats.totalOrders}</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur rounded-lg p-2">
+                                <div className="text-xs opacity-90">Завдань</div>
+                                <div className="text-lg font-bold">{stats.tasksCompleted}/{stats.tasksTotal}</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur rounded-lg p-2">
+                                <div className="text-xs opacity-90">Прибуток</div>
+                                <div className="text-lg font-bold">{stats.totalProfit}₴</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Контент */}
+                    <div className="p-4">
+                        {/* ТОВАРИ */}
+                        {activeTab === 'products' && (
+                            <>
+                                <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+                                    <div className="flex gap-2 mb-3">
+                                        <label className="flex-1 bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 cursor-pointer">
+                                            <UploadIcon size={20} />
+                                            {loading ? 'Завантаження...' : 'XML'}
+                                            <input type="file" accept=".xml" onChange={handleFileUpload} className="hidden" disabled={loading} />
+                                        </label>
+
+                                        <button
+                                            onClick={() => setShowAddProductModal(true)}
+                                            className="bg-green-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 px-4"
+                                        >
+                                            <PlusIcon size={18} />
+                                            Додати товар
+                                        </button>
+
+                                        <button
+                                            onClick={() => setShowTemplatesModal(true)}
+                                            className="flex-1 bg-purple-600 text-white py-3 rounded-lg flex items-center justify-center gap-2"
+                                        >
+                                            <MessageSquareIcon size={20} />
+                                            Шаблони
+                                        </button>
+                                    </div>
+
+                                    {/* Контроль націнки */}
+                                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-3 mb-3 border border-green-200">
+                                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                            💰 Наценка на всі товари: {priceMarkup}%
+                                        </label>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="200"
+                                                step="5"
+                                                value={priceMarkup}
+                                                onChange={(e) => {
+                                                    const newMarkup = parseInt(e.target.value);
+                                                    applyMarkupToAll(newMarkup);
+                                                }}
+                                                className="flex-1"
+                                            />
+                                            <input
+                                                type="number"
+                                                value={priceMarkup}
+                                                onChange={(e) => {
+                                                    const newMarkup = parseInt(e.target.value) || 0;
+                                                    if (newMarkup >= 0 && newMarkup <= 500) {
+                                                        applyMarkupToAll(newMarkup);
+                                                    }
+                                                }}
+                                                className="w-16 px-2 py-1 border rounded text-center"
+                                            />
+                                            <span className="text-xs text-gray-600">%</span>
+                                        </div>
+                                        <p className="text-xs text-gray-600 mt-2">
+                                            💡 Наприклад: 100₴ + {priceMarkup}% = {calculateRRP(100)}₴
+                                        </p>
+                                    </div>
+
+                                    <div className="relative mb-3">
+                                        <SearchIcon size={20} className="absolute left-3 top-3 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Пошук товару..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-3 border rounded-lg"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="grid grid-cols-3 gap-2 w-full">
+                                            <select value={filterSupplier} onChange={(e) => setFilterSupplier(e.target.value)} className="px-2 py-2 border rounded-lg text-sm">
+                                                <option value="all">Всі постач.</option>
+                                                {suppliers.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                            <select value={filterAvailable} onChange={(e) => setFilterAvailable(e.target.value)} className="px-2 py-2 border rounded-lg text-sm">
+                                                <option value="all">Всі</option>
+                                                <option value="yes">✅ Є</option>
+                                                <option value="no">❌ Немає</option>
+                                            </select>
+                                            <select value={filterPublished} onChange={(e) => setFilterPublished(e.target.value)} className="px-2 py-2 border rounded-lg text-sm">
+                                                <option value="all">Всі</option>
+                                                <option value="yes">📱 Опубл.</option>
+                                                <option value="no">⏸️ Не опубл.</option>
+                                            </select>
+                                        </div>
+
+                                        <button onClick={() => setShowAdvancedFilters(!showAdvancedFilters)} className="text-xs text-gray-600 underline">
+                                            {showAdvancedFilters ? 'Сховати фільтри' : 'Розширені фільтри'}
+                                        </button>
+                                    </div>
+
+                                    {showAdvancedFilters && (
+                                        <div className="mt-3 grid grid-cols-3 gap-2">
+                                            <input type="number" placeholder="Ціна min" value={filterPriceMin}
+                                                onChange={(e) => setFilterPriceMin(e.target.value)} className="px-2 py-2 border rounded" />
+                                            <input type="number" placeholder="Ціна max" value={filterPriceMax}
+                                                onChange={(e) => setFilterPriceMax(e.target.value)} className="px-2 py-2 border rounded" />
+                                            <input type="text" placeholder="Бренд / Виробник" value={filterBrand}
+                                                onChange={(e) => setFilterBrand(e.target.value)} className="px-2 py-2 border rounded" />
+                                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-2 py-2 border rounded col-span-1">
+                                                <option value="date">Сортувати: за датою</option>
+                                                <option value="name">Сортувати: назва</option>
+                                                <option value="price-asc">Сортувати: ціна ↑</option>
+                                                <option value="price-desc">Сортувати: ціна ↓</option>
+                                            </select>
+                                            <select multiple value={uniqueCategoriesFromProducts} onChange={() => {}} className="px-2 py-2 border rounded col-span-2 text-xs">
+                                                {uniqueCategoriesFromProducts.length === 0 ? <option disabled>Категорії відсутні</option> : uniqueCategoriesFromProducts.map(c => <option key={c} value={c}>{c}</option>)}
+                                            </select>
+                                            <div className="flex gap-2">
+                                                <button onClick={resetFilters} className="px-3 py-2 bg-gray-200 rounded">Скинути</button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {loading ? (
+                                    <div className="bg-white rounded-lg p-12 text-center">
+                                        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                                        <p>Завантаження...</p>
+                                    </div>
+                                ) : sortedProducts.length === 0 ? (
+                                    <div className="bg-white rounded-lg p-8 text-center">
+                                        <PackageIcon size={48} className="mx-auto text-gray-300 mb-3" />
+                                        <p className="text-gray-600">{products.length === 0 ? 'Завантаж XML файл або додай товар вручну' : 'Нічого не знайдено'}</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {sortedProducts.map(product => {
+                                            const basePrice = parseFloat(product.basePrice) || 0;
+                                            const displayRRP = parseFloat(product.rrp) || basePrice;
+
+                                            return (
+                                            <div key={product.id} className="bg-white rounded-lg shadow-sm p-3">
+                                                <div className="flex gap-3 mb-2">
+                                                    {product.image ? (
+                                                        <img src={product.image} alt={product.name} className="w-20 h-20 object-cover rounded" onError={(e) => e.target.style.display = 'none'} />
+                                                    ) : (
+                                                        <div className="w-20 h-20 bg-gray-200 rounded flex items-center justify-center">
+                                                            <PackageIcon size={24} className="text-gray-400" />
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
+                                                        {product.supplierUrl ? (
+                                                            <a
+                                                                href={product.supplierUrl}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="font-bold text-sm text-blue-600 hover:underline block truncate"
+                                                            >
+                                                                {product.name}
+                                                            </a>
+                                                        ) : (
+                                                            <h3 className="font-bold text-sm truncate">{product.name}</h3>
+                                                        )}
+                                                        <p className="text-xs text-gray-500 mb-1">
+                                                            🔢 Мій: {product.myCode} | Постач: {product.supplierCode} {product.category ? `| Катег.: ${product.category}` : ''}
+                                                        </p>
+                                                        <div className="flex gap-1">
+                                                            <span className={`px-2 py-0.5 rounded text-xs ${product.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                                {product.available ? '✅' : '❌'}
+                                                            </span>
+                                                            <span className={`px-2 py-0.5 rounded text-xs ${product.published ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                                {product.published ? '📱' : '⏸️'}
+                                                            </span>
+                                                            {product.customPrice && (
+                                                                <span className="px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-800">
+                                                                    ✏️
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded p-3 text-center border border-green-200">
+                                                    <div className="text-xs text-gray-600 mb-1">РРЦ</div>
+                                                    <div className="text-2xl font-bold text-green-600">
+                                                        {displayRRP.toFixed(2)} ₴
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-1 mt-2">
+                                                    <button onClick={() => { setEditingProduct({...product}); setShowEditModal(true); }} className="bg-blue-600 text-white py-2 rounded text-xs">
+                                                        Змінити
+                                                    </button>
+                                                    <button onClick={() => { setSelectedProduct(product); setShowPostModal(true); }} className="bg-purple-600 text-white py-2 rounded text-xs">
+                                                        Пости
+                                                    </button>
+                                                    <button onClick={() => createOrder(product)} className="bg-green-600 text-white py-2 rounded text-xs">
+                                                        Замовити
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )})}
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {/* ЗАМОВЛЕННЯ */}
+                        {activeTab === 'orders' && (
+                            <div className="space-y-3">
+                                <button
+                                    onClick={() => {
+                                        setNewOrder({
+                                            id: Date.now().toString(),
+                                            productId: '',
+                                            productName: '',
+                                            customerName: '',
+                                            customerPhone: '',
+                                            deliveryAddress: '',
+                                            price: 0,
+                                            cost: 0,
+                                            ttn: '',
+                                            status: 'new',
+                                            createdAt: new Date().toISOString()
+                                        });
+                                        setShowOrderModal(true);
+                                    }}
+                                    className="w-full bg-green-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                                >
+                                    <PlusIcon size={20} />
+                                    Нове замовлення
                                 </button>
+
+                                {orders.length === 0 ? (
+                                    <div className="bg-white rounded-lg p-8 text-center">
+                                        <ShoppingBagIcon size={48} className="mx-auto text-gray-300 mb-3" />
+                                        <p className="text-gray-600">Замовлень поки немає</p>
+                                        <p className="text-xs text-gray-500 mt-2">Натисни "Нове замовлення" щоб створити</p>
+                                    </div>
+                                ) : (
+                                    [...orders].reverse().map(order => (
+                                        <div key={order.id} className="bg-white rounded-lg p-4 shadow-sm">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <h3 className="font-semibold text-sm">{order.productName}</h3>
+                                                    <p className="text-xs text-gray-600">{order.customerName}</p>
+                                                    <p className="text-xs text-gray-600">{order.customerPhone}</p>
+                                                </div>
+                                                <select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                    className={`px-2 py-1 rounded text-xs font-medium ${
+                                                        order.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                                                        order.status === 'sent' ? 'bg-yellow-100 text-yellow-800' :
+                                                        order.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                    }`}>
+                                                    <option value="new">Нове</option>
+                                                    <option value="sent">Відправлено</option>
+                                                    <option value="completed">Виконано</option>
+                                                    <option value="cancelled">Скасовано</option>
+                                                </select>
+                                            </div>
+                                            <div className="flex gap-3 text-xs mb-2">
+                                                <span>💰 {order.price}₴</span>
+                                                <span className="text-green-600">💵 +{order.price - order.cost}₴</span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <input type="text" placeholder="ТТН..." value={order.ttn || ''}
+                                                    onChange={(e) => updateOrderTTN(order.id, e.target.value)}
+                                                    className="flex-1 px-3 py-2 border rounded text-sm" />
+                                                {order.ttn && (
+                                                    <a href={`https://novaposhta.ua/tracking/?cargo_number=${order.ttn}`} target="_blank"
+                                                        className="bg-orange-600 text-white px-3 py-2 rounded flex items-center">
+                                                        <TruckIcon size={16} />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+
+                        {/* ЗАВДАННЯ */}
+                        {activeTab === 'tasks' && (
+                            <div className="space-y-3">
+                                <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h2 className="font-bold">✅ Щоденні завдання</h2>
+                                        <span className="text-sm text-gray-600">{stats.tasksCompleted}/{stats.tasksTotal}</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {dailyTasks.map(task => (
+                                            <label key={task.id} className={`flex items-center gap-3 p-3 rounded border-2 cursor-pointer ${
+                                                task.done ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
+                                            }`}>
+                                                <input type="checkbox" checked={task.done}
+                                                    onChange={() => setDailyTasks(dailyTasks.map(t => t.id === task.id ? {...t, done: !t.done} : t))}
+                                                    className="w-5 h-5" />
+                                                <span className={`flex-1 text-sm ${task.done ? 'line-through text-gray-500' : ''}`}>
+                                                    {task.title}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <button onClick={() => { initializeDailyTasks(); alert('✅ Завдання оновлено!'); }}
+                                        className="w-full mt-3 bg-blue-600 text-white py-2 rounded">
+                                        🔄 Скинути на завтра
+                                    </button>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <h2 className="font-bold mb-3">📅 Тижневі цілі</h2>
+                                    <div className="space-y-3">
+                                        {weeklyGoals.map(goal => (
+                                            <div key={goal.id}>
+                                                <div className="flex justify-between mb-1">
+                                                    <span className="text-sm">{goal.title}</span>
+                                                    <span className="text-sm font-bold text-blue-600">{goal.current}/{goal.target}</span>
+                                                </div>
+                                                <div className="bg-gray-200 rounded-full h-2 mb-2">
+                                                    <div className="bg-blue-600 h-2 rounded-full" style={{width: `${Math.min((goal.current / goal.target) * 100, 100)}%`}}></div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => setWeeklyGoals(weeklyGoals.map(g => g.id === goal.id ? {...g, current: Math.min(g.current + 1, g.target)} : g))}
+                                                        className="flex-1 bg-green-600 text-white py-1 rounded text-sm">+1</button>
+                                                    <button onClick={() => setWeeklyGoals(weeklyGoals.map(g => g.id === goal.id ? {...g, current: Math.max(g.current - 1, 0)} : g))}
+                                                        className="flex-1 bg-red-600 text-white py-1 rounded text-sm">-1</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* СТАТИСТИКА */}
+                        {activeTab === 'stats' && (
+                            <div className="space-y-3">
+                                <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <h3 className="font-bold mb-3">📊 Загальна статистика</h3>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span>Товарів:</span>
+                                            <strong className="text-blue-600">{stats.totalProducts}</strong>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>В наявності:</span>
+                                            <strong className="text-green-600">{stats.availableProducts}</strong>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Опубліковано:</span>
+                                            <strong className="text-purple-600">{stats.publishedProducts}</strong>
+                                        </div>
+                                        <div className="flex justify-between border-t pt-2">
+                                            <span>Замовлень:</span>
+                                            <strong className="text-blue-600">{stats.totalOrders}</strong>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Нових:</span>
+                                            <strong className="text-yellow-600">{stats.newOrders}</strong>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Виконано:</span>
+                                            <strong className="text-green-600">{stats.completedOrders}</strong>
+                                        </div>
+                                        <div className="flex justify-between border-t pt-2">
+                                            <span>Прибуток:</span>
+                                            <strong className="text-green-600 text-lg">{stats.totalProfit} ₴</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <h3 className="font-bold mb-3">💾 Бекап даних</h3>
+                                    <button onClick={exportBackup} className="w-full bg-green-600 text-white py-3 rounded-lg mb-2 flex items-center justify-center gap-2">
+                                        <DownloadIcon size={20} />
+                                        Створити бекап
+                                    </button>
+                                    <label className="w-full bg-purple-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 cursor-pointer">
+                                        📥 Відновити з бекапу
+                                        <input type="file" accept=".json" onChange={importBackup} className="hidden" />
+                                    </label>
+                                </div>
+
+                                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
+                                    <h3 className="font-bold mb-2">💡 Порада</h3>
+                                    <p className="text-sm text-gray-700">
+                                        💾 Створюй бекап щотижня! Зберігай файл в Google Drive або хмарі для безпеки.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* МОДАЛКА РЕДАГУВАННЯ */}
+                    {showEditModal && editingProduct && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-end modal-overlay">
+                            <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+                                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+                                    <h3 className="font-semibold">✏️ Редагування</h3>
+                                    <button onClick={() => setShowEditModal(false)} className="p-2">
+                                        <XIcon size={20} />
+                                    </button>
+                                </div>
+                                <div className="p-4 space-y-3">
+                                    {editingProduct.image && (
+                                        <img src={editingProduct.image} alt="" className="max-w-full h-32 object-contain mx-auto" />
+                                    )}
+                                    <div className="bg-blue-50 rounded p-2 text-xs">
+                                        <div className="mb-1">Мій код: <strong>{editingProduct.myCode}</strong></div>
+                                        <div className="mb-1">Код постачальника: <strong>{editingProduct.supplierCode}</strong></div>
+                                        <div>Постачальник: <strong>{editingProduct.supplier}</strong></div>
+                                    </div>
+                                    <input type="text" value={editingProduct.name}
+                                        onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" placeholder="Назва товару" />
+                                    <input type="url" value={editingProduct.supplierUrl || ''}
+                                        onChange={(e) => setEditingProduct({...editingProduct, supplierUrl: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" placeholder="Посилання на товар" />
+
+                                    <input type="text" value={editingProduct.category || ''}
+                                        onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" placeholder="Категорія" />
+
+                                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
+                                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                                            💰 РРЦ (ціна продажу)
+                                        </label>
+                                        <input type="number" value={editingProduct.rrp || ''}
+                                            onChange={(e) => setEditingProduct({...editingProduct, rrp: parseFloat(e.target.value) || 0, customPrice: true})}
+                                            className="w-full px-4 py-3 border-2 border-green-300 rounded-lg text-xl font-bold text-center"
+                                            placeholder="0" />
+                                        <p className="text-xs text-gray-600 mt-2 text-center">
+                                            💡 Базова ціна з XML: {editingProduct.basePrice}₴
+                                        </p>
+                                        {editingProduct.customPrice && (
+                                            <button
+                                                onClick={() => setEditingProduct({
+                                                    ...editingProduct,
+                                                    rrp: calculateRRP(editingProduct.basePrice),
+                                                    customPrice: false
+                                                })}
+                                                className="w-full mt-2 bg-gray-200 text-gray-700 py-2 rounded text-sm"
+                                            >
+                                                🔄 Скинути на автоматичну ({calculateRRP(editingProduct.basePrice).toFixed(2)}₴)
+                                            </button>
+                                        )}
+                                    </div>
+                                    <label className="flex items-center gap-3 p-3 border rounded cursor-pointer">
+                                        <input type="checkbox" checked={editingProduct.available}
+                                            onChange={(e) => setEditingProduct({...editingProduct, available: e.target.checked})}
+                                            className="w-5 h-5" />
+                                        <span>✅ Є в наявності</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 p-3 border rounded cursor-pointer">
+                                        <input type="checkbox" checked={editingProduct.published}
+                                            onChange={(e) => setEditingProduct({...editingProduct, published: e.target.checked})}
+                                            className="w-5 h-5" />
+                                        <span>📱 Опубліковано</span>
+                                    </label>
+                                    <div className="flex gap-3 pt-3">
+                                        <button onClick={() => setShowEditModal(false)} className="flex-1 bg-gray-200 py-3 rounded-lg">
+                                            Скасувати
+                                        </button>
+                                        <button onClick={() => { updateProduct(editingProduct.id, editingProduct); setShowEditModal(false); alert('✅ Збережено!'); }}
+                                            className="flex-1 bg-blue-600 text-white py-3 rounded-lg">
+                                            Зберегти
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Товари */}
-                    {activeTab === 'products' && (
-                        <div className="p-3 space-y-3">
-                            {filteredProducts.map(product => (
-                                <div key={product.id} className="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                                    <div>
-                                        <h3 className="font-semibold">{product.name}</h3>
-                                        <p className="text-xs">💰 {product.rrp}₴</p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={() => { setEditingProduct(product); setShowEditModal(true); }} className="bg-blue-600 text-white px-3 py-1 rounded">Редагувати</button>
-                                        <button onClick={() => { setSelectedProduct(product); setShowPostModal(true); }} className="bg-purple-600 text-white px-3 py-1 rounded">Пости</button>
-                                    </div>
+                    {/* МОДАЛКА ПОСТІВ */}
+                    {showPostModal && selectedProduct && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-end modal-overlay">
+                            <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+                                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+                                    <h3 className="font-semibold">📱 Генерація постів</h3>
+                                    <button onClick={() => setShowPostModal(false)} className="p-2">
+                                        <XIcon size={20} />
+                                    </button>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Замовлення */}
-                    {activeTab === 'orders' && (
-                        <div className="p-3 space-y-3">
-                            <button onClick={() => setShowOrderModal(true)} className="bg-green-600 text-white px-3 py-2 rounded mb-2">➕ Нове замовлення</button>
-                            {orders.map(order => (
-                                <div key={order.id} className="bg-white rounded-lg p-4 shadow-sm">
-                                    <div className="flex justify-between items-start mb-2">
+                                <div className="p-4 space-y-4">
+                                    {selectedProduct.image && (
                                         <div>
-                                            <h3 className="font-semibold text-sm">{order.productName}</h3>
-                                            <p className="text-xs">{order.customerName}</p>
-                                            <p className="text-xs">{order.customerPhone}</p>
+                                            <img src={selectedProduct.image} alt="" className="w-full max-h-48 object-contain bg-gray-50 rounded" />
+                                            <p className="text-xs text-gray-500 text-center mt-1">💡 Збережи фото для публікації</p>
                                         </div>
-                                        <select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                            className={`px-2 py-1 rounded text-xs font-medium ${order.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                                                    order.status === 'sent' ? 'bg-yellow-100 text-yellow-800' :
-                                                        order.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                                }`}>
-                                            <option value="new">Нове</option>
-                                            <option value="sent">Відправлено</option>
-                                            <option value="completed">Виконано</option>
-                                            <option value="cancelled">Скасовано</option>
-                                        </select>
+                                    )}
+                                    <div className="bg-gray-50 rounded p-3">
+                                        <h4 className="font-bold text-sm">{selectedProduct.name}</h4>
+                                        <p className="text-sm text-gray-600">💰 {selectedProduct.rrp || selectedProduct.dropPrice} ₴</p>
                                     </div>
+                                    {['instagram', 'facebook', 'tiktok'].map(platform => (
+                                        <div key={platform} className="border rounded-lg p-3">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="font-semibold capitalize">
+                                                    {platform === 'instagram' && '📸 Instagram'}
+                                                    {platform === 'facebook' && '👥 Facebook'}
+                                                    {platform === 'tiktok' && '🎵 TikTok'}
+                                                </span>
+                                                <button onClick={() => {
+                                                    navigator.clipboard.writeText(generatePost(selectedProduct, platform));
+                                                    updateProduct(selectedProduct.id, {published: true});
+                                                    alert(`✅ Скопійовано!\nТовар відмічено як опубліковано.`);
+                                                }} className="bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1">
+                                                    <CopyIcon size={14} />
+                                                    Копіювати
+                                                </button>
+                                            </div>
+                                            <textarea readOnly value={generatePost(selectedProduct, platform)}
+                                                className="w-full text-xs bg-gray-50 p-2 rounded border resize-none" rows="8" />
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     )}
 
-                    {/* Нижня навігація */}
+                    {/* МОДАЛКА ЗАМОВЛЕННЯ */}
+                    {showOrderModal && newOrder && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-end modal-overlay">
+                            <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+                                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+                                    <h3 className="font-semibold">🛍️ Нове замовлення</h3>
+                                    <button onClick={() => setShowOrderModal(false)} className="p-2">
+                                        <XIcon size={20} />
+                                    </button>
+                                </div>
+                                <div className="p-4 space-y-3">
+                                    {newOrder.productName ? (
+                                        <div className="bg-blue-50 rounded p-3">
+                                            <p className="font-semibold text-sm">{newOrder.productName}</p>
+                                            <p className="text-sm">Ціна: {newOrder.price} ₴</p>
+                                        </div>
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            placeholder="Назва товару *"
+                                            value={newOrder.productName}
+                                            onChange={(e) => setNewOrder({...newOrder, productName: e.target.value})}
+                                            className="w-full px-4 py-3 border rounded-lg"
+                                        />
+                                    )}
+                                    <input type="text" placeholder="Ім'я клієнта *" value={newOrder.customerName}
+                                        onChange={(e) => setNewOrder({...newOrder, customerName: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" />
+                                    <input type="tel" placeholder="Телефон *" value={newOrder.customerPhone}
+                                        onChange={(e) => setNewOrder({...newOrder, customerPhone: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" />
+                                    <textarea placeholder="Адреса доставки" value={newOrder.deliveryAddress}
+                                        onChange={(e) => setNewOrder({...newOrder, deliveryAddress: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg resize-none" rows="2" />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="text-xs text-gray-600 block mb-1">Ціна продажу, ₴</label>
+                                            <input type="number" placeholder="0" value={newOrder.price || ''}
+                                                onChange={(e) => setNewOrder({...newOrder, price: parseFloat(e.target.value) || 0})}
+                                                className="w-full px-4 py-3 border rounded-lg" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-gray-600 block mb-1">Собівартість, ₴</label>
+                                            <input type="number" placeholder="0" value={newOrder.cost || ''}
+                                                onChange={(e) => setNewOrder({...newOrder, cost: parseFloat(e.target.value) || 0})}
+                                                className="w-full px-4 py-3 border rounded-lg" />
+                                        </div>
+                                    </div>
+                                    {newOrder.price > 0 && newOrder.cost > 0 && (
+                                        <div className="bg-green-50 rounded p-3 text-center">
+                                            <span className="text-sm">Твій прибуток:</span>
+                                            <span className="text-xl font-bold text-green-600 ml-2">
+                                                {newOrder.price - newOrder.cost} ₴
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="flex gap-3">
+                                        <button onClick={() => setShowOrderModal(false)} className="flex-1 bg-gray-200 py-3 rounded-lg">
+                                            Скасувати
+                                        </button>
+                                        <button onClick={saveOrder} className="flex-1 bg-green-600 text-white py-3 rounded-lg">
+                                            Створити
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* МОДАЛКА ШАБЛОНІВ */}
+                    {showTemplatesModal && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-end modal-overlay">
+                            <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+                                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between z-10">
+                                    <h3 className="font-semibold">💬 Шаблони відповідей</h3>
+                                    <button onClick={() => setShowTemplatesModal(false)} className="p-2">
+                                        <XIcon size={20} />
+                                    </button>
+                                </div>
+                                <div className="p-4 space-y-3">
+                                    {[
+                                        {title: '👋 Привітання', text: 'Привіт! 👋\nДякую за звернення!\nЧим можу допомогти? 😊'},
+                                        {title: '📦 Доставка', text: 'Доставка по Україні 🇺🇦\n\n✅ Нова Пошта (2-3 дні)\n💰 Оплата: Передплата або накладений платіж\n\nВідправка протягом 1-2 днів! 📦'},
+                                        {title: '✅ Підтвердження', text: '✅ Твоє замовлення прийняте!\n\nВідправка протягом 1-2 днів.\nТТН надішлю одразу! 🚚'},
+                                        {title: '🚚 ТТН', text: '📦 Твоє замовлення відправлено!\n\nТТН: [номер]\n\nВідстежити: novaposhta.ua\n\nОчікуй на відділенні! 😊'},
+                                        {title: '⭐ Відгук', text: 'Сподіваюсь все сподобалось! 😊\n\nБуду вдячний за відгук!\nМожна фото/відео? 📸\n\nБонус: знижка 10% на наступну покупку! 🎁'},
+                                        {title: '❌ Немає в наявності', text: 'На жаль, цього немає 😔\n\nМожу запропонувати:\n1️⃣ [Альтернатива]\n2️⃣ [Альтернатива]\n\nАбо повідомлю коли з\'явиться! 🔔'}
+                                    ].map((tmpl, idx) => (
+                                        <div key={idx} className="border rounded-lg p-3">
+                                            <h4 className="font-semibold text-sm mb-2">{tmpl.title}</h4>
+                                            <textarea readOnly value={tmpl.text} className="w-full text-xs bg-gray-50 p-2 rounded border resize-none mb-2" rows="5" />
+                                            <button onClick={() => { navigator.clipboard.writeText(tmpl.text); alert('✅ Скопійовано!'); }}
+                                                className="w-full bg-blue-600 text-white py-2 rounded flex items-center justify-center gap-2">
+                                                <CopyIcon size={16} />
+                                                Копіювати
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* МОДАЛКА ДОДАВАННЯ ТОВАРУ (ручна) */}
+                    {showAddProductModal && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-end modal-overlay">
+                            <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+                                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+                                    <h3 className="font-semibold">➕ Додати товар вручну</h3>
+                                    <button onClick={() => setShowAddProductModal(false)} className="p-2">
+                                        <XIcon size={20} />
+                                    </button>
+                                </div>
+                                <div className="p-4 space-y-3">
+                                    <input type="text" placeholder="Назва" value={manualProduct.name || ''}
+                                        onChange={(e) => setManualProduct({...manualProduct, name: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" />
+                                    <input type="text" placeholder="Постачальник" value={manualProduct.supplier || ''}
+                                        onChange={(e) => setManualProduct({...manualProduct, supplier: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" />
+                                    <input type="text" placeholder="Код постачальника" value={manualProduct.supplierCode || ''}
+                                        onChange={(e) => setManualProduct({...manualProduct, supplierCode: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" />
+                                    <input type="text" placeholder="Бренд / Виробник" value={manualProduct.vendor || ''}
+                                        onChange={(e) => setManualProduct({...manualProduct, vendor: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" />
+                                    <input type="text" placeholder="Посилання на фото" value={manualProduct.image || ''}
+                                        onChange={(e) => setManualProduct({...manualProduct, image: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" />
+                                    <input type="text" placeholder="Категорія" value={manualProduct.category || ''}
+                                        onChange={(e) => setManualProduct({...manualProduct, category: e.target.value})}
+                                        className="w-full px-4 py-3 border rounded-lg" />
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input type="number" placeholder="Закуп. ціна (basePrice)" value={manualProduct.basePrice || ''}
+                                            onChange={(e) => setManualProduct({...manualProduct, basePrice: e.target.value})}
+                                            className="w-full px-4 py-3 border rounded-lg" />
+                                        <input type="number" placeholder="РРЦ (rrp)" value={manualProduct.rrp || ''}
+                                            onChange={(e) => setManualProduct({...manualProduct, rrp: e.target.value, customPrice: true})}
+                                            className="w-full px-4 py-3 border rounded-lg" />
+                                    </div>
+                                    <label className="flex items-center gap-3">
+                                        <input type="checkbox" checked={manualProduct.available} onChange={(e) => setManualProduct({...manualProduct, available: e.target.checked})} />
+                                        Є в наявності
+                                    </label>
+                                    <label className="flex items-center gap-3">
+                                        <input type="checkbox" checked={manualProduct.published} onChange={(e) => setManualProduct({...manualProduct, published: e.target.checked})} />
+                                        Опубліковано
+                                    </label>
+                                    <div className="flex gap-3">
+                                        <button onClick={() => setShowAddProductModal(false)} className="flex-1 bg-gray-200 py-3 rounded-lg">Скасувати</button>
+                                        <button onClick={addManualProduct} className="flex-1 bg-green-600 text-white py-3 rounded-lg">Додати</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* МОДАЛКА ІМПОРТУ XML з вибором категорій + режимом імпорту */}
+                    {showXmlImportModal && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-end modal-overlay">
+                            <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+                                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+                                    <h3 className="font-semibold">📥 Імпорт XML — Вибір категорій</h3>
+                                    <button onClick={() => { setShowXmlImportModal(false); setXmlImportPreview([]); setXmlCategories([]); }} className="p-2">
+                                        <XIcon size={20} />
+                                    </button>
+                                </div>
+                                <div className="p-4 space-y-3">
+                                    <p className="text-sm text-gray-600">Вибери категорії, які потрібно імпортувати. Залиш пустим для імпорту всіх.</p>
+
+                                    <div className="mb-2">
+                                        <div className="text-xs font-medium mb-1">Режим імпорту:</div>
+                                        <div className="flex gap-3 items-center">
+                                            <label className="flex items-center gap-2">
+                                                <input type="radio" name="xmlImportMode" value="all" checked={xmlImportMode === 'all'} onChange={() => setXmlImportMode('all')} />
+                                                <span className="text-sm">Імпортувати всі</span>
+                                            </label>
+                                            <label className="flex items-center gap-2">
+                                                <input type="radio" name="xmlImportMode" value="onlyNew" checked={xmlImportMode === 'onlyNew'} onChange={() => setXmlImportMode('onlyNew')} />
+                                                <span className="text-sm">Імпортувати тільки нові (без дублів по supplierCode)</span>
+                                            </label>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">Якщо вибрано "тільки нові", товари з supplierCode, які вже є у твоєму CRM — будуть пропущені.</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {xmlCategories.length === 0 ? (
+                                            <div className="col-span-2 text-sm text-gray-500">Категорії не знайдені — буде імпортовано всі товари</div>
+                                        ) : xmlCategories.map(c => (
+                                            <label key={c} className="flex items-center gap-2 p-2 border rounded">
+                                                <input type="checkbox" checked={selectedXmlCategories.includes(c)} onChange={(e) => {
+                                                    if (e.target.checked) setSelectedXmlCategories(prev => [...prev, c]);
+                                                    else setSelectedXmlCategories(prev => prev.filter(x => x !== c));
+                                                }} />
+                                                <span className="text-sm truncate">{c}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+
+                                    <div className="pt-3">
+                                        <div className="text-sm font-medium mb-2">Перегляд (перші 10 товарів):</div>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                                            {xmlImportPreview.slice(0,10).map(p => (
+                                                <div key={p.id} className="border rounded p-2 text-xs">
+                                                    <div className="font-semibold truncate">{p.name}</div>
+                                                    <div className="text-gray-500">{p.category} — {p.rrp}₴</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2 pt-4">
+                                        <button onClick={() => { setSelectedXmlCategories([]); alert('🔄 Обрано: всі категорії'); }} className="flex-1 bg-gray-200 py-2 rounded">Обрати всі</button>
+                                        <button onClick={() => importSelectedXml()} className="flex-1 bg-green-600 text-white py-2 rounded">Імпортувати</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* НИЖНЯ НАВІГАЦІЯ */}
                     <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-40">
                         <div className="flex">
                             {[
-                                { id: 'products', icon: PackageIcon, name: 'Товари' },
-                                { id: 'orders', icon: ShoppingBagIcon, name: 'Замовлення' },
-                                { id: 'tasks', icon: CheckSquareIcon, name: 'Завдання' },
-                                { id: 'stats', icon: BarChartIcon, name: 'Статистика' }
+                                {id: 'products', icon: PackageIcon, name: 'Товари'},
+                                {id: 'orders', icon: ShoppingBagIcon, name: 'Замовлення'},
+                                {id: 'tasks', icon: CheckSquareIcon, name: 'Завдання'},
+                                {id: 'stats', icon: BarChartIcon, name: 'Статистика'}
                             ].map(tab => (
                                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                                    className={`flex-1 py-3 flex flex-col items-center gap-1 transition-colors relative ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-600'
-                                        }`}>
+                                    className={`flex-1 py-3 flex flex-col items-center gap-1 transition-colors relative ${
+                                        activeTab === tab.id ? 'text-blue-600' : 'text-gray-600'
+                                    }`}>
                                     <tab.icon size={24} />
                                     <span className="text-xs">{tab.name}</span>
                                     {tab.id === 'orders' && stats.newOrders > 0 && (
@@ -224,53 +1439,6 @@
                             ))}
                         </div>
                     </div>
-
-                    {/* Модалки для редагування та додавання */}
-                    {showEditModal && editingProduct && (
-                        <div className="fixed inset-0 bg-black/50 z-50 flex items-end">
-                            <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto p-4">
-                                <h3 className="font-semibold mb-2">✏️ Редагування</h3>
-                                <input type="text" value={editingProduct.name}
-                                    onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded mb-2" />
-                                <input type="number" value={editingProduct.rrp}
-                                    onChange={e => setEditingProduct({ ...editingProduct, rrp: parseFloat(e.target.value) })}
-                                    className="w-full px-3 py-2 border rounded mb-2" />
-                                <label className="flex items-center gap-2"><input type="checkbox" checked={editingProduct.available}
-                                    onChange={e => setEditingProduct({ ...editingProduct, available: e.target.checked })} /> ✅ В наявності</label>
-                                <label className="flex items-center gap-2"><input type="checkbox" checked={editingProduct.published}
-                                    onChange={e => setEditingProduct({ ...editingProduct, published: e.target.checked })} /> 📱 Опубліковано</label>
-                                <div className="flex gap-2 mt-3">
-                                    <button onClick={() => setShowEditModal(false)} className="flex-1 bg-gray-200 py-2 rounded">Скасувати</button>
-                                    <button onClick={() => { updateProduct(editingProduct.id, editingProduct); setShowEditModal(false); }} className="flex-1 bg-blue-600 text-white py-2 rounded">Зберегти</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {showAddProductModal && (
-                        <div className="fixed inset-0 bg-black/50 z-50 flex items-end">
-                            <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto p-4">
-                                <h3 className="font-semibold mb-2">➕ Додати товар</h3>
-                                <input type="text" placeholder="Назва" value={newProduct.name || ''}
-                                    onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded mb-2" />
-                                <input type="number" placeholder="Ціна (₴)" value={newProduct.rrp || ''}
-                                    onChange={e => setNewProduct({ ...newProduct, rrp: parseFloat(e.target.value) })}
-                                    className="w-full px-3 py-2 border rounded mb-2" />
-                                <input type="text" placeholder="Код постачальника" value={newProduct.supplierCode || ''}
-                                    onChange={e => setNewProduct({ ...newProduct, supplierCode: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded mb-2" />
-                                <input type="text" placeholder="Постачальник" value={newProduct.supplier || ''}
-                                    onChange={e => setNewProduct({ ...newProduct, supplier: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded mb-2" />
-                                <div className="flex gap-2 mt-2">
-                                    <button onClick={() => setShowAddProductModal(false)} className="flex-1 bg-gray-200 py-2 rounded">Скасувати</button>
-                                    <button onClick={addProduct} className="flex-1 bg-green-600 text-white py-2 rounded">Додати</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
             );
         }
