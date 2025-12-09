@@ -510,6 +510,38 @@ function addManualProduct(){
   };
 }
 
+document.getElementById('btnUploadXml').onclick = () => {
+  document.getElementById('xmlfile').click();
+};
+
+document.getElementById('xmlfile').onchange = async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const text = await file.text();
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(text, "application/xml");
+  
+  // перебір товарів (залежить від структури XML)
+  const items = xml.querySelectorAll('item'); // приклад
+  for(const i of items){
+    const product = {
+      id: uid('p'),
+      title: i.querySelector('title')?.textContent || 'Без назви',
+      sku: i.querySelector('sku')?.textContent || uid('SKU'),
+      price: parseFloat(i.querySelector('price')?.textContent) || 0,
+      supplier: i.querySelector('supplier')?.textContent || '',
+      link: i.querySelector('link')?.textContent || '',
+      image: i.querySelector('image')?.textContent || '',
+      description: i.querySelector('description')?.textContent || ''
+    };
+    product.category = categorizeProduct(product);
+    await put('products', product);
+  }
+  await renderProducts();
+  showNotification('Товари завантажено з XML');
+};
+
+
 async function editProduct(id){
   const p = await get('products', id);
   if(!p) return alert('Товар не знайдено');
