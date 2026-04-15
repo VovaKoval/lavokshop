@@ -3,105 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LaVok Ultimate CRM — Instagram Integrated</title>
+<title>LaVok CRM Pro — Instagram & Team Control</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
     --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
     --text: #0f172a; --text-light: #64748b; --danger: #ef4444; --success: #10b981;
   }
-  * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+  * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); }
   
-  /* Sidebar */
   .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 260px; background: var(--card); border-right: 1px solid var(--border); padding: 20px; position: fixed; height: 100vh; }
-  .nav-item { padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; font-weight: 500; color: var(--text-light); }
+  .sidebar { width: 260px; background: var(--card); border-right: 1px solid var(--border); padding: 25px; position: fixed; height: 100vh; display: flex; flex-direction: column; }
+  .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 10px; margin-bottom: 6px; font-weight: 500; color: var(--text-light); transition: 0.2s; }
   .nav-item:hover, .nav-item.active { background: var(--primary); color: white; }
   
-  /* Main */
-  .main { margin-left: 260px; padding: 30px; width: 100%; }
-  .view { display: none; }
+  .main { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+  .view { display: none; animation: fadeIn 0.3s ease; }
   .view.active { display: block; }
-  .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-  
-  /* Tables */
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-  th { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-light); font-size: 12px; }
-  td { padding: 12px; border-bottom: 1px solid var(--border); }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-  /* Chat System */
-  .chat-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; height: 70vh; }
-  .chat-list { overflow-y: auto; border-right: 1px solid var(--border); }
-  .chat-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .chat-item:hover { background: #f1f5f9; }
-  .bubble { padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; max-width: 70%; }
-  .bubble.in { background: #e2e8f0; align-self: flex-start; }
-  .bubble.out { background: var(--primary); color: white; align-self: flex-end; }
+  .card { background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 25px; }
   
-  /* Inputs */
-  input, select { padding: 10px; border: 1px solid var(--border); border-radius: 6px; width: 100%; margin-bottom: 10px; }
-  .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 15px; border-bottom: 2px solid var(--bg); color: var(--text-light); font-size: 13px; }
+  td { padding: 15px; border-bottom: 1px solid var(--bg); font-size: 14px; }
+
+  /* Chat */
+  .chat-container { display: grid; grid-template-columns: 320px 1fr; gap: 2px; background: var(--border); border-radius: 16px; overflow: hidden; height: 70vh; }
+  .chat-sidebar { background: var(--card); overflow-y: auto; }
+  .chat-main { background: #f1f5f9; display: flex; flex-direction: column; }
+  .chat-msg { padding: 10px 15px; border-radius: 12px; margin-bottom: 10px; max-width: 80%; font-size: 14px; }
+  .msg-in { background: white; align-self: flex-start; }
+  .msg-out { background: var(--primary); color: white; align-self: flex-end; }
+  
+  input, select { padding: 12px; border: 1px solid var(--border); border-radius: 10px; width: 100%; margin-bottom: 15px; background: var(--bg); }
+  .btn { padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.2s; }
   .btn-p { background: var(--primary); color: white; }
+  
+  #loader { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; z-index: 9999; }
 </style>
 </head>
 <body>
 
-<div id="login-screen" style="height:100vh; display:flex; align-items:center; justify-content:center;">
-    <div class="card" style="width:350px">
-        <h2 style="margin-bottom:20px">LaVok CRM</h2>
+<div id="loader"><h2>Завантаження CRM...</h2></div>
+
+<div id="login-screen" style="height:100vh; display:none; align-items:center; justify-content:center; background: var(--bg);">
+    <div class="card" style="width:380px; text-align:center">
+        <h1 style="margin-bottom:10px">LaVok CRM</h1>
+        <p style="color:var(--text-light); margin-bottom:30px">Введіть дані для входу</p>
         <input type="text" id="l-user" placeholder="Логін">
         <input type="password" id="l-pass" placeholder="Пароль">
-        <button class="btn btn-p" style="width:100%" onclick="login()">Увійти</button>
+        <button class="btn btn-p" style="width:100%" onclick="login()">Увійти в систему</button>
     </div>
 </div>
 
 <div id="app" class="layout" style="display:none">
     <aside class="sidebar">
-        <h2 style="color:var(--primary); margin-bottom:30px">LaVok Pro</h2>
-        <div class="nav-item active" onclick="sv('dash', this)">📊 Дашборд</div>
-        <div class="nav-item" onclick="sv('orders', this)">📦 Замовлення</div>
-        <div class="nav-item" onclick="sv('chats', this)">💬 Instagram Чати</div>
-        <div id="owner-menu">
-            <div class="nav-item" onclick="sv('team', this)">👥 Команда (Менеджери)</div>
+        <h2 style="color:var(--primary); margin-bottom:35px">LaVok Pro</h2>
+        <div class="nav-item active" onclick="sv('dash', this)">📊 Аналітика</div>
+        <div class="nav-item" onclick="sv('orders', this)">📦 Продажі</div>
+        <div class="nav-item" onclick="sv('chats', this)">💬 Instagram</div>
+        <div id="owner-only" style="display:none">
+            <div style="margin: 20px 0 10px 15px; font-size: 11px; color: var(--text-light); text-transform: uppercase;">Адміністрування</div>
+            <div class="nav-item" onclick="sv('team', this)">👥 Менеджери</div>
             <div class="nav-item" onclick="sv('stock', this)">🏠 Склад</div>
         </div>
-        <div style="margin-top:auto; padding-top:20px">
-            <b id="u-info"></b><br>
-            <small onclick="location.reload()" style="color:var(--danger); cursor:pointer">Вийти</small>
+        <div style="margin-top:auto; padding-top:20px; border-top: 1px solid var(--border)">
+            <p id="u-info" style="font-weight:700; font-size:14px"></p>
+            <p id="u-role" style="font-size:12px; color:var(--text-light)"></p>
+            <button onclick="location.reload()" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-top:10px; font-size:13px">Вийти з системи</button>
         </div>
     </aside>
 
     <main class="main">
         <div id="v-dash" class="view active">
-            <div class="card">
-                <h3>Загальна аналітика</h3>
-                <canvas id="myChart" height="100"></canvas>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:25px; margin-bottom:25px">
+                <div class="card"><h4>Виручка</h4><h2 id="st-rev">0 ₴</h2></div>
+                <div class="card"><h4>Замовлення</h4><h2 id="st-count">0</h2></div>
+                <div class="card"><h4>Чистий прибуток</h4><h2 id="st-prof" style="color:var(--success)">0 ₴</h2></div>
             </div>
+            <div class="card"><h3>Графік активності</h3><canvas id="myChart" height="100"></canvas></div>
         </div>
 
         <div id="v-team" class="view">
             <div class="card">
-                <div style="display:flex; justify-content:space-between">
-                    <h3>Керування менеджерами</h3>
-                    <button class="btn btn-p" onclick="addManager()">+ Додати менеджера</button>
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px">
+                    <h3>Команда менеджерів</h3>
+                    <button class="btn btn-p" onclick="addUser()">+ Новий співробітник</button>
                 </div>
                 <table>
-                    <thead><tr><th>Ім'я</th><th>Логін</th><th>Пароль</th><th>Роль</th><th>Дії</th></tr></thead>
-                    <tbody id="t-team"></tbody>
+                    <thead><tr><th>Ім'я</th><th>Логін</th><th>Пароль</th><th>Роль</th><th>Видалити</th></tr></thead>
+                    <tbody id="t-users"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="v-chats" class="view">
-            <div class="card chat-grid">
-                <div class="chat-list" id="chat-list"></div>
-                <div style="display:flex; flex-direction:column">
-                    <div id="active-chat-user" style="padding:10px; font-weight:700; border-bottom:1px solid var(--border)">Оберіть діалог</div>
-                    <div id="chat-window" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column"></div>
-                    <div style="padding:15px; display:flex; gap:10px">
-                        <input type="text" id="chat-msg" style="margin:0" placeholder="Напишіть відповідь в Instagram...">
-                        <button class="btn btn-p" onclick="replyMsg()">Відповісти</button>
+            <div class="chat-container">
+                <div class="chat-sidebar" id="chat-list"></div>
+                <div class="chat-main">
+                    <div id="chat-header" style="padding:15px; background:white; font-weight:700; border-bottom:1px solid var(--border)">Оберіть клієнта</div>
+                    <div id="chat-messages" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column"></div>
+                    <div style="padding:20px; background:white; display:flex; gap:10px">
+                        <input type="text" id="msg-input" style="margin:0" placeholder="Напишіть відповідь...">
+                        <button class="btn btn-p" onclick="sendReply()">Надіслати</button>
                     </div>
                 </div>
             </div>
@@ -109,9 +115,9 @@
 
         <div id="v-orders" class="view">
             <div class="card">
-                <div style="display:flex; justify-content:space-between">
-                    <h3>Замовлення</h3>
-                    <button class="btn btn-p" onclick="newOrder()">➕ Новий продаж</button>
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px">
+                    <h3>Історія замовлень</h3>
+                    <button class="btn btn-p" onclick="addOrder()">➕ Додати продаж</button>
                 </div>
                 <table id="t-orders">
                     <thead><tr><th>Дата</th><th>Клієнт</th><th>Товар</th><th>Сума</th><th>Менеджер</th></tr></thead>
@@ -123,65 +129,83 @@
 </div>
 
 <script>
-let GAS_URL = "ВАШ_URL_СКРИПТА"; // Вставте сюди URL після публікації GAS
+// ==========================================
+// КОНФІГУРАЦІЯ
+// ==========================================
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyv9Z_H31U9fE2qM2_E1oB_kF5kF8-O1Z5_S2z3y0-R-T2g-k/exec"; 
 let db = { users: [], orders: [], messages: [], products: [] };
 let currentUser = null;
-let activeChatIndex = null;
 
-// ФУНКЦІЯ ВХОДУ (Бере дані з Таблиці)
+// ПЕРШИЙ ЗАПУСК - Читаємо дані з Таблиці одразу
+window.onload = async () => {
+    try {
+        const res = await fetch(GAS_URL + "?action=readAll");
+        db = await res.json();
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+    } catch (e) {
+        alert("Помилка зв'язку з Google Таблицею. Перевірте GAS_URL та доступ до скрипта.");
+    }
+};
+
 async function login() {
     const u = document.getElementById('l-user').value;
     const p = document.getElementById('l-pass').value;
 
-    // Спершу вантажимо користувачів з Google
-    const res = await fetch(GAS_URL + "?action=readAll");
-    db = await res.json();
-
     const user = db.users.find(x => x.login == u && x.pass == p);
     
-    if(user || (u === 'admin' && p === 'admin')) {
-        currentUser = user || { name: "Власник", role: "admin" };
+    if (user) {
+        currentUser = user;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
-        document.getElementById('u-info').innerText = currentUser.name;
+        document.getElementById('u-info').innerText = user.name;
+        document.getElementById('u-role').innerText = user.role === 'admin' ? 'Адміністратор (Власник)' : 'Менеджер';
         
-        if(currentUser.role !== 'admin') {
-            document.getElementById('owner-menu').style.display = 'none';
-        }
+        if (user.role === 'admin') document.getElementById('owner-only').style.display = 'block';
         
         renderAll();
+        initChart();
     } else {
-        alert("Невірний логін або пароль!");
+        alert("Помилка: Користувача не знайдено в базі!");
     }
 }
 
-// УПРАВЛІННЯ КОМАНДОЮ
-function addManager() {
-    const name = prompt("Ім'я менеджера:");
-    const login = prompt("Логін:");
-    const pass = prompt("Пароль:");
-    if(name && login && pass) {
-        db.users.push({ name, login, pass, role: 'manager' });
-        save('users', 'Додав менеджера ' + name);
-    }
-}
-
-async function save(sheet, log) {
+// УПРАВЛІННЯ ДАНИМИ
+async function sync(sheet) {
     await fetch(GAS_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'write', sheet, data: db[sheet], logMsg: log })
+        body: JSON.stringify({ action: 'write', sheet: sheet, data: db[sheet] })
     });
     renderAll();
 }
 
+function addUser() {
+    const name = prompt("Ім'я:");
+    const login = prompt("Логін:");
+    const pass = prompt("Пароль:");
+    if(name && login) {
+        db.users.push({ name, login, pass, role: 'manager' });
+        sync('users');
+    }
+}
+
+function addOrder() {
+    const client = prompt("Клієнт:");
+    const sum = +prompt("Сума:");
+    if(client && sum) {
+        db.orders.push({ date: new Date().toLocaleDateString(), client, item: 'Товар', sum, manager: currentUser.name });
+        sync('orders');
+    }
+}
+
 // РЕНДЕРИНГ
 function renderAll() {
-    // Команда
-    const tTeam = document.getElementById('t-team');
-    if(tTeam) {
-        tTeam.innerHTML = db.users.map((u, i) => `
+    // Менеджери
+    const tUsers = document.getElementById('t-users');
+    if (tUsers) {
+        tUsers.innerHTML = db.users.map((u, i) => `
             <tr><td>${u.name}</td><td>${u.login}</td><td>${u.pass}</td><td>${u.role}</td>
-            <td><button onclick="del('users', ${i})">🗑️</button></td></tr>
+            <td><button onclick="del('users', ${i})" style="color:red; border:none; background:none; cursor:pointer">🗑️</button></td></tr>
         `).join('');
     }
 
@@ -189,43 +213,16 @@ function renderAll() {
     document.querySelector('#t-orders tbody').innerHTML = db.orders.map(o => `
         <tr><td>${o.date}</td><td>${o.client}</td><td>${o.item}</td><td>${o.sum} ₴</td><td>${o.manager}</td></tr>
     `).join('');
-
-    // Чати Instagram
-    const chatList = document.getElementById('chat-list');
-    chatList.innerHTML = db.messages.map((m, i) => `
-        <div class="chat-item" onclick="openChat(${i})">
-            <b>${m.sender}</b><br><small>${m.text.substring(0,30)}...</small>
-        </div>
-    `).join('');
-}
-
-function openChat(i) {
-    activeChatIndex = i;
-    const m = db.messages[i];
-    document.getElementById('active-chat-user').innerText = "Instagram: " + m.sender;
-    document.getElementById('chat-window').innerHTML = `
-        <div class="bubble in">${m.text}</div>
-        ${m.reply ? `<div class="bubble out">${m.reply}</div>` : ''}
-    `;
-}
-
-async function replyMsg() {
-    const txt = document.getElementById('chat-msg').value;
-    if(!txt || activeChatIndex === null) return;
     
-    db.messages[activeChatIndex].reply = txt;
-    db.messages[activeChatIndex].status = 'replied';
-    
-    // Тут в реальності ми б смикали Instagram Graph API для відправки
-    await save('messages', 'Відповідь клієнту ' + db.messages[activeChatIndex].sender);
-    document.getElementById('chat-msg').value = '';
-    openChat(activeChatIndex);
+    // Статистика
+    document.getElementById('st-rev').innerText = db.orders.reduce((a,b)=>a+Number(b.sum),0).toLocaleString() + ' ₴';
+    document.getElementById('st-count').innerText = db.orders.length;
 }
 
 function del(sheet, i) {
-    if(confirm('Видалити?')) {
+    if(confirm('Видалити запис?')) {
         db[sheet].splice(i, 1);
-        save(sheet, 'Видалення з ' + sheet);
+        sync(sheet);
     }
 }
 
@@ -234,6 +231,17 @@ function sv(id, el) {
     document.getElementById('v-' + id).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
+}
+
+function initChart() {
+    const ctx = document.getElementById('myChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+            datasets: [{ label: 'Продажі', data: [5, 12, 8, 20, 15, 25, 22], borderColor: '#4f46e5', tension: 0.3 }]
+        }
+    });
 }
 </script>
 </body>
