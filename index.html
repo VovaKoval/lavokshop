@@ -132,7 +132,7 @@
     <h1>CRM Бізнес Pro</h1>
     <div class="sync-status" id="sync-status">
       <div class="dot" id="sync-dot"></div>
-      <span id="sync-label">Не підключено</span>
+      <span id="sync-label">Завантаження...</span>
     </div>
     <button class="tbtn" onclick="syncAll()" id="sync-btn">Синхронізувати</button>
     <button class="tbtn" onclick="toggleSetup()">Налаштування Google</button>
@@ -143,12 +143,7 @@
   </div>
 
   <div class="setup-panel" id="setup-panel" style="display:none">
-    <h2>Підключення до Google Таблиці — виконай 1 раз</h2>
-    <div class="setup-steps">
-      <div class="step"><div class="step-num">1</div><div class="step-body">Відкрий <strong><a href="https://docs.google.com/spreadsheets/create" target="_blank" style="color:var(--warn-text)">Google Таблиці</a></strong> → створи нову таблицю → скопіюй ID з URL</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-body">В таблиці: <strong>Розширення → Apps Script</strong> → встав код → заміни SHEET_ID → збережи</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Деплой → Новий деплой → Веб-застосунок</strong> → Хто має доступ: <em>Всі (Anyone)</em> → натисни Деплой</div></div>
-    </div>
+    <h2>Підключення до Google Таблиці</h2>
     <div class="url-row">
       <input type="text" id="gas-url-input" placeholder="https://script.google.com/macros/s/АБВ.../exec">
       <button onclick="saveGasUrl()">Зберегти і перевірити</button>
@@ -251,7 +246,6 @@
         <div class="fl"><label>Джерело</label><select id="nc-src"><option value="instagram">Instagram</option><option value="tiktok">TikTok</option><option value="rozetka">Rozetka</option><option value="google">Google</option><option value="other">Інше</option></select></div>
       </div>
       <div class="br"><button class="bp" onclick="addClient()">Додати клієнта</button></div>
-      <div id="nc-msg"></div>
     </div>
   </div>
 
@@ -295,20 +289,36 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ============================================================
+// КОНФІГУРАЦІЯ ТА ДАНІ
+// ============================================================
+
+// ВАШЕ ПОСИЛАННЯ ВСТАВЛЕНО СЮДИ:
+let GAS_URL = 'https://script.google.com/macros/s/AKfycby_ngKMNrE9dkTjW84xKpwfMVkp-n0-POvk1vaJMHn0GJ1W69OKbV_Hx7yvtN0EjoOqCg/exec';
+
 const LS = {
   clients:'crmgs_clients', orders:'crmgs_orders', products:'crmgs_products',
   expenses:'crmgs_expenses', monthly_exp:'crmgs_monthly_exp', gas_url:'crmgs_gas_url'
 };
-let db = {clients:[],orders:[],products:[],expenses:[],monthly_exp:[{name:'Реклама',amt:600}]};
-let GAS_URL = 'https://script.google.com/macros/s/AKfycby_ngKMNrE9dkTjW84xKpwfMVkp-n0-POvk1vaJMHn0GJ1W69OKbV_Hx7yvtN0EjoOqCg/exec';
-let chartMonthly = null;
 
+let db = {
+  clients:[],
+  orders:[],
+  products:[],
+  expenses:[],
+  monthly_exp:[{name:'Реклама',amt:600}]
+};
+
+// ============================================================
+// РОБОТА З LOCALSTORAGE
+// ============================================================
 const lsGet = k => { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch{return null;} };
 const lsSet = (k,v) => { try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 const save = k => lsSet(LS[k], db[k]);
-const saveAll = () => Object.keys(LS).filter(k=>db[k]!==undefined).forEach(save);
 
-// ВИПРАВЛЕНА ФУНКЦІЯ ЗАПИТУ
+// ============================================================
+// СИНХРОНІЗАЦІЯ З GOOGLE
+// ============================================================
 async function gasRequest(action, sheet, data=null) {
   if (!GAS_URL) return null;
   try {
@@ -320,7 +330,6 @@ async function gasRequest(action, sheet, data=null) {
       const res = await fetch(url.toString(), { method: 'GET' });
       return await res.json();
     } else {
-      // КЛЮЧОВЕ ВИПРАВЛЕННЯ: Відправляємо БЕЗ заголовоків Content-Type
       const res = await fetch(GAS_URL, {
         method: 'POST',
         body: JSON.stringify({ action, sheet, data })
@@ -338,6 +347,7 @@ async function syncAll(silent=false) {
   setSyncStatus('loading', 'Синхронізація...');
   const sheets = ['clients','orders','products','expenses','monthly_exp'];
   try {
+    // 1. Читаємо з Google
     for (const sh of sheets) {
       const res = await gasRequest('read', sh);
       if (res && res.data && res.data.length > 0) {
@@ -345,6 +355,7 @@ async function syncAll(silent=false) {
         save(sh);
       }
     }
+    // 2. Відправляємо локальні дані (якщо вони новіші, зазвичай додається логіка Merge, але тут проста заміна)
     for (const sh of sheets) {
       if (db[sh] && db[sh].length > 0) await gasRequest('write', sh, db[sh]);
     }
@@ -380,7 +391,7 @@ async function saveGasUrl() {
     syncAll();
     document.getElementById('setup-panel').style.display='none';
   } else {
-    toast('Помилка підключення. Перевір деплой!', 'err');
+    toast('Помилка підключення!', 'err');
   }
 }
 
@@ -390,6 +401,9 @@ function toggleSetup() {
   if (GAS_URL) document.getElementById('gas-url-input').value = GAS_URL;
 }
 
+// ============================================================
+// ІНТЕРФЕЙС ТА ЛОГІКА (Рендеринг)
+// ============================================================
 function toast(msg, type='info') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -398,7 +412,6 @@ function toast(msg, type='info') {
 }
 
 const fmt = n => Math.round(+n || 0).toLocaleString('uk-UA');
-const pct = (a,b) => b ? Math.round(a/b*100) : 0;
 const today = () => new Date().toISOString().split('T')[0];
 
 function sv(v) {
@@ -406,11 +419,14 @@ function sv(v) {
   document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
   document.getElementById('v-'+v)?.classList.add('on');
   if(v==='ao') populateSels();
-  if(v==='analytics') renderAnalytics();
-  if(v==='profit') renderProfit();
 }
 
-function renderAll(){renderDash();renderClients();renderOrders();renderInventory();}
+function renderAll(){
+  renderDash();
+  renderClients();
+  renderOrders();
+  renderInventory();
+}
 
 function renderDash() {
   const rev = db.orders.filter(o=>o.status==='paid').reduce((s,o)=>s+(+o.amount),0);
@@ -439,11 +455,14 @@ function populateSels(){
 
 function fillPrice(){
   const opt=document.getElementById('no-pr').options[document.getElementById('no-pr').selectedIndex];
-  if(opt){document.getElementById('no-am').value=opt.dataset.price; recalcOrder();}
+  if(opt){document.getElementById('no-am').value=opt.dataset.price;}
 }
 
-function recalcOrder(){ /* логіка розрахунку */ }
+function recalcOrder(){}
 
+// ============================================================
+// ДОДАВАННЯ ТА ВИДАЛЕННЯ
+// ============================================================
 function addClient(){
   const n=document.getElementById('nc-n').value;
   const p=document.getElementById('nc-p').value;
@@ -473,10 +492,26 @@ function delC(id){ db.clients=db.clients.filter(c=>c.id!==id); save('clients'); 
 function delO(id){ db.orders=db.orders.filter(o=>o.id!==id); save('orders'); pushToGoogle('orders'); renderOrders(); }
 function delP(id){ db.products=db.products.filter(p=>p.id!==id); save('products'); pushToGoogle('products'); renderInventory(); }
 
+// ============================================================
+// ІНІЦІАЛІЗАЦІЯ
+// ============================================================
 function load() {
-  GAS_URL = lsGet(LS.gas_url) || '';
-  Object.keys(LS).forEach(k=>{ if(db[k]) db[k]=lsGet(LS[k])||db[k]; });
-  if(GAS_URL) syncAll(true);
+  // Пріоритет: 1. Те що в пам'яті браузера, 2. Те що ми вписали вручну (хардкод)
+  const savedUrl = lsGet(LS.gas_url);
+  if (savedUrl) {
+    GAS_URL = savedUrl;
+  }
+  
+  // Завантаження локальних даних
+  Object.keys(LS).forEach(k => { 
+    if(db[k]) db[k] = lsGet(LS[k]) || db[k]; 
+  });
+  
+  if (GAS_URL) {
+    syncAll(true);
+  } else {
+    setSyncStatus('err', 'Немає URL');
+  }
   renderAll();
 }
 
