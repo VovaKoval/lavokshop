@@ -1,142 +1,92 @@
 ﻿<!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LaVok CRM Pro — Instagram & Team Control</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-  :root {
-    --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
-    --text: #0f172a; --text-light: #64748b; --danger: #ef4444; --success: #10b981;
-  }
-  * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); }
-  
-  .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 260px; background: var(--card); border-right: 1px solid var(--border); padding: 25px; position: fixed; height: 100vh; display: flex; flex-direction: column; }
-  .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 10px; margin-bottom: 6px; font-weight: 500; color: var(--text-light); transition: 0.2s; }
-  .nav-item:hover, .nav-item.active { background: var(--primary); color: white; }
-  
-  .main { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
-  .view { display: none; animation: fadeIn 0.3s ease; }
-  .view.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .card { background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 25px; }
-  
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; padding: 15px; border-bottom: 2px solid var(--bg); color: var(--text-light); font-size: 13px; }
-  td { padding: 15px; border-bottom: 1px solid var(--bg); font-size: 14px; }
-
-  /* Chat */
-  .chat-container { display: grid; grid-template-columns: 320px 1fr; gap: 2px; background: var(--border); border-radius: 16px; overflow: hidden; height: 70vh; }
-  .chat-sidebar { background: var(--card); overflow-y: auto; }
-  .chat-main { background: #f1f5f9; display: flex; flex-direction: column; }
-  .chat-msg { padding: 10px 15px; border-radius: 12px; margin-bottom: 10px; max-width: 80%; font-size: 14px; }
-  .msg-in { background: white; align-self: flex-start; }
-  .msg-out { background: var(--primary); color: white; align-self: flex-end; }
-  
-  input, select { padding: 12px; border: 1px solid var(--border); border-radius: 10px; width: 100%; margin-bottom: 15px; background: var(--bg); }
-  .btn { padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-  .btn-p { background: var(--primary); color: white; }
-  
-  #loader { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-</style>
+    <meta charset="UTF-8">
+    <title>LaVok CRM Ultimate</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        :root { --p: #4f46e5; --bg: #f8fafc; --c: #ffffff; --b: #e2e8f0; --t: #0f172a; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--t); overflow-x: hidden; }
+        .layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: var(--c); border-right: 1px solid var(--b); padding: 25px; position: fixed; height: 100vh; display: flex; flex-direction: column; }
+        .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 10px; margin-bottom: 6px; color: #64748b; font-weight: 500; }
+        .nav-item.active { background: var(--p); color: white; }
+        .main { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+        .view { display: none; } .view.active { display: block; }
+        .card { background: var(--c); padding: 25px; border-radius: 16px; border: 1px solid var(--b); box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; }
+        input { padding: 12px; border: 1px solid var(--b); border-radius: 10px; width: 100%; margin-bottom: 15px; outline: none; }
+        .btn { padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; background: var(--p); color: white; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; color: #64748b; font-size: 12px; text-transform: uppercase; }
+        td { padding: 12px; border-top: 1px solid var(--bg); font-size: 14px; }
+        #loader { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; }
+    </style>
 </head>
 <body>
 
-<div id="loader"><h2>Завантаження CRM...</h2></div>
+<div id="loader">
+    <h2 style="color: var(--p)">Завантаження бази даних...</h2>
+    <p id="load-status">Встановлення зв'язку з Google Sheets</p>
+</div>
 
-<div id="login-screen" style="height:100vh; display:none; align-items:center; justify-content:center; background: var(--bg);">
-    <div class="card" style="width:380px; text-align:center">
-        <h1 style="margin-bottom:10px">LaVok CRM</h1>
-        <p style="color:var(--text-light); margin-bottom:30px">Введіть дані для входу</p>
+<div id="login-screen" style="height:100vh; display:none; align-items:center; justify-content:center;">
+    <div class="card" style="width:360px; text-align:center">
+        <h2 style="margin-bottom:10px">LaVok CRM</h2>
+        <p style="margin-bottom:25px; color:#64748b">Авторизація</p>
         <input type="text" id="l-user" placeholder="Логін">
         <input type="password" id="l-pass" placeholder="Пароль">
-        <button class="btn btn-p" style="width:100%" onclick="login()">Увійти в систему</button>
+        <button class="btn" style="width:100%" onclick="login()">Увійти</button>
     </div>
 </div>
 
 <div id="app" class="layout" style="display:none">
     <aside class="sidebar">
-        <h2 style="color:var(--primary); margin-bottom:35px">LaVok Pro</h2>
-        <div class="nav-item active" onclick="sv('dash', this)">📊 Аналітика</div>
+        <h2 style="color:var(--p); margin-bottom:30px">LaVok Pro</h2>
+        <div class="nav-item active" onclick="sv('dash', this)">📊 Дашборд</div>
         <div class="nav-item" onclick="sv('orders', this)">📦 Продажі</div>
         <div class="nav-item" onclick="sv('chats', this)">💬 Instagram</div>
         <div id="owner-only" style="display:none">
-            <div style="margin: 20px 0 10px 15px; font-size: 11px; color: var(--text-light); text-transform: uppercase;">Адміністрування</div>
             <div class="nav-item" onclick="sv('team', this)">👥 Менеджери</div>
-            <div class="nav-item" onclick="sv('stock', this)">🏠 Склад</div>
         </div>
-        <div style="margin-top:auto; padding-top:20px; border-top: 1px solid var(--border)">
-            <p id="u-info" style="font-weight:700; font-size:14px"></p>
-            <p id="u-role" style="font-size:12px; color:var(--text-light)"></p>
-            <button onclick="location.reload()" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-top:10px; font-size:13px">Вийти з системи</button>
+        <div style="margin-top:auto; font-size:13px">
+            <b id="u-info"></b><br>
+            <span onclick="location.reload()" style="color:red; cursor:pointer">Вийти</span>
         </div>
     </aside>
-
     <main class="main">
         <div id="v-dash" class="view active">
-            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:25px; margin-bottom:25px">
-                <div class="card"><h4>Виручка</h4><h2 id="st-rev">0 ₴</h2></div>
-                <div class="card"><h4>Замовлення</h4><h2 id="st-count">0</h2></div>
-                <div class="card"><h4>Чистий прибуток</h4><h2 id="st-prof" style="color:var(--success)">0 ₴</h2></div>
-            </div>
-            <div class="card"><h3>Графік активності</h3><canvas id="myChart" height="100"></canvas></div>
+            <div class="card"><h3>Аналітика продажів</h3><canvas id="myChart" height="100"></canvas></div>
         </div>
-
         <div id="v-team" class="view">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                    <h3>Команда менеджерів</h3>
-                    <button class="btn btn-p" onclick="addUser()">+ Новий співробітник</button>
+                    <h3>Команда</h3>
+                    <button class="btn" onclick="addUser()">+ Додати</button>
                 </div>
-                <table>
-                    <thead><tr><th>Ім'я</th><th>Логін</th><th>Пароль</th><th>Роль</th><th>Видалити</th></tr></thead>
-                    <tbody id="t-users"></tbody>
-                </table>
+                <table id="t-users"><thead><tr><th>Ім'я</th><th>Логін</th><th>Пароль</th><th>Роль</th><th>Дія</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
-
-        <div id="v-chats" class="view">
-            <div class="chat-container">
-                <div class="chat-sidebar" id="chat-list"></div>
-                <div class="chat-main">
-                    <div id="chat-header" style="padding:15px; background:white; font-weight:700; border-bottom:1px solid var(--border)">Оберіть клієнта</div>
-                    <div id="chat-messages" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column"></div>
-                    <div style="padding:20px; background:white; display:flex; gap:10px">
-                        <input type="text" id="msg-input" style="margin:0" placeholder="Напишіть відповідь...">
-                        <button class="btn btn-p" onclick="sendReply()">Надіслати</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div id="v-orders" class="view">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                    <h3>Історія замовлень</h3>
-                    <button class="btn btn-p" onclick="addOrder()">➕ Додати продаж</button>
+                    <h3>Замовлення</h3>
+                    <button class="btn" onclick="addOrder()">+ Новий продаж</button>
                 </div>
-                <table id="t-orders">
-                    <thead><tr><th>Дата</th><th>Клієнт</th><th>Товар</th><th>Сума</th><th>Менеджер</th></tr></thead>
-                    <tbody></tbody>
-                </table>
+                <table id="t-orders"><thead><tr><th>Дата</th><th>Клієнт</th><th>Сума</th><th>Менеджер</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
+        <div id="v-chats" class="view"><div class="card"><h3>Instagram чати будуть тут</h3></div></div>
     </main>
 </div>
 
 <script>
-// ==========================================
-// КОНФІГУРАЦІЯ
-// ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycby_ngKMNrE9dkTjW84xKpwfMVkp-n0-POvk1vaJMHn0GJ1W69OKbV_Hx7yvtN0EjoOqCg/exec"; 
-let db = { users: [], orders: [], messages: [], products: [] };
+const GAS_URL = "https://script.google.com/macros/s/AKfycby_ngKMNrE9dkTjW84xKpwfMVkp-n0-POvk1vaJMHn0GJ1W69OKbV_Hx7yvtN0EjoOqCg/exec";
+let db = { users: [], orders: [] };
 let currentUser = null;
 
-// ПЕРШИЙ ЗАПУСК - Читаємо дані з Таблиці одразу
+// ЗАВАНТАЖЕННЯ ДАНИХ ПРИ ЗАПУСКУ
 window.onload = async () => {
     try {
         const res = await fetch(GAS_URL + "?action=readAll");
@@ -144,7 +94,12 @@ window.onload = async () => {
         document.getElementById('loader').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
     } catch (e) {
-        alert("Помилка зв'язку з Google Таблицею. Перевірте GAS_URL та доступ до скрипта.");
+        document.getElementById('load-status').innerHTML = "<b style='color:red'>Помилка доступу! Перевірте публікацію скрипта.</b>";
+        // Навіть при помилці показуємо вхід, щоб спрацював "admin/admin" резерв
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }, 2000);
     }
 };
 
@@ -152,25 +107,29 @@ async function login() {
     const u = document.getElementById('l-user').value;
     const p = document.getElementById('l-pass').value;
 
-    const user = db.users.find(x => x.login == u && x.pass == p);
-    
+    // Шукаємо користувача
+    let user = (db.users || []).find(x => x.login == u && x.pass == p);
+
+    // РЕЗЕРВНИЙ ВХІД (якщо база ще пуста або помилка мережі)
+    if (!user && u === 'admin' && p === 'admin') {
+        user = { name: "Власник", login: "admin", pass: "admin", role: "admin" };
+        if (!db.users) db.users = [];
+        db.users.push(user);
+    }
+
     if (user) {
         currentUser = user;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
         document.getElementById('u-info').innerText = user.name;
-        document.getElementById('u-role').innerText = user.role === 'admin' ? 'Адміністратор (Власник)' : 'Менеджер';
-        
         if (user.role === 'admin') document.getElementById('owner-only').style.display = 'block';
-        
         renderAll();
         initChart();
     } else {
-        alert("Помилка: Користувача не знайдено в базі!");
+        alert("Невірний логін або пароль!");
     }
 }
 
-// УПРАВЛІННЯ ДАНИМИ
 async function sync(sheet) {
     await fetch(GAS_URL, {
         method: 'POST',
@@ -191,36 +150,29 @@ function addUser() {
 
 function addOrder() {
     const client = prompt("Клієнт:");
-    const sum = +prompt("Сума:");
+    const sum = prompt("Сума:");
     if(client && sum) {
-        db.orders.push({ date: new Date().toLocaleDateString(), client, item: 'Товар', sum, manager: currentUser.name });
+        db.orders.push({ date: new Date().toLocaleDateString(), client, sum, manager: currentUser.name });
         sync('orders');
     }
 }
 
-// РЕНДЕРИНГ
 function renderAll() {
-    // Менеджери
-    const tUsers = document.getElementById('t-users');
-    if (tUsers) {
-        tUsers.innerHTML = db.users.map((u, i) => `
+    if (db.users) {
+        document.querySelector('#t-users tbody').innerHTML = db.users.map((u, i) => `
             <tr><td>${u.name}</td><td>${u.login}</td><td>${u.pass}</td><td>${u.role}</td>
-            <td><button onclick="del('users', ${i})" style="color:red; border:none; background:none; cursor:pointer">🗑️</button></td></tr>
+            <td><button onclick="del('users', ${i})">🗑️</button></td></tr>
         `).join('');
     }
-
-    // Замовлення
-    document.querySelector('#t-orders tbody').innerHTML = db.orders.map(o => `
-        <tr><td>${o.date}</td><td>${o.client}</td><td>${o.item}</td><td>${o.sum} ₴</td><td>${o.manager}</td></tr>
-    `).join('');
-    
-    // Статистика
-    document.getElementById('st-rev').innerText = db.orders.reduce((a,b)=>a+Number(b.sum),0).toLocaleString() + ' ₴';
-    document.getElementById('st-count').innerText = db.orders.length;
+    if (db.orders) {
+        document.querySelector('#t-orders tbody').innerHTML = db.orders.map(o => `
+            <tr><td>${o.date}</td><td>${o.client}</td><td>${o.sum} ₴</td><td>${o.manager}</td></tr>
+        `).join('');
+    }
 }
 
 function del(sheet, i) {
-    if(confirm('Видалити запис?')) {
+    if(confirm('Видалити?')) {
         db[sheet].splice(i, 1);
         sync(sheet);
     }
@@ -234,12 +186,13 @@ function sv(id, el) {
 }
 
 function initChart() {
-    const ctx = document.getElementById('myChart').getContext('2d');
+    const ctx = document.getElementById('myChart');
+    if (!ctx) return;
     new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
-            datasets: [{ label: 'Продажі', data: [5, 12, 8, 20, 15, 25, 22], borderColor: '#4f46e5', tension: 0.3 }]
+            datasets: [{ label: 'Виручка', data: [1200, 1900, 1500, 2500, 2200, 3000, 2800], borderColor: '#4f46e5', tension: 0.3 }]
         }
     });
 }
