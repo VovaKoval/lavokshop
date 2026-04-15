@@ -2,179 +2,229 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>LaVok CRM Ultimate</title>
+    <title>LaVok CRM Pro — Склад & Модальні Вікна</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     <style>
-        :root { --p: #4f46e5; --bg: #f8fafc; --c: #ffffff; --b: #e2e8f0; --t: #0f172a; }
+        :root { --p: #4f46e5; --bg: #f8fafc; --c: #ffffff; --b: #e2e8f0; --t: #0f172a; --danger: #ef4444; }
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
-        body { background: var(--bg); color: var(--t); overflow-x: hidden; }
+        body { background: var(--bg); color: var(--t); }
+        
+        /* Layout */
         .layout { display: flex; min-height: 100vh; }
         .sidebar { width: 260px; background: var(--c); border-right: 1px solid var(--b); padding: 25px; position: fixed; height: 100vh; display: flex; flex-direction: column; }
-        .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 10px; margin-bottom: 6px; color: #64748b; font-weight: 500; }
+        .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 10px; margin-bottom: 6px; color: #64748b; font-weight: 500; transition: 0.2s; }
         .nav-item.active { background: var(--p); color: white; }
         .main { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
         .view { display: none; } .view.active { display: block; }
+        
+        /* UI Elements */
         .card { background: var(--c); padding: 25px; border-radius: 16px; border: 1px solid var(--b); box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; }
-        input { padding: 12px; border: 1px solid var(--b); border-radius: 10px; width: 100%; margin-bottom: 15px; outline: none; }
-        .btn { padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; background: var(--p); color: white; transition: 0.2s; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; background: var(--p); color: white; }
+        .btn-del { background: var(--danger); }
+        
+        /* Modal System */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal { background: white; padding: 30px; border-radius: 20px; width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal h3 { margin-bottom: 20px; }
+        .modal label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #64748b; }
+        .modal input, .modal select { width: 100%; padding: 12px; border: 1px solid var(--b); border-radius: 10px; margin-bottom: 15px; }
+        
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; color: #64748b; font-size: 12px; text-transform: uppercase; }
-        td { padding: 12px; border-top: 1px solid var(--bg); font-size: 14px; }
-        #loader { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; }
+        th { text-align: left; padding: 12px; color: #64748b; font-size: 12px; border-bottom: 1px solid var(--b); }
+        td { padding: 15px; border-bottom: 1px solid var(--bg); font-size: 14px; }
+        
+        #loader { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; z-index: 10000; }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <h2 style="color: var(--p)">Завантаження бази даних...</h2>
-    <p id="load-status">Встановлення зв'язку з Google Sheets</p>
-</div>
+<div id="loader"><h2>Завантаження системи LaVok...</h2></div>
 
-<div id="login-screen" style="height:100vh; display:none; align-items:center; justify-content:center;">
-    <div class="card" style="width:360px; text-align:center">
-        <h2 style="margin-bottom:10px">LaVok CRM</h2>
-        <p style="margin-bottom:25px; color:#64748b">Авторизація</p>
-        <input type="text" id="l-user" placeholder="Логін">
-        <input type="password" id="l-pass" placeholder="Пароль">
-        <button class="btn" style="width:100%" onclick="login()">Увійти</button>
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+        <h3 id="modal-title">Редагування</h3>
+        <div id="modal-content"></div>
+        <div style="display:flex; gap:10px; justify-content: flex-end; margin-top: 10px;">
+            <button class="btn" style="background:#e2e8f0; color: #000" onclick="closeModal()">Скасувати</button>
+            <button class="btn" id="modal-save-btn">Зберегти</button>
+        </div>
     </div>
 </div>
 
 <div id="app" class="layout" style="display:none">
     <aside class="sidebar">
-        <h2 style="color:var(--p); margin-bottom:30px">LaVok Pro</h2>
-        <div class="nav-item active" onclick="sv('dash', this)">📊 Дашборд</div>
+        <h2 style="color:var(--p); margin-bottom:30px">LaVok CRM</h2>
+        <div class="nav-item active" onclick="sv('dash', this)">📊 Аналітика</div>
         <div class="nav-item" onclick="sv('orders', this)">📦 Продажі</div>
-        <div class="nav-item" onclick="sv('chats', this)">💬 Instagram</div>
+        <div class="nav-item" onclick="sv('stock', this)">🏠 Склад (Товари)</div>
         <div id="owner-only" style="display:none">
             <div class="nav-item" onclick="sv('team', this)">👥 Менеджери</div>
         </div>
-        <div style="margin-top:auto; font-size:13px">
+        <div style="margin-top:auto; font-size:13px; border-top: 1px solid var(--b); padding-top: 15px;">
             <b id="u-info"></b><br>
-            <span onclick="location.reload()" style="color:red; cursor:pointer">Вийти</span>
+            <span onclick="location.reload()" style="color:var(--danger); cursor:pointer">Вийти</span>
         </div>
     </aside>
+
     <main class="main">
-        <div id="v-dash" class="view active">
-            <div class="card"><h3>Аналітика продажів</h3><canvas id="myChart" height="100"></canvas></div>
-        </div>
-        <div id="v-team" class="view">
+        <div id="v-stock" class="view">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                    <h3>Команда</h3>
-                    <button class="btn" onclick="addUser()">+ Додати</button>
+                    <h3>Склад товарів</h3>
+                    <button class="btn" onclick="openProductModal()">+ Додати товар</button>
                 </div>
-                <table id="t-users"><thead><tr><th>Ім'я</th><th>Логін</th><th>Пароль</th><th>Роль</th><th>Дія</th></tr></thead><tbody></tbody></table>
+                <table id="t-stock">
+                    <thead><tr><th>Назва</th><th>Категорія</th><th>Кількість</th><th>Ціна</th><th>Дії</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
+
         <div id="v-orders" class="view">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                    <h3>Замовлення</h3>
-                    <button class="btn" onclick="addOrder()">+ Новий продаж</button>
+                    <h3>Журнал продажів</h3>
+                    <button class="btn" onclick="openOrderModal()">+ Новий продаж</button>
                 </div>
-                <table id="t-orders"><thead><tr><th>Дата</th><th>Клієнт</th><th>Сума</th><th>Менеджер</th></tr></thead><tbody></tbody></table>
+                <table id="t-orders">
+                    <thead><tr><th>Дата</th><th>Клієнт</th><th>Товар</th><th>Сума</th><th>Менеджер</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
-        <div id="v-chats" class="view"><div class="card"><h3>Instagram чати будуть тут</h3></div></div>
+
+        <div id="v-dash" class="view active"><div class="card"><h3>Вітаємо, <span id="u-name-display"></span>!</h3></div></div>
+        <div id="v-team" class="view">
+            <div class="card"><h3>Менеджери</h3><table id="t-users"><tbody></tbody></table></div>
+        </div>
     </main>
 </div>
 
+<div id="login-screen" style="height:100vh; display:flex; align-items:center; justify-content:center;">
+    <div class="card" style="width:360px; text-align:center">
+        <h2>LaVok Login</h2><br>
+        <input type="text" id="l-user" placeholder="Логін"><input type="password" id="l-pass" placeholder="Пароль">
+        <button class="btn" style="width:100%" onclick="login()">Увійти</button>
+    </div>
+</div>
+
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycby_ngKMNrE9dkTjW84xKpwfMVkp-n0-POvk1vaJMHn0GJ1W69OKbV_Hx7yvtN0EjoOqCg/exec";
-let db = { users: [], orders: [] };
+const GAS_URL = "ВАШ_URL_СКРИПТА"; // Вставте свій URL
+let db = { users: [], orders: [], products: [], logs: [] };
 let currentUser = null;
 
-// ЗАВАНТАЖЕННЯ ДАНИХ ПРИ ЗАПУСКУ
 window.onload = async () => {
     try {
         const res = await fetch(GAS_URL + "?action=readAll");
         db = await res.json();
         document.getElementById('loader').style.display = 'none';
-        document.getElementById('login-screen').style.display = 'flex';
-    } catch (e) {
-        document.getElementById('load-status').innerHTML = "<b style='color:red'>Помилка доступу! Перевірте публікацію скрипта.</b>";
-        // Навіть при помилці показуємо вхід, щоб спрацював "admin/admin" резерв
-        setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
-        }, 2000);
-    }
+    } catch (e) { alert("Помилка з'єднання!"); }
 };
 
-async function login() {
+function login() {
     const u = document.getElementById('l-user').value;
     const p = document.getElementById('l-pass').value;
-
-    // Шукаємо користувача
-    let user = (db.users || []).find(x => x.login == u && x.pass == p);
-
-    // РЕЗЕРВНИЙ ВХІД (якщо база ще пуста або помилка мережі)
-    if (!user && u === 'admin' && p === 'admin') {
-        user = { name: "Власник", login: "admin", pass: "admin", role: "admin" };
-        if (!db.users) db.users = [];
-        db.users.push(user);
-    }
+    let user = db.users.find(x => x.login == u && x.pass == p);
+    if (!user && u === 'admin' && p === 'admin') user = {name: "Власник", role: "admin"};
 
     if (user) {
         currentUser = user;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
         document.getElementById('u-info').innerText = user.name;
+        document.getElementById('u-name-display').innerText = user.name;
         if (user.role === 'admin') document.getElementById('owner-only').style.display = 'block';
         renderAll();
-        initChart();
-    } else {
-        alert("Невірний логін або пароль!");
-    }
+    } else alert("Невірні дані!");
 }
 
-async function sync(sheet) {
+// MODAL LOGIC
+function openModal(title, html, onSave) {
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-content').innerHTML = html;
+    document.getElementById('modal-overlay').style.display = 'flex';
+    document.getElementById('modal-save-btn').onclick = onSave;
+}
+function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+// STOCK LOGIC
+function openProductModal(index = null) {
+    const p = index !== null ? db.products[index] : { name: '', cat: '', qty: 0, price: 0 };
+    const html = `
+        <label>Назва товару</label><input id="p-name" value="${p.name}">
+        <label>Категорія</label><input id="p-cat" value="${p.cat}">
+        <label>Кількість</label><input type="number" id="p-qty" value="${p.qty}">
+        <label>Ціна (₴)</label><input type="number" id="p-price" value="${p.price}">
+    `;
+    openModal(index !== null ? "Редагувати товар" : "Додати товар", html, () => {
+        const newP = {
+            name: document.getElementById('p-name').value,
+            cat: document.getElementById('p-cat').value,
+            qty: document.getElementById('p-qty').value,
+            price: document.getElementById('p-price').value
+        };
+        if (index !== null) db.products[index] = newP; else db.products.push(newP);
+        save('products', (index !== null ? "Редагував товар: " : "Додав товар: ") + newP.name);
+        closeModal();
+    });
+}
+
+// ORDER LOGIC
+function openOrderModal() {
+    const productOptions = db.products.map(p => `<option value="${p.name}">${p.name} (Залишок: ${p.qty})</option>`).join('');
+    const html = `
+        <label>Виберіть товар</label><select id="o-prod">${productOptions}</select>
+        <label>Клієнт</label><input id="o-client">
+        <label>Кількість</label><input type="number" id="o-qty" value="1">
+    `;
+    openModal("Новий продаж", html, () => {
+        const pName = document.getElementById('o-prod').value;
+        const qty = parseInt(document.getElementById('o-qty').value);
+        const prod = db.products.find(x => x.name === pName);
+        
+        if (prod && prod.qty >= qty) {
+            prod.qty -= qty; // Віднімаємо зі складу
+            db.orders.push({
+                date: new Date().toLocaleDateString(),
+                client: document.getElementById('o-client').value,
+                item: pName,
+                sum: prod.price * qty,
+                manager: currentUser.name
+            });
+            save('products', `Продаж товару ${pName}, кількість ${qty}`);
+            save('orders', `Створено замовлення для ${document.getElementById('o-client').value}`);
+            closeModal();
+        } else alert("Недостатньо товару на складі!");
+    });
+}
+
+async function save(sheet, logMsg) {
     await fetch(GAS_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'write', sheet: sheet, data: db[sheet] })
+        body: JSON.stringify({ action: 'write', sheet, data: db[sheet], log: logMsg, user: currentUser.name })
     });
     renderAll();
 }
 
-function addUser() {
-    const name = prompt("Ім'я:");
-    const login = prompt("Логін:");
-    const pass = prompt("Пароль:");
-    if(name && login) {
-        db.users.push({ name, login, pass, role: 'manager' });
-        sync('users');
-    }
-}
-
-function addOrder() {
-    const client = prompt("Клієнт:");
-    const sum = prompt("Сума:");
-    if(client && sum) {
-        db.orders.push({ date: new Date().toLocaleDateString(), client, sum, manager: currentUser.name });
-        sync('orders');
-    }
-}
-
 function renderAll() {
-    if (db.users) {
-        document.querySelector('#t-users tbody').innerHTML = db.users.map((u, i) => `
-            <tr><td>${u.name}</td><td>${u.login}</td><td>${u.pass}</td><td>${u.role}</td>
-            <td><button onclick="del('users', ${i})">🗑️</button></td></tr>
-        `).join('');
-    }
-    if (db.orders) {
-        document.querySelector('#t-orders tbody').innerHTML = db.orders.map(o => `
-            <tr><td>${o.date}</td><td>${o.client}</td><td>${o.sum} ₴</td><td>${o.manager}</td></tr>
-        `).join('');
-    }
+    // Рендер складу
+    document.querySelector('#t-stock tbody').innerHTML = db.products.map((p, i) => `
+        <tr><td>${p.name}</td><td>${p.cat}</td><td>${p.qty}</td><td>${p.price} ₴</td>
+        <td><button class="btn" onclick="openProductModal(${i})">✏️</button>
+        <button class="btn btn-del" onclick="del('products', ${i})">🗑️</button></td></tr>
+    `).join('');
+
+    // Рендер замовлень
+    document.querySelector('#t-orders tbody').innerHTML = db.orders.map(o => `
+        <tr><td>${o.date}</td><td>${o.client}</td><td>${o.item}</td><td>${o.sum} ₴</td><td>${o.manager}</td></tr>
+    `).join('');
 }
 
 function del(sheet, i) {
     if(confirm('Видалити?')) {
+        const name = db[sheet][i].name || 'запис';
         db[sheet].splice(i, 1);
-        sync(sheet);
+        save(sheet, `Видалено з ${sheet}: ${name}`);
     }
 }
 
@@ -183,18 +233,6 @@ function sv(id, el) {
     document.getElementById('v-' + id).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
-}
-
-function initChart() {
-    const ctx = document.getElementById('myChart');
-    if (!ctx) return;
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
-            datasets: [{ label: 'Виручка', data: [1200, 1900, 1500, 2500, 2200, 3000, 2800], borderColor: '#4f46e5', tension: 0.3 }]
-        }
-    });
 }
 </script>
 </body>
