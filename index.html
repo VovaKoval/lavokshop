@@ -3,69 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LaVok SHOP — Global CRM Pro</title>
+<title>LaVok Ultimate ERP — Hybrid Business System</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
-    --bg:#f8fafc; --card:#ffffff; --primary:#6366f1; --primary-dark:#4f46e5;
+    --bg:#f1f5f9; --card:#ffffff; --primary:#4f46e5; --primary-soft:#eef2ff;
     --text:#0f172a; --text-light:#64748b; --border:#e2e8f0;
-    --success:#10b981; --danger:#ef4444; --warn:#f59e0b;
+    --success:#10b981; --danger:#f43f5e; --warn:#f59e0b;
     --radius:12px; --shadow:0 10px 15px -3px rgba(0,0,0,0.1);
   }
   @media(prefers-color-scheme:dark){
     :root{ --bg:#020617; --card:#1e293b; --text:#f1f5f9; --text-light:#94a3b8; --border:#334155; }
   }
   * { box-sizing:border-box; margin:0; padding:0; font-family:'Inter', sans-serif; }
-  body { background:var(--bg); color:var(--text); padding:20px; }
+  body { background:var(--bg); color:var(--text); padding:15px; }
 
-  /* UI Structure */
-  .container { max-width: 1400px; margin: 0 auto; }
-  .header { display:flex; justify-content:space-between; align-items:center; background:var(--card); padding:20px 25px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; border:1px solid var(--border); }
+  /* Header & Navigation */
+  .container { max-width: 1500px; margin: 0 auto; }
+  .header { display:flex; justify-content:space-between; align-items:center; background:var(--card); padding:15px 25px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:15px; border:1px solid var(--border); }
   
-  .nav { display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin-bottom:20px; }
-  .nav-btn { padding:14px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; font-weight:700; color:var(--text); transition:0.3s; text-align:center; }
-  .nav-btn:hover { transform: translateY(-2px); border-color: var(--primary); }
-  .nav-btn.active { background:var(--primary); color:white; border-color:var(--primary); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+  .nav { display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px; margin-bottom:15px; }
+  .nav-btn { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; font-weight:700; color:var(--text-light); transition:0.3s; text-align:center; border-bottom: 3px solid transparent; }
+  .nav-btn.active { color:var(--primary); border-bottom-color:var(--primary); background:var(--primary-soft); }
 
-  /* Stats & Cards */
-  .card { background:var(--card); padding:25px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:20px; }
-  .grid-stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-bottom:20px; }
-  .stat-card h3 { font-size:12px; color:var(--text-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
-  .stat-card h2 { font-size:28px; font-weight:800; }
+  /* Analytics Grid */
+  .grid-stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom:15px; }
+  .stat-card { background:var(--card); padding:20px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); transition: 0.3s; }
+  .stat-card:hover { transform: translateY(-3px); }
+  .stat-label { font-size:11px; font-weight:800; color:var(--text-light); text-transform:uppercase; margin-bottom:8px; display:block; }
+  .stat-val { font-size:24px; font-weight:900; }
 
-  /* Tables */
+  /* Tables & Content */
+  .card { background:var(--card); padding:20px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:15px; }
   .table-res { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; margin-top:10px; }
-  th { text-align:left; padding:15px; background:var(--bg); color:var(--text-light); font-weight:600; border-bottom:2px solid var(--border); }
-  td { padding:15px; border-bottom:1px solid var(--border); font-size:14px; }
-  tr:hover { background:rgba(99, 102, 241, 0.03); }
-
-  /* Inputs & Forms */
-  input, select, textarea { width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); outline:none; transition:0.2s; font-size:14px; }
-  input:focus { border-color:var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
-  label { display:block; font-size:12px; font-weight:700; color:var(--text-light); margin-bottom:6px; text-transform:uppercase; }
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; padding:12px; background:var(--bg); color:var(--text-light); font-size:12px; text-transform:uppercase; }
+  td { padding:12px; border-bottom:1px solid var(--border); font-size:14px; }
   
-  .btn { padding:12px 24px; border-radius:8px; border:none; cursor:pointer; font-weight:700; transition:0.2s; display:inline-flex; align-items:center; gap:8px; }
+  /* Inputs */
+  .f-group { margin-bottom:12px; }
+  .f-group label { display:block; font-size:11px; font-weight:800; color:var(--text-light); margin-bottom:4px; }
+  input, select, textarea { width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); outline:none; font-size:14px; }
+  input:focus { border-color:var(--primary); }
+  
+  .btn { padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:700; transition:0.2s; display:inline-flex; align-items:center; gap:8px; font-size:14px; }
   .btn-p { background:var(--primary); color:white; }
-  .btn-p:hover { background:var(--primary-dark); }
-  .btn-edit { color:var(--warn); background:rgba(245, 158, 11, 0.1); }
-  .btn-del { color:var(--danger); background:rgba(239, 68, 68, 0.1); }
+  .btn-p:hover { filter: brightness(1.1); }
+  .btn-sec { background:var(--bg); color:var(--text); border: 1px solid var(--border); }
 
-  /* Modal System */
-  .modal { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:1000; backdrop-filter: blur(4px); }
-  .modal-content { background:var(--card); padding:30px; border-radius:var(--radius); width:100%; max-width:550px; max-height:90vh; overflow-y:auto; border: 1px solid var(--border); }
+  /* Modals */
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1000; backdrop-filter: blur(5px); }
+  .modal-content { background:var(--card); padding:25px; border-radius:var(--radius); width:95%; max-width:600px; max-height:90vh; overflow-y:auto; }
   
-  /* Views */
+  /* Badges */
+  .badge { padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase; }
+  .badge-on { background:#dcfce7; color:#166534; }
+  .badge-off { background:#fef3c7; color:#92400e; }
+
   .view { display:none; }
-  .view.active { display:block; animation: slideUp 0.4s ease; }
-  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-
-  .badge { padding:4px 8px; border-radius:6px; font-size:11px; font-weight:bold; }
-  .badge-low { background:var(--danger); color:white; }
-  .badge-ok { background:var(--success); color:white; }
-
-  /* Receipt */
-  .receipt { background:white; color:#000; padding:30px; width:350px; font-family:'Courier New', monospace; box-shadow:0 20px 40px rgba(0,0,0,0.4); border-radius: 4px; }
+  .view.active { display:block; }
 </style>
 </head>
 <body>
@@ -73,351 +69,361 @@
 <div class="container">
   <div class="header">
     <div>
-      <h1 style="font-size:24px; letter-spacing:-1px">LaVok <span style="color:var(--primary)">SHOP</span></h1>
-      <p id="sync-indicator" style="font-size:11px; font-weight:700; color:var(--text-light)">● ПІДКЛЮЧЕННЯ...</p>
+      <h2 style="letter-spacing:-1px">LaVok <span style="color:var(--primary)">Ultimate ERP</span></h2>
+      <p id="sync-status" style="font-size:10px; font-weight:bold; color:var(--text-light)">● ПЕРЕВІРКА МЕРЕЖІ...</p>
     </div>
-    <div style="display:flex; gap:12px">
-      <button class="btn btn-p" onclick="syncAll()">🔄 Оновити дані</button>
+    <div style="display:flex; gap:10px">
+        <button class="btn btn-sec" onclick="syncAll()">🔄 Оновити</button>
+        <button class="btn btn-p" onclick="openModal('order')">➕ Новий продаж</button>
     </div>
   </div>
 
   <div class="nav">
-    <button class="nav-btn active" onclick="sv('dash', this)">📈 Аналітика</button>
+    <button class="nav-btn active" onclick="sv('dash', this)">📊 Аналітика</button>
     <button class="nav-btn" onclick="sv('orders', this)">📦 Замовлення</button>
-    <button class="nav-btn" onclick="sv('inv', this)">🏠 Склад</button>
-    <button class="nav-btn" onclick="sv('clients', this)">👥 Клієнти</button>
-    <button class="nav-btn" onclick="sv('exp', this)">💸 Витрати</button>
+    <button class="nav-btn" onclick="sv('stock', this)">🏠 Склад</button>
+    <button class="nav-btn" onclick="sv('crm', this)">👥 Клієнти</button>
+    <button class="nav-btn" onclick="sv('ads', this)">📢 Маркетинг</button>
+    <button class="nav-btn" onclick="sv('fin', this)">💰 Фінанси</button>
   </div>
 
   <div id="v-dash" class="view active">
     <div class="grid-stats">
-      <div class="card stat-card"><h3>Каса (Місяць)</h3><h2 id="st-rev">0 ₴</h2></div>
-      <div class="card stat-card"><h3>Чистий прибуток</h3><h2 id="st-prof" style="color:var(--success)">0 ₴</h2></div>
-      <div class="card stat-card"><h3>Операційні витрати</h3><h2 id="st-exp" style="color:var(--danger)">0 ₴</h2></div>
+        <div class="stat-card"><span class="stat-label">Виручка (Загальна)</span><div class="stat-val" id="st-rev">0 ₴</div></div>
+        <div class="stat-card"><span class="stat-label">Чистий прибуток</span><div class="stat-val" style="color:var(--success)" id="st-prof">0 ₴</div></div>
+        <div class="stat-card"><span class="stat-label">Затрати на рекламу</span><div class="stat-val" style="color:var(--danger)" id="st-ads">0 ₴</div></div>
+        <div class="stat-card"><span class="stat-label">Товарів у наявності</span><div class="stat-val" id="st-stock">0 шт</div></div>
     </div>
-    <div class="card">
-      <canvas id="salesChart" style="max-height:350px"></canvas>
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px">
+        <div class="card"><h3>Динаміка продажів</h3><canvas id="chartSales" style="max-height:300px"></canvas></div>
+        <div class="card"><h3>Джерела замовлень</h3><canvas id="chartAds" style="max-height:300px"></canvas></div>
     </div>
   </div>
 
   <div id="v-orders" class="view">
     <div class="card">
-      <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center; gap:15px">
-        <input type="text" id="search-o" placeholder="Пошук замовлення або клієнта..." oninput="renderOrders()">
-        <button class="btn btn-p" onclick="openModal('order')">➕ Створити продаж</button>
-      </div>
-      <div class="table-res">
-        <table>
-          <thead><tr><th>ID</th><th>Клієнт</th><th>Товар</th><th>Сума</th><th>Дата</th><th>Дії</th></tr></thead>
-          <tbody id="tb-orders"></tbody>
-        </table>
-      </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px">
+            <input type="text" id="order-search" placeholder="Пошук замовлення..." oninput="renderOrders()" style="max-width:300px">
+            <div style="display:flex; gap:5px">
+                <button class="btn btn-sec" onclick="filterOrders('all')">Всі</button>
+                <button class="btn btn-sec" onclick="filterOrders('Online')">Online</button>
+                <button class="btn btn-sec" onclick="filterOrders('Shop')">Offline</button>
+            </div>
+        </div>
+        <div class="table-res">
+            <table>
+                <thead><tr><th>ID</th><th>Тип</th><th>Клієнт</th><th>Товари</th><th>Сума</th><th>Дата</th><th>Дії</th></tr></thead>
+                <tbody id="tb-orders"></tbody>
+            </table>
+        </div>
     </div>
   </div>
 
-  <div id="v-inv" class="view">
+  <div id="v-stock" class="view">
     <div class="card">
-      <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center">
-        <h3>Управління складом</h3>
-        <button class="btn btn-p" onclick="openModal('product')">➕ Додати товар</button>
-      </div>
-      <div class="table-res">
-        <table>
-          <thead><tr><th>Назва</th><th>Категорія</th><th>Ціна</th><th>Собівартість</th><th>Склад</th><th>Дії</th></tr></thead>
-          <tbody id="tb-inv"></tbody>
-        </table>
-      </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px">
+            <h3>Управління запасами</h3>
+            <button class="btn btn-p" onclick="openModal('product')">➕ Додати товар</button>
+        </div>
+        <div class="table-res">
+            <table>
+                <thead><tr><th>Назва</th><th>Категорія</th><th>Склад</th><th>Собівартість</th><th>Ціна</th><th>Очікуваний прибуток</th><th>Дії</th></tr></thead>
+                <tbody id="tb-stock"></tbody>
+            </table>
+        </div>
     </div>
   </div>
 
-  <div id="v-clients" class="view">
+  <div id="v-crm" class="view">
     <div class="card">
-      <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-        <h3>База клієнтів</h3>
-        <button class="btn btn-p" onclick="openModal('client')">➕ Новий клієнт</button>
-      </div>
-      <div class="table-res">
-        <table>
-          <thead><tr><th>Ім'я</th><th>Телефон</th><th>Джерело</th><th>Дії</th></tr></thead>
-          <tbody id="tb-clients"></tbody>
-        </table>
-      </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px">
+            <h3>Клієнтська база</h3>
+            <button class="btn btn-p" onclick="openModal('client')">➕ Додати клієнта</button>
+        </div>
+        <div class="table-res">
+            <table>
+                <thead><tr><th>Клієнт</th><th>Телефон</th><th>Джерело</th><th>Усього замовлень</th><th>Дії</th></tr></thead>
+                <tbody id="tb-crm"></tbody>
+            </table>
+        </div>
     </div>
   </div>
 
-  <div id="v-exp" class="view">
+  <div id="v-ads" class="view">
     <div class="card">
-      <h3>Нова витрата</h3><br>
-      <div style="display:grid; grid-template-columns: 2fr 1fr 1fr auto; gap:12px">
-        <input type="text" id="ex-name" placeholder="Оренда, Реклама, Пакування...">
-        <input type="number" id="ex-sum" placeholder="Сума ₴">
-        <input type="date" id="ex-date">
-        <button class="btn btn-p" onclick="addExpense()">Зберегти</button>
-      </div>
+        <h3>Ефективність каналів реклами</h3><br>
+        <div id="ads-stats" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px"></div>
     </div>
+  </div>
+
+  <div id="v-fin" class="view">
     <div class="card">
-      <div class="table-res">
-        <table>
-          <thead><tr><th>Назва</th><th>Сума</th><th>Дата</th><th>Дії</th></tr></thead>
-          <tbody id="tb-exp"></tbody>
-        </table>
-      </div>
+        <h3>Операційні витрати (Оренда, Податки, Реклама)</h3><br>
+        <div style="display:grid; grid-template-columns: 2fr 1fr 1fr auto; gap:10px; margin-bottom:20px">
+            <input type="text" id="fin-name" placeholder="Назва витрати">
+            <input type="number" id="fin-amt" placeholder="Сума ₴">
+            <select id="fin-cat">
+                <option value="Ads">Реклама</option>
+                <option value="Rent">Оренда/Комуналка</option>
+                <option value="Tax">Податки</option>
+                <option value="Other">Інше</option>
+            </select>
+            <button class="btn btn-p" onclick="addExpense()">Додати</button>
+        </div>
+        <div class="table-res">
+            <table>
+                <thead><tr><th>Назва</th><th>Категорія</th><th>Сума</th><th>Дата</th><th>Дії</th></tr></thead>
+                <tbody id="tb-fin"></tbody>
+            </table>
+        </div>
     </div>
   </div>
 </div>
 
 <div id="main-modal" class="modal">
-  <div class="modal-content">
-    <h2 id="modal-title" style="margin-bottom:25px"></h2>
-    <div id="modal-body"></div>
-    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:25px">
-      <button class="btn" style="background:var(--bg)" onclick="closeModal()">Скасувати</button>
-      <button class="btn btn-p" id="modal-save-btn">Підтвердити</button>
+    <div class="modal-content">
+        <h2 id="modal-title" style="margin-bottom:20px"></h2>
+        <div id="modal-body"></div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px">
+            <button class="btn btn-sec" onclick="closeModal()">Закрити</button>
+            <button class="btn btn-p" id="modal-save-btn">Зберегти зміни</button>
+        </div>
     </div>
-  </div>
-</div>
-
-<div id="check-modal" class="modal" onclick="this.style.display='none'">
-  <div class="receipt" onclick="event.stopPropagation()">
-    <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:15px; margin-bottom:15px">
-      <h1 style="margin:0">LaVok SHOP</h1>
-      <p style="font-size:12px">Дякуємо за покупку!</p>
-    </div>
-    <div id="check-data" style="font-size:14px; line-height:1.8"></div>
-    <div style="border-top:2px dashed #000; margin-top:15px; padding-top:15px; font-weight:bold; display:flex; justify-content:space-between; font-size:20px">
-      <span>РАЗОМ:</span><span id="check-total">0 ₴</span>
-    </div>
-    <button class="btn btn-p" style="width:100%; margin-top:30px; background:#000" onclick="window.print()">Роздрукувати чек</button>
-  </div>
 </div>
 
 <script>
-// ================= ВШИТЕ ПОСИЛАННЯ (SYNCHRONIZATION) =================
+// ВШИТИЙ GAS URL
 const GAS_URL = 'https://script.google.com/macros/s/AKfycby_ngKMNrE9dkTjW84xKpwfMVkp-n0-POvk1vaJMHn0GJ1W69OKbV_Hx7yvtN0EjoOqCg/exec';
 
 let db = {
-  clients: JSON.parse(localStorage.getItem('lv_clients')) || [],
-  orders: JSON.parse(localStorage.getItem('lv_orders')) || [],
-  products: JSON.parse(localStorage.getItem('lv_products')) || [],
-  expenses: JSON.parse(localStorage.getItem('lv_expenses')) || []
+  clients: JSON.parse(localStorage.getItem('lv_cl')) || [],
+  orders: JSON.parse(localStorage.getItem('lv_or')) || [],
+  products: JSON.parse(localStorage.getItem('lv_pr')) || [],
+  expenses: JSON.parse(localStorage.getItem('lv_ex')) || []
 };
 
-// ================= CORE ENGINE =================
+// ================= CORE FUNCTIONS =================
 async function syncAll() {
-  const indicator = document.getElementById('sync-indicator');
-  indicator.innerText = '● СИНХРОНІЗАЦІЯ...'; indicator.style.color = 'var(--warn)';
-  
-  try {
-    const sheets = ['clients', 'orders', 'products', 'expenses'];
-    for(let s of sheets) {
-      // 1. Отримуємо актуальні дані з хмари
-      const res = await fetch(`${GAS_URL}?action=read&sheet=${s}`);
-      const json = await res.json();
-      if(json.data) db[s] = json.data;
-
-      // 2. Відправляємо локальні оновлення в хмару
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'write', sheet: s, data: db[s] }) });
+    const status = document.getElementById('sync-status');
+    status.innerText = '● СИНХРОНІЗАЦІЯ...'; status.style.color = 'var(--warn)';
+    try {
+        const sheets = ['clients', 'orders', 'products', 'expenses'];
+        for(let s of sheets) {
+            const res = await fetch(`${GAS_URL}?action=read&sheet=${s}`);
+            const json = await res.json();
+            if(json.data) db[s] = json.data;
+            await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'write', sheet: s, data: db[s] }) });
+        }
+        saveLocal(); renderAll();
+        status.innerText = '● ОНЛАЙН (СИНХРОНІЗОВАНО)'; status.style.color = 'var(--success)';
+    } catch(e) {
+        status.innerText = '● ПОМИЛКА МЕРЕЖІ'; status.style.color = 'var(--danger)';
     }
-    saveLocal(); renderAll();
-    indicator.innerText = '● ОНЛАЙН (СИНХРОНІЗОВАНО)'; indicator.style.color = 'var(--success)';
-  } catch(e) {
-    indicator.innerText = '● ПОМИЛКА ЗВ\'ЯЗКУ'; indicator.style.color = 'var(--danger)';
-  }
-}
-
-function pushSheet(s) {
-  fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'write', sheet: s, data: db[s] }) });
 }
 
 function saveLocal() {
-  Object.keys(db).forEach(k => localStorage.setItem('lv_'+k, JSON.stringify(db[k])));
+    localStorage.setItem('lv_cl', JSON.stringify(db.clients));
+    localStorage.setItem('lv_or', JSON.stringify(db.orders));
+    localStorage.setItem('lv_pr', JSON.stringify(db.products));
+    localStorage.setItem('lv_ex', JSON.stringify(db.expenses));
 }
 
-// ================= UI CONTROL =================
-function sv(id, btn) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('v-'+id).classList.add('active');
-  if(btn) btn.classList.add('active');
-  renderAll();
+function push(sheet) {
+    fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'write', sheet: sheet, data: db[sheet] }) });
 }
 
+// ================= MODAL LOGIC =================
+function openModal(type, id = null) {
+    const m = document.getElementById('main-modal');
+    const body = document.getElementById('modal-body');
+    const title = document.getElementById('modal-title');
+    const saveBtn = document.getElementById('modal-save-btn');
+    m.style.display = 'flex';
+
+    if(type === 'order') {
+        title.innerText = 'Оформлення продажу';
+        body.innerHTML = `
+            <div class="f-group"><label>Тип продажу</label><select id="o-type"><option value="Shop">Офлайн (Магазин)</option><option value="Online">Онлайн (Instagram/Сайт)</option></select></div>
+            <div class="f-group"><label>Клієнт</label><select id="o-cl">${db.clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+            <div class="f-group"><label>Товар</label><select id="o-pr">${db.products.map(p=>`<option value="${p.id}">${p.name} (Залишок: ${p.stock})</option>`).join('')}</select></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+                <div class="f-group"><label>Кількість</label><input type="number" id="o-q" value="1" oninput="calcOrder()"></div>
+                <div class="f-group"><label>Ціна за одиницю (₴)</label><input type="number" id="o-p" oninput="calcOrder()"></div>
+            </div>
+            <div class="card" style="background:var(--primary-soft); text-align:center">
+                <span class="stat-label">ЗАГАЛЬНА СУМА</span>
+                <h2 id="o-total">0 ₴</h2>
+            </div>
+        `;
+        const updatePrice = () => {
+            const p = db.products.find(x => x.id == document.getElementById('o-pr').value);
+            if(p) { document.getElementById('o-p').value = p.price; calcOrder(); }
+        };
+        document.getElementById('o-pr').onchange = updatePrice;
+        updatePrice();
+
+        saveBtn.onclick = () => {
+            const p = db.products.find(x => x.id == document.getElementById('o-pr').value);
+            const c = db.clients.find(x => x.id == document.getElementById('o-cl').value);
+            const q = +document.getElementById('o-q').value;
+            const price = +document.getElementById('o-p').value;
+            if(p.stock < q) return alert('Немає такої кількості на складі!');
+            
+            p.stock -= q;
+            db.orders.unshift({
+                id: Date.now().toString().slice(-6),
+                type: document.getElementById('o-type').value,
+                clientName: c.name,
+                productName: p.name,
+                qty: q,
+                amount: q * price,
+                profit: (q * price) - (p.cost * q),
+                date: new Date().toLocaleDateString('uk-UA')
+            });
+            push('products'); push('orders'); finalize();
+        };
+    }
+
+    if(type === 'product') {
+        const p = id ? db.products.find(x => x.id == id) : null;
+        title.innerText = p ? 'Редагувати товар' : 'Новий товар';
+        body.innerHTML = `
+            <div class="f-group"><label>Назва</label><input type="text" id="p-n" value="${p?p.name:''}"></div>
+            <div class="f-group"><label>Категорія</label><input type="text" id="p-c" list="p-cats" value="${p?p.category:''}">
+            <datalist id="p-cats">${[...new Set(db.products.map(x=>x.category))].map(c=>`<option value="${c}">`).join('')}</datalist></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+                <div class="f-group"><label>Собівартість</label><input type="number" id="p-cost" value="${p?p.cost:''}"></div>
+                <div class="f-group"><label>Ціна продажу</label><input type="number" id="p-price" value="${p?p.price:''}"></div>
+            </div>
+            <div class="f-group"><label>Кількість на складі</label><input type="number" id="p-s" value="${p?p.stock:''}"></div>
+        `;
+        saveBtn.onclick = () => {
+            const data = { id: p?p.id:Date.now(), name: document.getElementById('p-n').value, category: document.getElementById('p-c').value, cost: +document.getElementById('p-cost').value, price: +document.getElementById('p-price').value, stock: +document.getElementById('p-s').value };
+            if(p) db.products[db.products.findIndex(x=>x.id==id)] = data; else db.products.push(data);
+            push('products'); finalize();
+        };
+    }
+
+    if(type === 'client') {
+        const c = id ? db.clients.find(x => x.id == id) : null;
+        title.innerText = c ? 'Редагувати клієнта' : 'Новий клієнт';
+        body.innerHTML = `
+            <div class="f-group"><label>ПІБ</label><input type="text" id="c-n" value="${c?c.name:''}"></div>
+            <div class="f-group"><label>Телефон</label><input type="text" id="c-p" value="${c?c.phone:''}"></div>
+            <div class="f-group"><label>Джерело</label><select id="c-s">
+                <option ${c?.source==='Instagram'?'selected':''}>Instagram</option>
+                <option ${c?.source==='TikTok'?'selected':''}>TikTok</option>
+                <option ${c?.source==='Shop'?'selected':''}>Прямий візит (Shop)</option>
+                <option ${c?.source==='Recomendation'?'selected':''}>Рекомендація</option>
+            </select></div>
+        `;
+        saveBtn.onclick = () => {
+            const data = { id: c?c.id:Date.now(), name: document.getElementById('c-n').value, phone: document.getElementById('c-p').value, source: document.getElementById('c-s').value };
+            if(c) db.clients[db.clients.findIndex(x=>x.id==id)] = data; else db.clients.push(data);
+            push('clients'); finalize();
+        };
+    }
+}
+
+function calcOrder() {
+    const q = +document.getElementById('o-q').value;
+    const p = +document.getElementById('o-p').value;
+    document.getElementById('o-total').innerText = (q * p) + ' ₴';
+}
+
+function finalize() { saveLocal(); renderAll(); closeModal(); }
 function closeModal() { document.getElementById('main-modal').style.display = 'none'; }
 
-// ================= MODALS & EDITING =================
-function openModal(type, id = null) {
-  const m = document.getElementById('main-modal');
-  const body = document.getElementById('modal-body');
-  const title = document.getElementById('modal-title');
-  const saveBtn = document.getElementById('modal-save-btn');
-  m.style.display = 'flex';
-
-  if(type === 'product') {
-    const p = id ? db.products.find(x => x.id == id) : null;
-    title.innerText = p ? 'Редагувати товар' : 'Додати товар';
-    body.innerHTML = `
-      <label>Назва</label><input type="text" id="m-name" value="${p?p.name:''}">
-      <br><label>Категорія</label><input type="text" id="m-cat" list="dl-cats" value="${p?p.category:''}">
-      <datalist id="dl-cats">${[...new Set(db.products.map(x=>x.category))].map(c=>`<option value="${c}">`).join('')}</datalist>
-      <br><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-        <div><label>Ціна продажу</label><input type="number" id="m-price" value="${p?p.price:''}"></div>
-        <div><label>Собівартість</label><input type="number" id="m-cost" value="${p?p.cost:''}"></div>
-      </div>
-      <br><label>Кількість на складі</label><input type="number" id="m-stock" value="${p?p.stock:''}">
-    `;
-    saveBtn.onclick = () => {
-      const data = { id: p?p.id:Date.now(), name: document.getElementById('m-name').value, category: document.getElementById('m-cat').value, price: +document.getElementById('m-price').value, cost: +document.getElementById('m-cost').value, stock: +document.getElementById('m-stock').value };
-      if(p) db.products[db.products.findIndex(x=>x.id==id)] = data; else db.products.push(data);
-      finalize('products');
-    };
-  }
-
-  if(type === 'order') {
-    title.innerText = 'Новий продаж';
-    body.innerHTML = `
-      <label>Оберіть клієнта</label><select id="m-cl">${db.clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
-      <br><label>Товар</label><select id="m-pr">${db.products.map(p=>`<option value="${p.id}">${p.name} (Залишок: ${p.stock})</option>`).join('')}</select>
-      <br><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-        <div><label>Кількість</label><input type="number" id="m-qty" value="1"></div>
-        <div><label>Фінальна ціна</label><input type="number" id="m-total"></div>
-      </div>
-    `;
-    const selPr = () => { 
-        const p = db.products.find(x=>x.id == document.getElementById('m-pr').value);
-        if(p) document.getElementById('m-total').value = p.price;
-    };
-    document.getElementById('m-pr').onchange = selPr; selPr();
-
-    saveBtn.onclick = () => {
-      const p = db.products.find(x=>x.id == document.getElementById('m-pr').value);
-      const c = db.clients.find(x=>x.id == document.getElementById('m-cl').value);
-      const q = +document.getElementById('m-qty').value;
-      const t = +document.getElementById('m-total').value;
-      if(p.stock < q) return alert('Недостатньо товару!');
-      
-      p.stock -= q;
-      db.orders.unshift({ id: Date.now().toString().slice(-6), clientName: c.name, productName: p.name, qty: q, amount: t, profit: t - (p.cost * q), date: new Date().toLocaleDateString('uk-UA') });
-      pushSheet('products'); finalize('orders');
-    };
-  }
-
-  if(type === 'client') {
-    const c = id ? db.clients.find(x => x.id == id) : null;
-    title.innerText = c ? 'Редагувати клієнта' : 'Додати клієнта';
-    body.innerHTML = `
-      <label>Ім'я та прізвище</label><input type="text" id="m-n" value="${c?c.name:''}">
-      <br><label>Телефон</label><input type="text" id="m-p" value="${c?c.phone:''}">
-      <br><label>Джерело</label><input type="text" id="m-s" value="${c?c.source:''}">
-    `;
-    saveBtn.onclick = () => {
-      const data = { id: c?c.id:Date.now(), name: document.getElementById('m-n').value, phone: document.getElementById('m-p').value, source: document.getElementById('m-s').value };
-      if(c) db.clients[db.clients.findIndex(x=>x.id==id)] = data; else db.clients.push(data);
-      finalize('clients');
-    };
-  }
-}
-
-function finalize(s) {
-  saveLocal(); closeModal(); renderAll(); pushSheet(s);
-}
-
-// ================= LOGIC & RENDERING =================
-function addExpense() {
-  const name = document.getElementById('ex-name').value;
-  const sum = +document.getElementById('ex-sum').value;
-  const date = document.getElementById('ex-date').value;
-  if(!name || !sum) return alert('Заповніть назву та суму');
-
-  db.expenses.push({ id: Date.now(), name, amt: sum, date: date || new Date().toLocaleDateString('uk-UA') });
-  
-  // АВТО-ОЧИЩЕННЯ
-  document.getElementById('ex-name').value = '';
-  document.getElementById('ex-sum').value = '';
-  document.getElementById('ex-date').value = '';
-
-  finalize('expenses');
-}
-
-function del(s, id) {
-  if(!confirm('Видалити?')) return;
-  db[s] = db[s].filter(x => x.id != id);
-  finalize(s);
-}
-
+// ================= RENDER LOGIC =================
 function renderOrders() {
-  const s = document.getElementById('search-o').value.toLowerCase();
-  document.getElementById('tb-orders').innerHTML = db.orders.filter(o => o.clientName.toLowerCase().includes(s) || o.productName.toLowerCase().includes(s)).map(o => `
-    <tr><td>#${o.id}</td><td>${o.clientName}</td><td>${o.productName} (x${o.qty})</td><td><b>${o.amount} ₴</b></td><td>${o.date}</td>
-    <td><button class="btn btn-edit" style="padding:5px 10px" onclick="showCheck('${o.id}')">Чек</button> <button class="btn btn-del" style="padding:5px 10px" onclick="del('orders', '${o.id}')">🗑️</button></td></tr>
-  `).join('');
+    const s = document.getElementById('order-search').value.toLowerCase();
+    document.getElementById('tb-orders').innerHTML = db.orders.filter(o=>o.clientName.toLowerCase().includes(s)||o.productName.toLowerCase().includes(s)).map(o=>`
+        <tr><td>#${o.id}</td><td><span class="badge ${o.type==='Online'?'badge-on':'badge-off'}">${o.type}</span></td>
+        <td>${o.clientName}</td><td>${o.productName} (x${o.qty})</td><td><b>${o.amount} ₴</b></td><td>${o.date}</td>
+        <td><button class="btn btn-sec" onclick="del('orders', '${o.id}')">🗑️</button></td></tr>
+    `).join('');
 }
 
-function renderInv() {
-  document.getElementById('tb-inv').innerHTML = db.products.map(p => `
-    <tr><td><b>${p.name}</b></td><td>${p.category}</td><td>${p.price} ₴</td><td>${p.cost} ₴</td><td><span class="badge ${p.stock < 5 ? 'badge-low' : 'badge-ok'}">${p.stock} шт</span></td>
-    <td><button class="btn btn-edit" style="padding:5px 10px" onclick="openModal('product', ${p.id})">✏️</button> <button class="btn btn-del" style="padding:5px 10px" onclick="del('products', ${p.id})">🗑️</button></td></tr>
-  `).join('');
+function renderStock() {
+    document.getElementById('tb-stock').innerHTML = db.products.map(p=>`
+        <tr><td><b>${p.name}</b></td><td>${p.category}</td><td><b style="color:${p.stock<5?'red':''}">${p.stock} шт</b></td>
+        <td>${p.cost} ₴</td><td>${p.price} ₴</td><td style="color:green">+${(p.price - p.cost) * p.stock} ₴</td>
+        <td><button class="btn btn-sec" onclick="openModal('product', ${p.id})">✏️</button></td></tr>
+    `).join('');
 }
 
-function renderClients() {
-  document.getElementById('tb-clients').innerHTML = db.clients.map(c => `
-    <tr><td>${c.name}</td><td>${c.phone}</td><td>${c.source}</td>
-    <td><button class="btn btn-edit" style="padding:5px 10px" onclick="openModal('client', ${c.id})">✏️</button> <button class="btn btn-del" style="padding:5px 10px" onclick="del('clients', ${c.id})">🗑️</button></td></tr>
-  `).join('');
+function renderCRM() {
+    document.getElementById('tb-crm').innerHTML = db.clients.map(c=>`
+        <tr><td><b>${c.name}</b></td><td>${c.phone}</td><td>${c.source}</td>
+        <td>${db.orders.filter(o=>o.clientName===c.name).length}</td>
+        <td><button class="btn btn-sec" onclick="openModal('client', ${c.id})">✏️</button></td></tr>
+    `).join('');
 }
 
-function renderExp() {
-  document.getElementById('tb-exp').innerHTML = db.expenses.map(e => `
-    <tr><td>${e.name}</td><td>${e.amt} ₴</td><td>${e.date}</td>
-    <td><button class="btn btn-del" style="padding:5px 10px" onclick="del('expenses', ${e.id})">🗑️</button></td></tr>
-  `).join('');
+function renderAnalytics() {
+    const rev = db.orders.reduce((a,b)=>a+b.amount,0);
+    const ads = db.expenses.filter(e=>e.cat==='Ads').reduce((a,b)=>a+b.amt,0);
+    const expAll = db.expenses.reduce((a,b)=>a+b.amt,0);
+    const prof = db.orders.reduce((a,b)=>a+b.profit,0) - (expAll - ads) - ads;
+
+    document.getElementById('st-rev').innerText = rev.toLocaleString() + ' ₴';
+    document.getElementById('st-ads').innerText = ads.toLocaleString() + ' ₴';
+    document.getElementById('st-prof').innerText = prof.toLocaleString() + ' ₴';
+    document.getElementById('st-stock').innerText = db.products.reduce((a,b)=>a+b.stock,0) + ' шт';
+
+    // Charts
+    const ctxS = document.getElementById('chartSales').getContext('2d');
+    if(window.chS) window.chS.destroy();
+    window.chS = new Chart(ctxS, { type:'line', data:{ labels:db.orders.slice(0,7).map(o=>o.date).reverse(), datasets:[{label:'Продажі', data:db.orders.slice(0,7).map(o=>o.amount).reverse(), borderColor:'#4f46e5', tension:0.4}]} });
+
+    const sources = {};
+    db.clients.forEach(c => sources[c.source] = (sources[c.source] || 0) + 1);
+    const ctxA = document.getElementById('chartAds').getContext('2d');
+    if(window.chA) window.chA.destroy();
+    window.chA = new Chart(ctxA, { type:'doughnut', data:{ labels:Object.keys(sources), datasets:[{data:Object.values(sources), backgroundColor:['#4f46e5', '#10b981', '#f59e0b', '#f43f5e']}]} });
+    
+    // Ads Efficiency
+    document.getElementById('ads-stats').innerHTML = Object.keys(sources).map(s => {
+        const clientsCount = sources[s];
+        const ordersBySource = db.orders.filter(o => db.clients.find(c=>c.name===o.clientName && c.source===s)).length;
+        return `<div class="stat-card"><span class="stat-label">${s}</span><div>Клієнтів: ${clientsCount}</div><div>Продажів: ${ordersBySource}</div></div>`;
+    }).join('');
 }
 
-function updateAnalytics() {
-  const rev = db.orders.reduce((a,b)=>a+b.amount, 0);
-  const exp = db.expenses.reduce((a,b)=>a+b.amt, 0);
-  const prof = db.orders.reduce((a,b)=>a+b.profit, 0) - exp;
-
-  document.getElementById('st-rev').innerText = rev.toLocaleString() + ' ₴';
-  document.getElementById('st-exp').innerText = exp.toLocaleString() + ' ₴';
-  document.getElementById('st-prof').innerText = prof.toLocaleString() + ' ₴';
-
-  const ctx = document.getElementById('salesChart').getContext('2d');
-  if(window.crmChart) window.crmChart.destroy();
-  window.crmChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: db.orders.slice(0,10).map(o=>o.date).reverse(),
-      datasets: [{ label: 'Продажі ₴', data: db.orders.slice(0,10).map(o=>o.amount).reverse(), borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4 }]
-    },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-  });
+function addExpense() {
+    const name = document.getElementById('fin-name').value;
+    const amt = +document.getElementById('fin-amt').value;
+    const cat = document.getElementById('fin-cat').value;
+    if(!name || !amt) return;
+    db.expenses.push({ id:Date.now(), name, amt, cat, date: new Date().toLocaleDateString('uk-UA') });
+    document.getElementById('fin-name').value = ''; document.getElementById('fin-amt').value = '';
+    push('expenses'); finalize();
 }
 
-function showCheck(id) {
-  const o = db.orders.find(x => x.id == id);
-  document.getElementById('check-data').innerHTML = `
-    <div style="display:flex; justify-content:space-between"><span>ЧЕК №:</span><span>#${o.id}</span></div>
-    <div style="display:flex; justify-content:space-between"><span>ДАТА:</span><span>${o.date}</span></div>
-    <div style="display:flex; justify-content:space-between"><span>КЛІЄНТ:</span><span>${o.clientName}</span></div>
-    <div style="border-top:1px solid #000; margin:15px 0; padding-top:10px">
-      <b style="font-size:16px">${o.productName}</b><br>
-      <div style="display:flex; justify-content:space-between"><span>Кількість:</span><span>${o.qty} шт</span></div>
-      <div style="display:flex; justify-content:space-between"><span>Ціна од.:</span><span>${o.amount / o.qty} ₴</span></div>
-    </div>
-  `;
-  document.getElementById('check-total').innerText = o.amount + ' ₴';
-  document.getElementById('check-modal').style.display = 'flex';
+function renderFin() {
+    document.getElementById('tb-fin').innerHTML = db.expenses.map(e=>`
+        <tr><td>${e.name}</td><td>${e.cat}</td><td>${e.amt} ₴</td><td>${e.date}</td>
+        <td><button class="btn btn-sec" onclick="del('expenses', ${e.id})">🗑️</button></td></tr>
+    `).join('');
 }
 
-function renderAll() {
-  renderOrders(); renderInv(); renderClients(); renderExp(); updateAnalytics();
+function del(sheet, id) {
+    if(!confirm('Видалити?')) return;
+    db[sheet] = db[sheet].filter(x => x.id != id);
+    push(sheet); finalize();
 }
 
-window.onload = () => {
-  syncAll();
-  renderAll();
-};
+function sv(id, btn) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('v-'+id).classList.add('active');
+    if(btn) btn.classList.add('active');
+    renderAll();
+}
+
+function renderAll() { renderOrders(); renderStock(); renderCRM(); renderAnalytics(); renderFin(); }
+
+window.onload = () => { syncAll(); renderAll(); };
 </script>
 </body>
 </html>
