@@ -231,14 +231,12 @@ tbody tr:last-child td{border-bottom:none}
 </head>
 <body>
 
-<!-- LOADER -->
 <div id="loader">
   <h1>LaVok CRM</h1>
   <p>Підключення до бази даних...</p>
   <div class="loader-bar"><div class="loader-fill"></div></div>
 </div>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">LaVok</div>
@@ -254,7 +252,6 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- NOTIFICATIONS PANEL -->
 <div class="notif-panel" id="notif-panel">
   <div class="notif-header">
     <h4 style="font-family:'Syne',sans-serif">Сповіщення</h4>
@@ -266,7 +263,6 @@ tbody tr:last-child td{border-bottom:none}
   <div class="notif-list" id="notif-list"></div>
 </div>
 
-<!-- MODAL -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
     <div class="modal-header">
@@ -281,10 +277,8 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast-container"></div>
 
-<!-- APP -->
 <div id="app" class="layout" style="display:none">
 
   <aside class="sidebar">
@@ -321,7 +315,6 @@ tbody tr:last-child td{border-bottom:none}
 
   <main class="main">
 
-    <!-- TOPBAR -->
     <div class="topbar">
       <button class="topbar-btn" onclick="doBackup()" id="backup-btn">💾 Резервна копія</button>
       <button class="topbar-btn" onclick="toggleNotif()">
@@ -330,7 +323,6 @@ tbody tr:last-child td{border-bottom:none}
       </button>
     </div>
 
-    <!-- DASHBOARD -->
     <div id="v-dashboard" class="view active">
       <div class="page-header">
         <div><h2>Дашборд</h2><p id="dash-date"></p></div>
@@ -360,7 +352,6 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- STOCK -->
     <div id="v-stock" class="view">
       <div class="page-header">
         <div><h2>Склад</h2><p>Управління товарами та залишками</p></div>
@@ -383,7 +374,6 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- ORDERS -->
     <div id="v-orders" class="view">
       <div class="page-header">
         <div><h2>Продажі</h2><p>Всі транзакції та замовлення</p></div>
@@ -406,7 +396,6 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- CLIENTS -->
     <div id="v-clients" class="view">
       <div class="page-header">
         <div><h2>Клієнти</h2><p>База клієнтів та контактів</p></div>
@@ -425,7 +414,6 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- TEAM -->
     <div id="v-team" class="view">
       <div class="page-header">
         <div><h2>Команда</h2><p>Управління менеджерами та доступами</p></div>
@@ -441,7 +429,6 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- ANALYTICS -->
     <div id="v-analytics" class="view">
       <div class="page-header">
         <div><h2>Аналітика</h2><p>Детальна статистика та звіти</p></div>
@@ -469,7 +456,6 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- LOGS -->
     <div id="v-logs" class="view">
       <div class="page-header">
         <div><h2>Журнал дій</h2><p>Всі дії в системі з часом та автором</p></div>
@@ -491,7 +477,6 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- SETTINGS -->
     <div id="v-settings" class="view">
       <div class="page-header">
         <div><h2>Налаштування</h2><p>Конфігурація системи</p></div>
@@ -553,7 +538,7 @@ tbody tr:last-child td{border-bottom:none}
 
 <script>
 // ===================== CONFIG =====================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyz34mL4VbO66Ub6dhDnO_53pvYz_wNfMTwJi_-WrKFoE1ZJKe0dtAFPSbxysLB-eUQ3A/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxLrxYQ7Wrv10XAm8oFYrFyfs9FwTJBWlmRqePLr7hYt1iFXtcwSpeMml0M1N5XQPP4-w/exec";
 
 // ===================== STATE =====================
 let db = { users: [], orders: [], products: [], clients: [], logs: [] };
@@ -652,17 +637,16 @@ async function commit(sheet, log) {
   try {
     await fetch(GAS_URL, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ action: 'write', sheet, data: db[sheet] || [], log, user: currentUser?.name || 'System' })
     });
     if (sheet === 'logs') return;
     // Also write logs sheet
     await fetch(GAS_URL, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ action: 'write', sheet: 'logs', data: db.logs || [] })
     });
   } catch(e) {
+    console.error(e);
     showToast('Помилка збереження даних', 'error');
   }
 }
