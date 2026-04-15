@@ -3,519 +3,476 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM Бізнес Pro — Google Sync</title>
+<title>LaVok SHOP — CRM Pro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
-    --bg:#ffffff;--bg2:#f5f5f4;--bg3:#efefec;
-    --text:#1a1a18;--text2:#6b6b67;--text3:#9b9b96;
-    --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.2);
-    --info-bg:#e6f1fb;--info-text:#0c447c;
-    --success-bg:#eaf3de;--success-text:#27500a;
-    --warn-bg:#faeeda;--warn-text:#633806;
-    --danger-bg:#fcebeb;--danger-text:#791f1f;
-    --radius:8px;--radius-lg:12px;
-    --blue:#378ADD;--green:#1D9E75;--amber:#BA7517;--purple:#7F77DD;--coral:#D85A30;
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --radius: 12px;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   }
+
   @media(prefers-color-scheme:dark){
     :root{
-      --bg:#1c1c1a;--bg2:#252522;--bg3:#2e2e2b;
-      --text:#f0efec;--text2:#a0a09a;--text3:#6a6a65;
-      --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
-      --info-bg:#0c447c;--info-text:#b5d4f4;
-      --success-bg:#27500a;--success-text:#c0dd97;
-      --warn-bg:#633806;--warn-text:#fac775;
-      --danger-bg:#791f1f;--danger-text:#f7c1c1;
+      --bg-main: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
     }
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg3);min-height:100vh}
-  .app{max-width:1280px;margin:0 auto;padding:14px}
-  .topbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border);flex-wrap:wrap}
-  .topbar h1{font-size:15px;font-weight:700;flex:1;min-width:120px}
-  .sync-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);padding:5px 10px;border-radius:var(--radius);border:0.5px solid var(--border)}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
-  .dot.green{background:#1D9E75}
-  .dot.yellow{background:#BA7517}
-  .dot.red{background:#D85A30}
-  .dot.spin{animation:spin 1s linear infinite;border:2px solid var(--blue);background:transparent;border-top-color:transparent}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .tbtn{padding:5px 12px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;font-weight:500}
-  .tbtn:hover{background:var(--bg2)}
-  .tbtn.primary{background:var(--info-bg);color:var(--info-text);border-color:transparent}
-  .setup-panel{background:var(--warn-bg);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:14px;border:1px solid var(--warn-text)}
-  .setup-panel h2{font-size:14px;font-weight:600;color:var(--warn-text);margin-bottom:10px}
-  .setup-steps{counter-reset:step}
-  .step{display:flex;gap:10px;margin-bottom:10px;font-size:13px;color:var(--warn-text)}
-  .step-num{width:22px;height:22px;border-radius:50%;background:var(--warn-text);color:var(--warn-bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-  .step-body{flex:1;line-height:1.6}
-  .step-body code{background:rgba(0,0,0,0.1);padding:1px 5px;border-radius:3px;font-size:11px;font-family:monospace}
-  .url-row{display:flex;gap:7px;margin-top:10px;align-items:center;flex-wrap:wrap}
-  .url-row input{flex:1;min-width:200px;font-size:13px;padding:7px 10px;border:1px solid var(--warn-text);border-radius:var(--radius);background:var(--bg);color:var(--text)}
-  .url-row button{padding:7px 14px;border-radius:var(--radius);border:none;background:var(--warn-text);color:var(--warn-bg);cursor:pointer;font-size:12px;font-weight:600}
-  .nav{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
-  .nb{padding:6px 13px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;font-weight:500}
-  .nb.on{background:var(--info-bg);color:var(--info-text);border-color:transparent}
-  .nb:hover:not(.on){background:var(--bg2)}
-  .view{display:none}.view.on{display:block}
-  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin-bottom:12px}
-  .mc{background:var(--bg2);border-radius:var(--radius);padding:.75rem .9rem}
-  .mc-l{font-size:11px;color:var(--text2);margin-bottom:2px}
-  .mc-v{font-size:17px;font-weight:700;color:var(--text)}
-  .mc-s{font-size:11px;color:var(--text3);margin-top:2px}
-  .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:.9rem 1.1rem;margin-bottom:10px}
-  .ct{font-size:13px;font-weight:600;margin-bottom:.65rem;color:var(--text)}
-  .fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px;margin-bottom:9px}
-  .fl{display:flex;flex-direction:column;gap:3px}
-  .fl label{font-size:11px;color:var(--text2)}
-  .fl input,.fl select,.fl textarea{font-size:13px;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none}
-  .fl input:focus,.fl select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(55,138,221,.15)}
-  .fl textarea{resize:vertical;min-height:52px}
-  .br{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
-  .bp{padding:7px 15px;border-radius:var(--radius);border:1px solid var(--info-text);background:var(--info-bg);color:var(--info-text);cursor:pointer;font-size:12px;font-weight:600}
-  .bg-btn{padding:7px 15px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:12px}
-  .bg-btn:hover{background:var(--bg2)}
-  .bd{padding:4px 8px;border-radius:var(--radius);border:0.5px solid var(--danger-text);background:transparent;color:var(--danger-text);cursor:pointer;font-size:11px}
-  .sr{display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap}
-  .sr input,.sr select{font-size:13px;padding:6px 9px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);max-width:190px}
-  .tw{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:12px}
-  th{text-align:left;padding:7px 8px;font-size:11px;font-weight:600;color:var(--text2);border-bottom:0.5px solid var(--border);background:var(--bg2);white-space:nowrap}
-  td{padding:7px 8px;border-bottom:0.5px solid var(--border);vertical-align:middle}
-  tr:last-child td{border-bottom:none}
-  tr:hover td{background:var(--bg2)}
-  .bx{display:inline-block;font-size:11px;padding:2px 6px;border-radius:var(--radius);font-weight:500}
-  .bn{background:var(--info-bg);color:var(--info-text)}
-  .ba{background:var(--success-bg);color:var(--success-text)}
-  .bv{background:var(--warn-bg);color:var(--warn-text)}
-  .bi{background:var(--bg2);color:var(--text2)}
-  .bpd{background:var(--success-bg);color:var(--success-text)}
-  .bpn{background:var(--warn-bg);color:var(--warn-text)}
-  .bpc{background:var(--danger-bg);color:var(--danger-text)}
-  .blow{background:var(--danger-bg);color:var(--danger-text)}
-  .bmid{background:var(--warn-bg);color:var(--warn-text)}
-  .bok{background:var(--success-bg);color:var(--success-text)}
-  .av{width:26px;height:26px;border-radius:50%;background:var(--info-bg);color:var(--info-text);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-right:6px;flex-shrink:0}
-  .nc-cell{display:flex;align-items:center}
-  .emp{text-align:center;padding:1.5rem;color:var(--text3);font-size:13px}
-  .alrt{background:var(--warn-bg);border-radius:var(--radius);padding:.5rem .9rem;font-size:12px;color:var(--warn-text);margin-bottom:9px}
-  .alrt-g{background:var(--success-bg);border-radius:var(--radius);padding:.5rem .9rem;font-size:12px;color:var(--success-text);margin-bottom:9px}
-  .g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:12px}
-  .profit-box{background:var(--success-bg);border-radius:var(--radius-lg);padding:.9rem 1.1rem;margin-bottom:12px}
-  .profit-box .mc-l{color:var(--success-text)}
-  .profit-box .mc-v{color:var(--success-text);font-size:20px}
-  .profit-box .mc-s{color:var(--success-text)}
-  .exp-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
-  .exp-row label{font-size:12px;color:var(--text2);width:130px;flex-shrink:0}
-  .exp-row input{font-size:13px;padding:5px 8px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);width:95px}
-  .bar-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-  .bar-label{font-size:12px;color:var(--text2);width:145px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .bar-track{flex:1;height:7px;background:var(--bg2);border-radius:4px;overflow:hidden}
-  .bar-fill{height:100%;border-radius:4px}
-  .bar-val{font-size:12px;font-weight:600;color:var(--text);min-width:62px;text-align:right}
-  .repcard{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:.9rem 1.1rem;margin-bottom:10px}
-  .msg-ok{color:var(--success-text);font-size:12px;margin-top:5px}
-  .msg-err{color:var(--danger-text);font-size:12px;margin-top:5px}
-  .inline-add{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:7px}
-  .inline-add input{font-size:13px;padding:5px 9px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text)}
-  .toast{position:fixed;bottom:20px;right:20px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:10px 16px;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:999;max-width:300px;display:none}
-  .toast.show{display:block}
-  .toast.ok{border-left:3px solid var(--green)}
-  .toast.err{border-left:3px solid var(--coral)}
-  .toast.info{border-left:3px solid var(--blue)}
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+  body { background: var(--bg-main); color: var(--text-main); line-height: 1.5; padding: 20px; }
+
+  /* Layout */
+  .app-container { max-width: 1200px; margin: 0 auto; }
+  
+  .header { 
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 24px; padding: 16px; background: var(--card-bg);
+    border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border);
+  }
+
+  .nav-grid { 
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
+    gap: 10px; margin-bottom: 24px; 
+  }
+
+  .nav-btn {
+    padding: 10px; border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--card-bg); color: var(--text-main); cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: all 0.2s; text-align: center;
+  }
+
+  .nav-btn:hover { background: var(--bg-main); transform: translateY(-2px); }
+  .nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* Cards & Tables */
+  .card { 
+    background: var(--card-bg); border-radius: var(--radius); 
+    padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+
+  .table-wrapper { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; background: var(--card-bg); font-size: 13px; }
+  th { background: var(--bg-main); padding: 12px; text-align: left; color: var(--text-muted); font-weight: 600; }
+  td { padding: 12px; border-top: 1px solid var(--border); }
+  tr:hover { background: rgba(99, 102, 241, 0.05); }
+
+  /* Inputs & Forms */
+  .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  input, select, textarea { 
+    padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg-main); color: var(--text-main); outline: none;
+  }
+  input:focus { border-color: var(--primary); ring: 2px var(--primary); }
+
+  .btn-primary { 
+    background: var(--primary); color: white; padding: 12px 24px; 
+    border-radius: 8px; border: none; cursor: pointer; font-weight: 600;
+  }
+
+  /* Badge Styles */
+  .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .badge-success { background: #dcfce7; color: #166534; }
+  .badge-warn { background: #fef9c3; color: #854d0e; }
+
+  /* CHECK MODAL STYLE */
+  #check-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+    display: none; justify-content: center; align-items: center; z-index: 1000;
+  }
+  .receipt {
+    background: white; color: black; width: 300px; padding: 20px;
+    font-family: 'Courier New', Courier, monospace; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  }
+  .receipt-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+  .receipt-row { display: flex; justify-content: space-between; margin: 5px 0; font-size: 12px; }
+  .receipt-total { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; font-weight: bold; font-size: 16px; }
+  
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .sync-spin { animation: rotate 1s linear infinite; }
+  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-<div class="app">
 
-  <div class="topbar">
-    <h1>CRM Бізнес Pro</h1>
-    <div class="sync-status" id="sync-status">
-      <div class="dot" id="sync-dot"></div>
-      <span id="sync-label">Завантаження...</span>
+<div class="app-container">
+  <div class="header">
+    <div>
+      <h1 style="font-size: 20px;">LaVok <span style="color:var(--primary)">SHOP</span></h1>
+      <p id="sync-status" style="font-size: 11px; color: var(--text-muted);">Перевірка з'єднання...</p>
     </div>
-    <button class="tbtn" onclick="syncAll()" id="sync-btn">Синхронізувати</button>
-    <button class="tbtn" onclick="toggleSetup()">Налаштування Google</button>
-    <button class="tbtn" onclick="exportData()">Експорт JSON</button>
-    <button class="tbtn" onclick="document.getElementById('imp-file').click()">Імпорт JSON</button>
-    <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(event)">
-    <span id="hdr-date" style="font-size:11px;color:var(--text3)"></span>
-  </div>
-
-  <div class="setup-panel" id="setup-panel" style="display:none">
-    <h2>Підключення до Google Таблиці</h2>
-    <div class="url-row">
-      <input type="text" id="gas-url-input" placeholder="https://script.google.com/macros/s/АБВ.../exec">
-      <button onclick="saveGasUrl()">Зберегти і перевірити</button>
-    </div>
-    <div id="setup-msg" style="font-size:12px;margin-top:8px"></div>
-  </div>
-
-  <div class="nav">
-    <button class="nb on" onclick="sv('dash')">Дашборд</button>
-    <button class="nb" onclick="sv('profit')">Прибуток</button>
-    <button class="nb" onclick="sv('analytics')">Аналітика</button>
-    <button class="nb" onclick="sv('reports')">Звіти</button>
-    <button class="nb" onclick="sv('clients')">Клієнти</button>
-    <button class="nb" onclick="sv('orders')">Замовлення</button>
-    <button class="nb" onclick="sv('inventory')">Склад</button>
-    <button class="nb" onclick="sv('ac')">+ Клієнт</button>
-    <button class="nb" onclick="sv('ao')">+ Замовлення</button>
-    <button class="nb" onclick="sv('ap')">+ Товар</button>
-    <button class="nb" onclick="sv('expenses')">+ Витрата</button>
-  </div>
-
-  <div id="v-dash" class="view on">
-    <div class="metrics" id="d-metrics"></div>
-    <div class="profit-box" id="d-profit-box"></div>
-    <div class="g2">
-      <div class="card"><div class="ct">Останні замовлення</div><div id="d-orders"></div></div>
-      <div class="card"><div class="ct">Попередження складу</div><div id="d-stock"></div></div>
-      <div class="card"><div class="ct">Клієнти без покупки 30+ дн</div><div id="d-inactive"></div></div>
-      <div class="card"><div class="ct">Топ товари (прибуток)</div><div id="d-top"></div></div>
+    <div style="display: flex; gap: 10px;">
+      <button class="nav-btn" onclick="syncAll()" title="Оновити дані">🔄 Синхронізація</button>
+      <button class="nav-btn" onclick="toggleSetup()">⚙️</button>
     </div>
   </div>
 
-  <div id="v-profit" class="view">
-    <div class="card">
-      <div class="ct">Щомісячні витрати бізнесу</div>
-      <div id="exp-list"></div>
-      <div class="inline-add">
-        <input type="text" id="exp-name" placeholder="Назва витрати" style="width:160px">
-        <input type="number" id="exp-amt" placeholder="Сума ₴" style="width:100px">
-        <button class="bp" onclick="addExpense()">Додати</button>
+  <div class="nav-grid">
+    <button class="nav-btn active" onclick="showView('dash', this)">📊 Дашборд</button>
+    <button class="nav-btn" onclick="showView('orders', this)">📦 Замовлення</button>
+    <button class="nav-btn" onclick="showView('clients', this)">👥 Клієнти</button>
+    <button class="nav-btn" onclick="showView('inventory', this)">🏠 Склад</button>
+    <button class="nav-btn" onclick="showView('add-order', this)">➕ Продаж</button>
+    <button class="nav-btn" onclick="showView('add-product', this)">🎁 Товар</button>
+  </div>
+
+  <div id="v-dash" class="view active">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+      <div class="card">
+        <label>Виручка (місяць)</label>
+        <h2 id="stat-rev">0 ₴</h2>
+      </div>
+      <div class="card">
+        <label>Прибуток</label>
+        <h2 id="stat-prof" style="color: var(--success);">0 ₴</h2>
+      </div>
+      <div class="card">
+        <label>Замовлень</label>
+        <h2 id="stat-count">0</h2>
       </div>
     </div>
-    <div class="metrics" id="p-metrics"></div>
-    <div class="card"><div class="ct">Деталізація чистого прибутку</div><div id="profit-detail"></div></div>
-    <div class="card"><div class="ct">Розподіл грошей</div><div id="reorder-detail"></div></div>
-  </div>
-
-  <div id="v-analytics" class="view">
-    <div class="card">
-      <div class="ct">Виручка та прибуток по місяцях</div>
-      <div id="ch1-legend" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;font-size:12px;color:var(--text2)"></div>
-      <div style="position:relative;width:100%;height:230px"><canvas id="chart-monthly"></canvas></div>
-    </div>
-    <div class="g2">
-      <div class="card"><div class="ct">Прибуток по категоріях</div><div id="cat-bars"></div></div>
-      <div class="card"><div class="ct">Джерела клієнтів</div><div id="src-bars"></div></div>
-    </div>
-  </div>
-
-  <div id="v-reports" class="view">
-    <div class="card">
-      <div class="ct">Фільтри</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select id="rep-period" onchange="renderReports()"><option value="all">Весь час</option><option value="month">Цей місяць</option><option value="week">Цей тиждень</option></select>
-        <select id="rep-cat" onchange="renderReports()"><option value="">Всі категорії</option></select>
-      </div>
-    </div>
-    <div class="g2" id="rep-metrics-grid"></div>
-    <div class="repcard"><div class="ct">Звіт по клієнтах</div><div class="tw" id="rep-clients"></div></div>
-    <div class="repcard"><div class="ct">Звіт по товарах</div><div class="tw" id="rep-products"></div></div>
-  </div>
-
-  <div id="v-clients" class="view">
-    <div class="sr">
-      <input type="text" id="cs" placeholder="Пошук..." oninput="renderClients()">
-      <select id="cf" onchange="renderClients()"><option value="">Всі статуси</option><option value="new">Новий</option><option value="active">Активний</option><option value="vip">VIP</option></select>
-    </div>
-    <div class="tw"><table><thead><tr><th>Клієнт</th><th>Телефон</th><th>Місто</th><th>Джерело</th><th>Статус</th><th>Замовлень</th><th>Виручка</th><th>Прибуток</th><th>Остання покупка</th><th></th></tr></thead><tbody id="ct-body"></tbody></table></div>
   </div>
 
   <div id="v-orders" class="view">
-    <div class="sr">
-      <input type="text" id="os" placeholder="Пошук..." oninput="renderOrders()">
-      <select id="of" onchange="renderOrders()"><option value="">Всі</option><option value="paid">Оплачено</option><option value="pending">Очікує</option></select>
+    <div class="card">
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input type="text" id="order-search" placeholder="Пошук замовлення..." oninput="renderOrders()" style="flex:1">
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Клієнт</th>
+              <th>Товар</th>
+              <th>Сума</th>
+              <th>Дата</th>
+              <th>Дії</th>
+            </tr>
+          </thead>
+          <tbody id="orders-body"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="tw"><table><thead><tr><th>#</th><th>Клієнт</th><th>Товар</th><th>К-ть</th><th>Виручка</th><th>Собів.</th><th>Прибуток</th><th>Статус</th><th>Дата</th><th></th></tr></thead><tbody id="or-body"></tbody></table></div>
   </div>
 
   <div id="v-inventory" class="view">
-    <div id="inv-alert"></div>
-    <div class="tw"><table><thead><tr><th>Товар</th><th>Категорія</th><th>Ціна</th><th>Собівартість</th><th>Залишок</th><th>Мінімум</th><th>Стан</th><th>Поповнити</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
-  </div>
-
-  <div id="v-ac" class="view">
-    <div class="card"><div class="ct">Новий клієнт</div>
-      <div class="fg">
-        <div class="fl"><label>Ім'я та прізвище *</label><input type="text" id="nc-n"></div>
-        <div class="fl"><label>Телефон *</label><input type="text" id="nc-p"></div>
-        <div class="fl"><label>Місто</label><input type="text" id="nc-c"></div>
-        <div class="fl"><label>Джерело</label><select id="nc-src"><option value="instagram">Instagram</option><option value="tiktok">TikTok</option><option value="rozetka">Rozetka</option><option value="google">Google</option><option value="other">Інше</option></select></div>
+    <div class="card">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Товар</th>
+              <th>Категорія</th>
+              <th>Ціна</th>
+              <th>Залишок</th>
+              <th>Дії</th>
+            </tr>
+          </thead>
+          <tbody id="inv-body"></tbody>
+        </table>
       </div>
-      <div class="br"><button class="bp" onclick="addClient()">Додати клієнта</button></div>
     </div>
   </div>
 
-  <div id="v-ao" class="view">
-    <div class="card"><div class="ct">Нове замовлення</div>
-      <div class="fg">
-        <div class="fl"><label>Клієнт *</label><select id="no-cl"></select></div>
-        <div class="fl"><label>Товар *</label><select id="no-pr" onchange="fillPrice()"></select></div>
-        <div class="fl"><label>Кількість</label><input type="number" id="no-q" value="1" oninput="recalcOrder()"></div>
-        <div class="fl"><label>Ціна продажу (₴)</label><input type="number" id="no-am" oninput="recalcOrder()"></div>
+  <div id="v-add-product" class="view">
+    <div class="card" style="max-width: 500px; margin: 0 auto;">
+      <h3 style="margin-bottom: 15px;">Додати новий товар</h3>
+      <div class="input-group">
+        <label>Назва товару</label>
+        <input type="text" id="np-name" placeholder="Наприклад: Шампунь">
       </div>
-      <div class="br"><button class="bp" onclick="addOrder()">Зберегти</button></div>
+      <div class="input-group">
+        <label>Категорія (виберіть або впишіть нову)</label>
+        <input type="text" id="np-cat" list="categories-list" placeholder="Виберіть або введіть категорію">
+        <datalist id="categories-list"></datalist>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="input-group">
+          <label>Ціна продажу</label>
+          <input type="number" id="np-price" placeholder="0">
+        </div>
+        <div class="input-group">
+          <label>Собівартість</label>
+          <input type="number" id="np-cost" placeholder="0">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Початковий залишок</label>
+        <input type="number" id="np-stock" value="0">
+      </div>
+      <button class="btn-primary" onclick="addProduct()" style="width:100%">Зберегти товар</button>
     </div>
   </div>
 
-  <div id="v-ap" class="view">
-    <div class="card"><div class="ct">Новий товар</div>
-      <div class="fg">
-        <div class="fl"><label>Назва *</label><input type="text" id="np-n"></div>
-        <div class="fl"><label>Категорія</label><select id="np-cat"><option value="Догляд">Догляд</option><option value="Хімія">Хімія</option><option value="Інше">Інше</option></select></div>
-        <div class="fl"><label>Ціна продажу</label><input type="number" id="np-pr"></div>
-        <div class="fl"><label>Собівартість</label><input type="number" id="np-co"></div>
-        <div class="fl"><label>Залишок</label><input type="number" id="np-st"></div>
+  <div id="v-add-order" class="view">
+    <div class="card" style="max-width: 500px; margin: 0 auto;">
+      <h3 style="margin-bottom: 15px;">Новий продаж</h3>
+      <div class="input-group">
+        <label>Клієнт</label>
+        <select id="no-client"></select>
       </div>
-      <div class="br"><button class="bp" onclick="addProduct()">Зберегти</button></div>
-    </div>
-  </div>
-
-  <div id="v-expenses" class="view">
-    <div class="card"><div class="ct">Додати витрату</div>
-      <div class="fg">
-        <div class="fl"><label>Назва</label><input type="text" id="ex-n"></div>
-        <div class="fl"><label>Сума</label><input type="number" id="ex-a"></div>
-        <div class="fl"><label>Дата</label><input type="date" id="ex-d"></div>
+      <div class="input-group">
+        <label>Товар</label>
+        <select id="no-product" onchange="updateOrderPrice()"></select>
       </div>
-      <div class="br"><button class="bp" onclick="addExpenseFull()">Зберегти</button></div>
+      <div class="input-group">
+        <label>Кількість</label>
+        <input type="number" id="no-qty" value="1" oninput="calculateTotal()">
+      </div>
+      <div class="input-group">
+        <label>Разом до сплати</label>
+        <input type="number" id="no-total" readonly style="background: #eee;">
+      </div>
+      <button class="btn-primary" onclick="addOrder()" style="width:100%">Оформити замовлення</button>
     </div>
   </div>
 
 </div>
-<div class="toast" id="toast"></div>
+
+<div id="check-modal" onclick="closeCheck()">
+  <div class="receipt" onclick="event.stopPropagation()">
+    <div class="receipt-header">
+      <h2 style="font-size: 18px;">LaVok SHOP</h2>
+      <p style="font-size: 10px;">Дякуємо за покупку!</p>
+    </div>
+    <div id="receipt-content"></div>
+    <div class="receipt-total">
+      <span>РАЗОМ:</span>
+      <span id="receipt-total-val">0.00 ₴</span>
+    </div>
+    <div style="text-align: center; margin-top: 15px; font-size: 10px;">
+      <p id="receipt-date"></p>
+      <div style="margin-top: 10px; border: 1px solid #000; display: inline-block; padding: 5px;">QR-CHECK</div>
+    </div>
+    <button onclick="window.print()" style="margin-top: 20px; width: 100%; border: 1px dashed #000; padding: 5px; cursor: pointer; background: transparent;">Друк</button>
+  </div>
+</div>
 
 <script>
-// ============================================================
-// КОНФІГУРАЦІЯ ТА ДАНІ
-// ============================================================
-
-// ВАШЕ ПОСИЛАННЯ ВСТАВЛЕНО СЮДИ:
 let GAS_URL = 'https://script.google.com/macros/s/AKfycby_ngKMNrE9dkTjW84xKpwfMVkp-n0-POvk1vaJMHn0GJ1W69OKbV_Hx7yvtN0EjoOqCg/exec';
 
-const LS = {
-  clients:'crmgs_clients', orders:'crmgs_orders', products:'crmgs_products',
-  expenses:'crmgs_expenses', monthly_exp:'crmgs_monthly_exp', gas_url:'crmgs_gas_url'
-};
-
 let db = {
-  clients:[],
-  orders:[],
-  products:[],
-  expenses:[],
-  monthly_exp:[{name:'Реклама',amt:600}]
+  clients: JSON.parse(localStorage.getItem('crm_clients')) || [],
+  orders: JSON.parse(localStorage.getItem('crm_orders')) || [],
+  products: JSON.parse(localStorage.getItem('crm_products')) || []
 };
 
-// ============================================================
-// РОБОТА З LOCALSTORAGE
-// ============================================================
-const lsGet = k => { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch{return null;} };
-const lsSet = (k,v) => { try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
-const save = k => lsSet(LS[k], db[k]);
-
-// ============================================================
-// СИНХРОНІЗАЦІЯ З GOOGLE
-// ============================================================
-async function gasRequest(action, sheet, data=null) {
-  if (!GAS_URL) return null;
-  try {
-    const url = new URL(GAS_URL);
-    url.searchParams.set('action', action);
-    if (sheet) url.searchParams.set('sheet', sheet);
-
-    if (action === 'read') {
-      const res = await fetch(url.toString(), { method: 'GET' });
-      return await res.json();
-    } else {
-      const res = await fetch(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action, sheet, data })
-      });
-      return await res.json();
-    }
-  } catch (e) {
-    console.error("GAS Error:", e);
-    return { error: e.message };
-  }
+// Перемикання вкладок
+function showView(viewId, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('v-' + viewId).classList.add('active');
+  btn.classList.add('active');
+  
+  if(viewId === 'add-order') populateSelectors();
+  if(viewId === 'add-product') renderCategories();
 }
 
-async function syncAll(silent=false) {
-  if (!GAS_URL) return;
-  setSyncStatus('loading', 'Синхронізація...');
-  const sheets = ['clients','orders','products','expenses','monthly_exp'];
-  try {
-    // 1. Читаємо з Google
-    for (const sh of sheets) {
-      const res = await gasRequest('read', sh);
-      if (res && res.data && res.data.length > 0) {
-        db[sh] = res.data;
-        save(sh);
-      }
-    }
-    // 2. Відправляємо локальні дані (якщо вони новіші, зазвичай додається логіка Merge, але тут проста заміна)
-    for (const sh of sheets) {
-      if (db[sh] && db[sh].length > 0) await gasRequest('write', sh, db[sh]);
-    }
-    setSyncStatus('ok', 'Синхронізовано');
-    renderAll();
-    if (!silent) toast('Дані синхронізовано', 'ok');
-  } catch(e) {
-    setSyncStatus('err', 'Помилка');
-  }
+// Рендер категорій (виправлено: тепер можна додавати будь-яку)
+function renderCategories() {
+  const cats = [...new Set(db.products.map(p => p.category))];
+  const list = document.getElementById('categories-list');
+  list.innerHTML = cats.map(c => `<option value="${c}">`).join('');
 }
 
-async function pushToGoogle(sheet) {
-  if (GAS_URL) await gasRequest('write', sheet, db[sheet]);
+// Селектори для замовлення
+function populateSelectors() {
+  const clSel = document.getElementById('no-client');
+  const prSel = document.getElementById('no-product');
+  
+  clSel.innerHTML = db.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  prSel.innerHTML = db.products.map(p => `<option value="${p.id}" data-price="${p.price}">${p.name} (${p.stock} шт.)</option>`).join('');
+  updateOrderPrice();
 }
 
-function setSyncStatus(state, label) {
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-label');
-  lbl.textContent = label;
-  dot.className = 'dot';
-  if (state === 'ok') dot.classList.add('green');
-  else if (state === 'err') dot.classList.add('red');
-  else if (state === 'loading') dot.classList.add('spin');
+function updateOrderPrice() {
+  const opt = document.getElementById('no-product').selectedOptions[0];
+  if(opt) calculateTotal();
 }
 
-async function saveGasUrl() {
-  const url = document.getElementById('gas-url-input').value.trim();
-  GAS_URL = url;
-  lsSet(LS.gas_url, url);
-  const res = await gasRequest('ping', null);
-  if (res && res.ok) {
-    setSyncStatus('ok', 'Підключено');
-    syncAll();
-    document.getElementById('setup-panel').style.display='none';
-  } else {
-    toast('Помилка підключення!', 'err');
-  }
+function calculateTotal() {
+  const price = document.getElementById('no-product').selectedOptions[0]?.dataset.price || 0;
+  const qty = document.getElementById('no-qty').value;
+  document.getElementById('no-total').value = price * qty;
 }
 
-function toggleSetup() {
-  const p = document.getElementById('setup-panel');
-  p.style.display = p.style.display === 'none' ? 'block' : 'none';
-  if (GAS_URL) document.getElementById('gas-url-input').value = GAS_URL;
-}
+// Додавання товару
+function addProduct() {
+  const name = document.getElementById('np-name').value;
+  const category = document.getElementById('np-cat').value;
+  const price = +document.getElementById('np-price').value;
+  const cost = +document.getElementById('np-cost').value;
+  const stock = +document.getElementById('np-stock').value;
 
-// ============================================================
-// ІНТЕРФЕЙС ТА ЛОГІКА (Рендеринг)
-// ============================================================
-function toast(msg, type='info') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = `toast show ${type}`;
-  setTimeout(()=>el.classList.remove('show'), 3000);
-}
+  if(!name || !category) return alert('Заповніть назву та категорію!');
 
-const fmt = n => Math.round(+n || 0).toLocaleString('uk-UA');
-const today = () => new Date().toISOString().split('T')[0];
-
-function sv(v) {
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
-  document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
-  document.getElementById('v-'+v)?.classList.add('on');
-  if(v==='ao') populateSels();
-}
-
-function renderAll(){
-  renderDash();
-  renderClients();
-  renderOrders();
+  const newProd = { id: Date.now(), name, category, price, cost, stock };
+  db.products.push(newProd);
+  saveAll();
+  alert('Товар додано!');
+  showView('inventory', document.querySelector('[onclick*="inventory"]'));
   renderInventory();
 }
 
-function renderDash() {
-  const rev = db.orders.filter(o=>o.status==='paid').reduce((s,o)=>s+(+o.amount),0);
-  const prof = db.orders.filter(o=>o.status==='paid').reduce((s,o)=>s+(+o.profit),0);
-  document.getElementById('d-metrics').innerHTML=`
-    <div class="mc"><div class="mc-l">Виручка</div><div class="mc-v">${fmt(rev)} ₴</div></div>
-    <div class="mc"><div class="mc-l">Прибуток</div><div class="mc-v">${fmt(prof)} ₴</div></div>`;
+// Оформлення замовлення
+function addOrder() {
+  const client = db.clients.find(c => c.id == document.getElementById('no-client').value);
+  const product = db.products.find(p => p.id == document.getElementById('no-product').value);
+  const qty = +document.getElementById('no-qty').value;
+  const total = +document.getElementById('no-total').value;
+
+  if(product.stock < qty) return alert('Недостатньо товару на складі!');
+
+  const order = {
+    id: 'L-' + Math.floor(1000 + Math.random() * 9000),
+    clientId: client.id,
+    clientName: client.name,
+    productName: product.name,
+    qty,
+    total,
+    profit: total - (product.cost * qty),
+    date: new Date().toLocaleString('uk-UA')
+  };
+
+  product.stock -= qty;
+  db.orders.unshift(order);
+  saveAll();
+  alert('Продаж успішний!');
+  renderOrders();
+  showView('orders', document.querySelector('[onclick*="orders"]'));
 }
 
-function renderClients(){
-  document.getElementById('ct-body').innerHTML=db.clients.map(c=>`<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.city}</td><td>${c.source}</td><td>${c.status}</td><td>${c.totalOrders}</td><td>${fmt(c.totalSum)} ₴</td><td>${fmt(c.totalProfit)} ₴</td><td>${c.lastOrder}</td><td><button class="bd" onclick="delC(${c.id})">×</button></td></tr>`).join('');
-}
-
-function renderOrders(){
-  document.getElementById('or-body').innerHTML=db.orders.map(o=>`<tr><td>#${o.id}</td><td>${o.clientName}</td><td>${o.product}</td><td>${o.qty}</td><td>${fmt(o.amount)} ₴</td><td>${fmt(o.cost)} ₴</td><td>${fmt(o.profit)} ₴</td><td>${o.status}</td><td>${o.date}</td><td><button class="bd" onclick="delO(${o.id})">×</button></td></tr>`).join('');
-}
-
-function renderInventory(){
-  document.getElementById('inv-body').innerHTML=db.products.map(p=>`<tr><td>${p.name}</td><td>${p.category}</td><td>${p.price}</td><td>${p.cost}</td><td>${p.stock}</td><td>${p.minStock}</td><td>OK</td><td>—</td><td><button class="bd" onclick="delP(${p.id})">×</button></td></tr>`).join('');
-}
-
-function populateSels(){
-  document.getElementById('no-cl').innerHTML=db.clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  document.getElementById('no-pr').innerHTML=db.products.map(p=>`<option value="${p.id}" data-price="${p.price}" data-cost="${p.cost}">${p.name}</option>`).join('');
-}
-
-function fillPrice(){
-  const opt=document.getElementById('no-pr').options[document.getElementById('no-pr').selectedIndex];
-  if(opt){document.getElementById('no-am').value=opt.dataset.price;}
-}
-
-function recalcOrder(){}
-
-// ============================================================
-// ДОДАВАННЯ ТА ВИДАЛЕННЯ
-// ============================================================
-function addClient(){
-  const n=document.getElementById('nc-n').value;
-  const p=document.getElementById('nc-p').value;
-  if(!n||!p)return;
-  db.clients.push({id:Date.now(),name:n,phone:p,city:document.getElementById('nc-c').value,source:document.getElementById('nc-src').value,status:'new',totalOrders:0,totalSum:0,totalProfit:0,lastOrder:today()});
-  save('clients'); pushToGoogle('clients'); sv('clients'); renderClients();
-}
-
-function addOrder(){
-  const cid=+document.getElementById('no-cl').value;
-  const pid=+document.getElementById('no-pr').value;
-  const cl=db.clients.find(c=>c.id===cid);
-  const pr=db.products.find(p=>p.id===pid);
-  const am=+document.getElementById('no-am').value;
-  const q=+document.getElementById('no-q').value;
-  const prof=am - (pr.cost*q);
-  db.orders.push({id:Date.now(),clientId:cid,clientName:cl.name,productId:pid,product:pr.name,qty:q,amount:am,cost:pr.cost*q,profit:prof,status:'paid',date:today()});
-  save('orders'); pushToGoogle('orders'); sv('orders'); renderOrders();
-}
-
-function addProduct(){
-  db.products.push({id:Date.now(),name:document.getElementById('np-n').value,category:document.getElementById('np-cat').value,price:+document.getElementById('np-pr').value,cost:+document.getElementById('np-co').value,stock:+document.getElementById('np-st').value,minStock:5});
-  save('products'); pushToGoogle('products'); sv('inventory'); renderInventory();
-}
-
-function delC(id){ db.clients=db.clients.filter(c=>c.id!==id); save('clients'); pushToGoogle('clients'); renderClients(); }
-function delO(id){ db.orders=db.orders.filter(o=>o.id!==id); save('orders'); pushToGoogle('orders'); renderOrders(); }
-function delP(id){ db.products=db.products.filter(p=>p.id!==id); save('products'); pushToGoogle('products'); renderInventory(); }
-
-// ============================================================
-// ІНІЦІАЛІЗАЦІЯ
-// ============================================================
-function load() {
-  // Пріоритет: 1. Те що в пам'яті браузера, 2. Те що ми вписали вручну (хардкод)
-  const savedUrl = lsGet(LS.gas_url);
-  if (savedUrl) {
-    GAS_URL = savedUrl;
-  }
+// Рендер замовлень
+function renderOrders() {
+  const search = document.getElementById('order-search').value.toLowerCase();
+  const body = document.getElementById('orders-body');
   
-  // Завантаження локальних даних
-  Object.keys(LS).forEach(k => { 
-    if(db[k]) db[k] = lsGet(LS[k]) || db[k]; 
-  });
-  
-  if (GAS_URL) {
-    syncAll(true);
-  } else {
-    setSyncStatus('err', 'Немає URL');
-  }
-  renderAll();
+  body.innerHTML = db.orders
+    .filter(o => o.clientName.toLowerCase().includes(search) || o.productName.toLowerCase().includes(search))
+    .map(o => `
+      <tr>
+        <td>${o.id}</td>
+        <td>${o.clientName}</td>
+        <td>${o.productName} (x${o.qty})</td>
+        <td><b>${o.total} ₴</b></td>
+        <td>${o.date}</td>
+        <td>
+          <button class="nav-btn" onclick="showCheck('${o.id}')">📄 Чек</button>
+        </td>
+      </tr>
+    `).join('');
+    updateStats();
 }
 
-load();
+// РОБОТА З ЧЕКОМ
+function showCheck(orderId) {
+  const order = db.orders.find(o => o.id === orderId);
+  if(!order) return;
+
+  document.getElementById('receipt-content').innerHTML = `
+    <div class="receipt-row"><span>КЛІЄНТ:</span><span>${order.clientName}</span></div>
+    <div class="receipt-row"><span>ТОВАР:</span><span>${order.productName}</span></div>
+    <div class="receipt-row"><span>К-СТЬ:</span><span>${order.qty} шт.</span></div>
+    <div class="receipt-row"><span>ЦІНА:</span><span>${(order.total/order.qty).toFixed(2)}</span></div>
+  `;
+  document.getElementById('receipt-total-val').innerText = order.total.toFixed(2) + ' ₴';
+  document.getElementById('receipt-date').innerText = order.date;
+  document.getElementById('check-modal').style.display = 'flex';
+}
+
+function closeCheck() { document.getElementById('check-modal').style.display = 'none'; }
+
+// Рендер складу
+function renderInventory() {
+  document.getElementById('inv-body').innerHTML = db.products.map(p => `
+    <tr>
+      <td>${p.name}</td>
+      <td><span class="badge" style="background:#eef2ff; color:#4338ca;">${p.category}</span></td>
+      <td>${p.price} ₴</td>
+      <td><span class="badge ${p.stock < 5 ? 'badge-warn' : 'badge-success'}">${p.stock} шт</span></td>
+      <td><button class="nav-btn" style="color:red" onclick="deleteProd(${p.id})">🗑️</button></td>
+    </tr>
+  `).join('');
+}
+
+function deleteProd(id) {
+  if(!confirm('Видалити товар?')) return;
+  db.products = db.products.filter(p => p.id !== id);
+  saveAll();
+  renderInventory();
+}
+
+// Статистика
+function updateStats() {
+  const rev = db.orders.reduce((sum, o) => sum + o.total, 0);
+  const prof = db.orders.reduce((sum, o) => sum + o.profit, 0);
+  document.getElementById('stat-rev').innerText = rev + ' ₴';
+  document.getElementById('stat-prof').innerText = prof + ' ₴';
+  document.getElementById('stat-count').innerText = db.orders.length;
+}
+
+// Збереження
+function saveAll() {
+  localStorage.setItem('crm_clients', JSON.stringify(db.clients));
+  localStorage.setItem('crm_orders', JSON.stringify(db.orders));
+  localStorage.setItem('crm_products', JSON.stringify(db.products));
+  updateStats();
+  syncAll(); // Автоматична спроба синхронізації при змінах
+}
+
+// СИНХРОНІЗАЦІЯ
+async function syncAll() {
+  if(!GAS_URL) return;
+  const status = document.getElementById('sync-status');
+  status.innerHTML = '⌛ Синхронізація...';
+  
+  try {
+    // Відправляємо дані в Google
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'write_all', data: db })
+    });
+    
+    // Отримуємо актуальні дані
+    const res = await fetch(GAS_URL + '?action=read_all');
+    const remoteData = await res.json();
+    
+    if(remoteData) {
+      db = remoteData;
+      status.innerHTML = '✅ Дані актуальні';
+      renderOrders();
+      renderInventory();
+    }
+  } catch(e) {
+    status.innerHTML = '❌ Помилка зв\'язку';
+  }
+}
+
+// Старт
+window.onload = () => {
+  renderOrders();
+  renderInventory();
+  syncAll();
+};
+
 </script>
 </body>
 </html>
