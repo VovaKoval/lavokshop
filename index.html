@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
@@ -300,7 +300,7 @@ const LS = {
   expenses:'crmgs_expenses', monthly_exp:'crmgs_monthly_exp', gas_url:'crmgs_gas_url'
 };
 let db = {clients:[],orders:[],products:[],expenses:[],monthly_exp:[{name:'Реклама',amt:600}]};
-let GAS_URL = '';
+let GAS_URL = 'https://script.google.com/macros/s/AKfycby_ngKMNrE9dkTjW84xKpwfMVkp-n0-POvk1vaJMHn0GJ1W69OKbV_Hx7yvtN0EjoOqCg/exec';
 let chartMonthly = null;
 
 const lsGet = k => { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch{return null;} };
