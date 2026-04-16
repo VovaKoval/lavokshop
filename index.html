@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>LaVok CRM Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -30,21 +30,21 @@
   --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 24px rgba(0,0,0,0.10);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);font-size:14px;line-height:1.5}
+*{box-sizing:border-box;margin:0;padding:0; -webkit-tap-highlight-color: transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);font-size:14px;line-height:1.5;overflow-x:hidden;}
 h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;line-height:1.2}
 
 /* LOADER */
 #loader{position:fixed;inset:0;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;transition:opacity .4s}
-#loader h1{font-family:'Syne',sans-serif;font-size:2.8rem;color:#fff;letter-spacing:-1px}
-#loader p{color:rgba(255,255,255,.5);margin-top:8px;font-size:.9rem}
-.loader-bar{width:200px;height:3px;background:rgba(255,255,255,.1);border-radius:99px;margin-top:32px;overflow:hidden}
+#loader h1{font-family:'Syne',sans-serif;font-size:2.8rem;color:#fff;letter-spacing:-1px; text-align:center;}
+#loader p{color:rgba(255,255,255,.5);margin-top:8px;font-size:.9rem; text-align:center; padding:0 20px;}
+.loader-bar{width:200px;max-width:80%;height:3px;background:rgba(255,255,255,.1);border-radius:99px;margin-top:32px;overflow:hidden}
 .loader-fill{height:100%;background:var(--accent2);border-radius:99px;animation:loadfill 1.6s ease-in-out forwards}
 @keyframes loadfill{from{width:0}to{width:100%}}
 
 /* LOGIN */
-#login-screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d0f14 0%,#1a1b2e 50%,#0d1117 100%);z-index:9999}
-.login-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:48px 40px;width:380px;backdrop-filter:blur(20px)}
+#login-screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d0f14 0%,#1a1b2e 50%,#0d1117 100%);z-index:9999; padding:16px;}
+.login-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:48px 40px;width:100%;max-width:380px;backdrop-filter:blur(20px)}
 .login-logo{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#fff;margin-bottom:4px}
 .login-sub{color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:36px}
 .login-card label{display:block;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
@@ -59,8 +59,8 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;line-height:1.2}
 /* LAYOUT */
 .layout{display:flex;min-height:100vh}
 
-/* SIDEBAR */
-.sidebar{width:var(--sidebar-w);background:var(--ink);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;padding:0;z-index:100;overflow:hidden}
+/* SIDEBAR & MOBILE MENU */
+.sidebar{width:var(--sidebar-w);background:var(--ink);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;padding:0;z-index:1000;overflow-y:auto; overflow-x:hidden;}
 .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
 .sidebar-logo span{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-0.5px}
 .sidebar-logo small{display:block;font-size:.7rem;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.1em;text-transform:uppercase}
@@ -69,17 +69,19 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;line-height:1.2}
 .nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
 .nav-item.active{background:var(--accent);color:#fff}
 .nav-item .ico{width:18px;text-align:center;flex-shrink:0;font-size:1rem}
-.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:99px;min-width:18px;text-align:center}
 .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,.06)}
 .user-chip{display:flex;align-items:center;gap:10px}
 .user-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:#fff;flex-shrink:0}
-.user-name{font-size:.85rem;font-weight:600;color:#fff}
+.user-name{font-size:.85rem;font-weight:600;color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100px;}
 .user-role{font-size:.7rem;color:rgba(255,255,255,.4)}
 .logout-btn{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:1rem;padding:4px;transition:color .2s}
 .logout-btn:hover{color:var(--red)}
 
+.sidebar-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; display:none; opacity:0; transition:opacity 0.3s; backdrop-filter:blur(2px); }
+.sidebar-overlay.show { display:block; opacity:1; }
+
 /* MAIN */
-.main{margin-left:var(--sidebar-w);flex:1;padding:32px;min-height:100vh}
+.main{margin-left:var(--sidebar-w);flex:1;padding:32px;min-height:100vh; display:flex; flex-direction:column; max-width: 100%; overflow:hidden;}
 .view{display:none;animation:fadeIn .2s ease}
 .view.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -101,11 +103,10 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;line-height:1.2}
 .stat-label{font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
 .stat-value{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:var(--ink);line-height:1}
 .stat-sub{font-size:.78rem;color:var(--muted2);margin-top:6px}
-.stat-icon{position:absolute;right:16px;top:16px;font-size:1.6rem;opacity:.2}
 
 /* TABLE */
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse}
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse; min-width: 600px;}
 thead th{text-align:left;padding:10px 14px;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border);white-space:nowrap}
 tbody tr{transition:background .1s}
 tbody tr:hover{background:var(--surface)}
@@ -113,39 +114,43 @@ tbody td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:.875r
 tbody tr:last-child td{border-bottom:none}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center; gap:6px;padding:9px 18px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover{background:var(--accent2)}
 .btn-secondary{background:var(--surface);color:var(--ink);border:1px solid var(--border)}
 .btn-secondary:hover{background:var(--border)}
 .btn-danger{background:var(--red-light);color:var(--red)}
-.btn-danger:hover{background:#fca5a5}
 .btn-success{background:var(--green-light);color:#16a34a}
-.btn-success:hover{background:#bbf7d0}
 .btn-sm{padding:5px 10px;font-size:.78rem}
-.btn-icon{padding:6px;background:none;border:none;cursor:pointer;border-radius:6px;color:var(--muted);transition:all .15s}
+.btn-icon{padding:6px;background:none;border:none;cursor:pointer;border-radius:6px;color:var(--muted);transition:all .15s; display:inline-flex; align-items:center;}
 .btn-icon:hover{background:var(--surface);color:var(--ink)}
 
-/* BADGES */
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+/* BADGES & NEW CLASSES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em; white-space:nowrap;}
 .badge-green{background:var(--green-light);color:#15803d}
 .badge-red{background:var(--red-light);color:#b91c1c}
 .badge-orange{background:var(--orange-light);color:#b45309}
 .badge-blue{background:var(--blue-light);color:#1d4ed8}
 .badge-purple{background:var(--accent-light);color:var(--accent)}
 .badge-gray{background:var(--surface);color:var(--muted)}
+.badge-admin{background:#fef3c7;color:#92400e}
+.badge-owner{background:var(--accent-light);color:var(--accent)}
+.xml-drop{border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s;font-size:.85rem;color:var(--muted);margin-bottom:12px}
+.xml-drop:hover,.xml-drop.drag{border-color:var(--accent);color:var(--accent)}
+.supplier-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;background:var(--blue-light);color:#1d4ed8;border-radius:99px;font-size:.72rem;font-weight:700; white-space:nowrap;}
+.sku-code{font-family:monospace;font-size:.78rem;background:var(--surface);padding:2px 8px;border-radius:4px;color:var(--muted);letter-spacing:.04em}
 
 /* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px);padding:16px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(4px);padding:16px}
 .modal-bg.open{display:flex}
-.modal{background:var(--card);border-radius:20px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.25);animation:modalIn .2s ease}
+.modal{background:var(--card);border-radius:20px;width:100%;max-width:500px;max-height:95vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.25);animation:modalIn .2s ease; display:flex; flex-direction:column;}
 @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-.modal-header{padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-header{padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; flex-shrink:0;}
 .modal-header h3{font-family:'Syne',sans-serif;font-size:1.1rem}
-.modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px}
+.modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px; display:inline-flex;}
 .modal-close:hover{background:var(--surface)}
-.modal-body{padding:0 24px}
-.modal-footer{padding:20px 24px 24px;display:flex;gap:10px;justify-content:flex-end}
+.modal-body{padding:0 24px; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+.modal-footer{padding:20px 24px 24px;display:flex;gap:10px;justify-content:flex-end; flex-shrink:0;}
 .form-group{margin-bottom:16px}
 .form-group label{display:block;font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.875rem;color:var(--ink);background:var(--card);outline:none;transition:border-color .15s}
@@ -154,8 +159,8 @@ tbody tr:last-child td{border-bottom:none}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
 /* TOAST */
-#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:var(--shadow-md);animation:toastIn .25s ease;display:flex;align-items:center;gap:8px;max-width:320px;pointer-events:auto}
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:var(--shadow-md);animation:toastIn .25s ease;display:flex;align-items:center;gap:8px;max-width:320px;pointer-events:auto; word-break:break-word;}
 .toast.success{background:#15803d}
 .toast.error{background:var(--red)}
 .toast.warning{background:#b45309}
@@ -178,7 +183,7 @@ tbody tr:last-child td{border-bottom:none}
 .client-avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-light);color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
 /* NOTIFICATIONS PANEL */
-.notif-panel{position:fixed;top:0;right:-360px;width:340px;height:100vh;background:var(--card);border-left:1px solid var(--border);z-index:200;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.08);transition:right .25s ease}
+.notif-panel{position:fixed;top:0;right:-100%;width:100%;max-width:360px;height:100vh;background:var(--card);border-left:1px solid var(--border);z-index:10001;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.08);transition:right .25s ease}
 .notif-panel.open{right:0}
 .notif-header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .notif-list{flex:1;overflow-y:auto;padding:12px}
@@ -190,43 +195,64 @@ tbody tr:last-child td{border-bottom:none}
 .notif-item-time{font-size:.7rem;color:var(--muted2);margin-top:4px}
 
 /* TOP BAR */
-.topbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:28px}
-.topbar-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);font-family:'DM Sans',sans-serif;position:relative;transition:border-color .15s}
+.topbar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:28px; flex-wrap:wrap;}
+.hamburger{background:none;border:none;font-size:1.6rem;color:var(--ink);cursor:pointer;display:none; padding:4px;}
+.topbar-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);font-family:'DM Sans',sans-serif;position:relative;transition:border-color .15s; white-space:nowrap;}
 .topbar-btn:hover{border-color:var(--accent);color:var(--accent)}
 .topbar-badge{position:absolute;top:-5px;right:-5px;width:17px;height:17px;background:var(--red);border-radius:50%;font-size:.6rem;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
-
-/* LOGS TABLE */
-.log-action{font-size:.78rem;font-family:'DM Sans',sans-serif}
-.progress-bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:6px}
-.progress-fill{height:100%;background:var(--accent);border-radius:99px}
 
 /* SETTINGS */
 .settings-section{margin-bottom:28px}
 .settings-section h4{font-family:'Syne',sans-serif;font-size:.9rem;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-.settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--surface)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--surface); gap:12px;}
 .settings-row:last-child{border-bottom:none}
 .toggle{width:40px;height:22px;background:var(--border);border-radius:99px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
 .toggle.on{background:var(--accent)}
 .toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .toggle.on::after{left:20px}
 
-/* RESPONSIVE ADJUSTMENTS */
+/* RESPONSIVE LAYOUT GRIDS */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* === MOBILE ADAPTATIONS === */
 @media(max-width:900px){
-  .grid-2,.grid-3{grid-template-columns:1fr}
-  .main{padding:20px}
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .hamburger { display: block; margin-right: auto; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; padding: 16px; }
+  .topbar { margin-bottom: 20px; }
+  .hide-text-mobile { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .card { padding: 16px; }
+  .search-input { min-width: 100%; }
+}
+@media(max-width:480px){
+  .stats-grid { grid-template-columns: 1fr; }
+  #toast-container { bottom: 16px; right: 16px; left: 16px; }
+  .toast { max-width: none; width: 100%; justify-content: center; }
+  .page-header h2 { font-size: 1.3rem; }
+  .btn { width: 100%; justify-content: center; }
+  .page-header { flex-direction: column; gap: 12px; align-items: stretch; }
 }
 
-/* PIPELINE */
-.pipeline{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px}
-.pipeline-col{min-width:220px;background:var(--surface);border-radius:var(--radius);padding:14px}
-.pipeline-col-title{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
-.pipeline-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:box-shadow .15s}
-.pipeline-card:hover{box-shadow:var(--shadow-md)}
-.pipeline-card-title{font-weight:600;font-size:.85rem;margin-bottom:4px}
-.pipeline-card-sub{font-size:.75rem;color:var(--muted)}
-.pipeline-card-sum{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:var(--accent);margin-top:6px}
+/* RECEIPT / ЧЕК */
+.receipt-wrapper { background: #e5e7eb; padding: 20px; display: flex; justify-content: center; border-radius: 8px; margin-bottom: 10px; overflow-x:auto;}
+.receipt-paper { background: #fff; width: 320px; min-width: 300px; padding: 24px; font-family: 'Courier New', Courier, monospace; color: #000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.r-center { text-align: center; }
+.r-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 4px; }
+.r-sub { font-size: .8rem; margin-bottom: 12px; }
+.r-line { border-top: 1px dashed #000; margin: 12px 0; }
+.r-row { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 4px; }
+.r-bold { font-weight: bold; }
+.r-total { font-size: 1.1rem; font-weight: bold; margin-top: 8px; }
+
+@media print {
+  body * { visibility: hidden !important; }
+  #receipt-print-area, #receipt-print-area * { visibility: visible !important; }
+  #receipt-print-area { position: absolute; left: 0; top: 0; margin: 0; padding: 0; background: #fff; box-shadow: none; width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -279,6 +305,8 @@ tbody tr:last-child td{border-bottom:none}
 
 <div id="toast-container"></div>
 
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <div id="app" class="layout" style="display:none">
 
   <aside class="sidebar">
@@ -293,6 +321,11 @@ tbody tr:last-child td{border-bottom:none}
     <div class="nav-item" onclick="sv('orders',this)"><span class="ico">💳</span> Продажі</div>
     <div class="nav-item" onclick="sv('clients',this)"><span class="ico">👤</span> Клієнти</div>
 
+    <div id="suppliers-nav" style="display:none">
+      <div class="nav-section">Каталог</div>
+      <div class="nav-item" onclick="sv('suppliers',this)"><span class="ico">🏭</span> Постачальники</div>
+    </div>
+
     <div id="owner-nav" style="display:none">
       <div class="nav-section">Управління</div>
       <div class="nav-item" onclick="sv('team',this)"><span class="ico">👥</span> Команда</div>
@@ -304,7 +337,7 @@ tbody tr:last-child td{border-bottom:none}
     <div class="sidebar-footer">
       <div class="user-chip">
         <div class="user-avatar" id="u-avatar">?</div>
-        <div>
+        <div style="overflow:hidden;">
           <div class="user-name" id="u-name">—</div>
           <div class="user-role" id="u-role">—</div>
         </div>
@@ -316,9 +349,11 @@ tbody tr:last-child td{border-bottom:none}
   <main class="main">
 
     <div class="topbar">
-      <button class="topbar-btn" onclick="doBackup()" id="backup-btn">💾 Резервна копія</button>
+      <button class="hamburger" id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      
+      <button class="topbar-btn" onclick="doBackup()" id="backup-btn" title="Зберегти дані в таблицю">💾 <span class="hide-text-mobile">Зберегти</span></button>
       <button class="topbar-btn" onclick="toggleNotif()">
-        🔔 Сповіщення
+        🔔 <span class="hide-text-mobile">Сповіщення</span>
         <span class="topbar-badge" id="notif-count" style="display:none">0</span>
       </button>
     </div>
@@ -326,12 +361,12 @@ tbody tr:last-child td{border-bottom:none}
     <div id="v-dashboard" class="view active">
       <div class="page-header">
         <div><h2>Дашборд</h2><p id="dash-date"></p></div>
-        <button class="btn btn-secondary" onclick="refreshData()">🔄 Оновити</button>
+        <button class="btn btn-secondary" onclick="refreshData()">🔄 Оновити дані</button>
       </div>
       <div class="stats-grid" id="dash-stats"></div>
       <div class="grid-2">
         <div class="card">
-          <div class="card-title" style="margin-bottom:4px">📦 Продажі (тижень)</div>
+          <div class="card-title" style="margin-bottom:4px">📦 Продажі (тиждень)</div>
           <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">Сума продажів за останні 7 днів</p>
           <div class="chart-bar-wrap" id="sales-chart"></div>
         </div>
@@ -355,18 +390,21 @@ tbody tr:last-child td{border-bottom:none}
     <div id="v-stock" class="view">
       <div class="page-header">
         <div><h2>Склад</h2><p>Управління товарами та залишками</p></div>
-        <button class="btn btn-primary" onclick="openStockModal()">+ Додати товар</button>
+        <div style="display:flex;gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-secondary" id="xml-import-btn" onclick="openXMLModal()" style="display:none">📂 Імпорт XML</button>
+          <button class="btn btn-primary" onclick="openStockModal()">+ Додати товар</button>
+        </div>
       </div>
       <div class="card">
         <div class="search-bar">
           <input class="search-input" placeholder="🔍 Пошук товарів..." id="stock-search" oninput="renderStock()">
-          <select class="search-input" style="max-width:160px" id="stock-cat-filter" onchange="renderStock()">
+          <select class="search-input" style="max-width:200px" id="stock-cat-filter" onchange="renderStock()">
             <option value="">Всі категорії</option>
           </select>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>#</th><th>Назва</th><th>Категорія</th><th>К-сть</th><th>Собівартість</th><th>Ціна</th><th>Сума (собіварт.)</th><th>Дії</th></tr></thead>
+            <thead><tr><th>#</th><th>Код (SKU)</th><th>Назва</th><th>Категорія</th><th>Постачальник</th><th>К-сть</th><th>Собівартість</th><th>Ціна</th><th>Дії</th></tr></thead>
             <tbody id="t-stock"></tbody>
           </table>
         </div>
@@ -381,14 +419,14 @@ tbody tr:last-child td{border-bottom:none}
       </div>
       <div class="card">
         <div class="search-bar">
-          <input class="search-input" placeholder="🔍 Пошук по клієнту, товару..." id="order-search" oninput="renderOrders()">
-          <select class="search-input" style="max-width:160px" id="order-manager-filter" onchange="renderOrders()">
+          <input class="search-input" placeholder="🔍 Пошук по клієнту, товару, чеку..." id="order-search" oninput="renderOrders()">
+          <select class="search-input" style="max-width:200px" id="order-manager-filter" onchange="renderOrders()">
             <option value="">Всі менеджери</option>
           </select>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Дата</th><th>Клієнт</th><th>Телефон</th><th>Товар</th><th>К-сть</th><th>Сума</th><th>Менеджер</th><th>Статус</th><th id="orders-actions-th">Дії</th></tr></thead>
+            <thead><tr><th>№ Чека</th><th>Дата</th><th>Клієнт</th><th>Телефон</th><th>Товар</th><th>К-сть</th><th>Сума</th><th>Менеджер</th><th>Статус</th><th id="orders-actions-th">Дії</th></tr></thead>
             <tbody id="t-orders"></tbody>
           </table>
         </div>
@@ -398,7 +436,7 @@ tbody tr:last-child td{border-bottom:none}
 
     <div id="v-clients" class="view">
       <div class="page-header">
-        <div><h2>Клієнти</h2><p>База клієнтів та контактів</p></div>
+        <div><h2>Клієнти</h2><p>База клієнтів та контактів (Дропшипінг)</p></div>
         <button class="btn btn-primary" onclick="openClientModal()">+ Новий клієнт</button>
       </div>
       <div class="card">
@@ -407,7 +445,7 @@ tbody tr:last-child td{border-bottom:none}
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Клієнт</th><th>Телефон</th><th>Email</th><th>Замовлень</th><th>Сума</th><th>Останній візит</th><th>Дії</th></tr></thead>
+            <thead><tr><th>Клієнт</th><th>Контакти</th><th>Доставка (Дропшипінг)</th><th>Замовлень</th><th>Сума</th><th>Останній візит</th><th>Дії</th></tr></thead>
             <tbody id="t-clients"></tbody>
           </table>
         </div>
@@ -432,7 +470,7 @@ tbody tr:last-child td{border-bottom:none}
     <div id="v-analytics" class="view">
       <div class="page-header">
         <div><h2>Аналітика</h2><p>Детальна статистика та звіти</p></div>
-        <select id="analytics-period" class="btn btn-secondary" onchange="renderAnalytics()" style="cursor:pointer">
+        <select id="analytics-period" class="btn btn-secondary" onchange="renderAnalytics()" style="cursor:pointer; width:100%; max-width:200px;">
           <option value="7">Останні 7 днів</option>
           <option value="30" selected>Останні 30 днів</option>
           <option value="90">Останні 90 днів</option>
@@ -450,10 +488,6 @@ tbody tr:last-child td{border-bottom:none}
           <div id="cat-stats"></div>
         </div>
       </div>
-      <div class="card" style="margin-top:16px">
-        <div class="card-title" style="margin-bottom:12px">📅 Динаміка продажів</div>
-        <div class="chart-bar-wrap" id="analytics-chart" style="height:140px"></div>
-      </div>
     </div>
 
     <div id="v-logs" class="view">
@@ -464,7 +498,7 @@ tbody tr:last-child td{border-bottom:none}
       <div class="card">
         <div class="search-bar">
           <input class="search-input" placeholder="🔍 Пошук по діях..." id="log-search" oninput="renderLogs()">
-          <select class="search-input" style="max-width:160px" id="log-user-filter" onchange="renderLogs()">
+          <select class="search-input" style="max-width:200px" id="log-user-filter" onchange="renderLogs()">
             <option value="">Всі користувачі</option>
           </select>
         </div>
@@ -524,11 +558,29 @@ tbody tr:last-child td{border-bottom:none}
           <div class="settings-section" style="margin-top:20px">
             <h4>🗄️ База даних</h4>
             <div style="display:flex;flex-direction:column;gap:8px">
-              <button class="btn btn-secondary" onclick="doBackup()">💾 Зробити резервну копію зараз</button>
+              <button class="btn btn-secondary" onclick="doBackup()">💾 Зберегти дані на сервер</button>
               <button class="btn btn-secondary" onclick="refreshData()">🔄 Оновити дані з сервера</button>
               <div id="backup-status" style="font-size:.78rem;color:var(--muted);margin-top:4px"></div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="v-suppliers" class="view">
+      <div class="page-header">
+        <div><h2>Постачальники</h2><p>Управління постачальниками</p></div>
+        <button class="btn btn-primary" onclick="openSupplierModal()">+ Додати постачальника</button>
+      </div>
+      <div class="card">
+        <div class="search-bar">
+          <input class="search-input" placeholder="🔍 Пошук постачальника..." id="supplier-search" oninput="renderSuppliers()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Назва</th><th>Контактна особа</th><th>Телефон</th><th>Email</th><th>Нотатки</th><th>Дії</th></tr></thead>
+            <tbody id="t-suppliers"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -538,10 +590,10 @@ tbody tr:last-child td{border-bottom:none}
 
 <script>
 // ===================== CONFIG =====================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxLrxYQ7Wrv10XAm8oFYrFyfs9FwTJBWlmRqePLr7hYt1iFXtcwSpeMml0M1N5XQPP4-w/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxOpd1TVewKpOpppECdbvTmQMePXMu0lM73q3CkGFD4UCzWh1zv9fXU8B1aXlMrK0-PTw/exec";
 
 // ===================== STATE =====================
-let db = { users: [], orders: [], products: [], clients: [], logs: [] };
+let db = { users: [], orders: [], products: [], clients: [], logs: [], suppliers: [] };
 let currentUser = null;
 let notifications = [];
 let backupInterval = null;
@@ -553,7 +605,7 @@ window.onload = async () => {
     const res = await fetch(GAS_URL + "?action=readAll");
     if (!res.ok) throw new Error('HTTP ' + res.status);
     db = await res.json();
-    ['users','orders','products','clients','logs'].forEach(k => { if(!db[k]) db[k] = []; });
+    ['users','orders','products','clients','logs','suppliers'].forEach(k => { if(!db[k]) db[k] = []; });
     if (!db.users.find(u => u.role === 'admin')) {
       db.users.unshift({name:'Власник',login:'admin',pass:'admin',role:'admin'});
     }
@@ -584,13 +636,22 @@ function login() {
   const av = (user.name || '?').charAt(0).toUpperCase();
   document.getElementById('u-avatar').innerText = av;
   document.getElementById('u-name').innerText = user.name;
-  document.getElementById('u-role').innerText = user.role === 'admin' ? '👑 Власник' : '💼 Менеджер';
-  if (user.role === 'admin') document.getElementById('owner-nav').style.display = 'block';
+  
+  const roleLabel = user.role === 'admin' ? '👑 Власник' : user.role === 'administrator' ? '🛡️ Адміністратор' : '💼 Менеджер';
+  document.getElementById('u-role').innerText = roleLabel;
+  
+  if (user.role === 'admin' || user.role === 'administrator') {
+    document.getElementById('owner-nav').style.display = 'block';
+    document.getElementById('suppliers-nav').style.display = 'block';
+    document.getElementById('xml-import-btn').style.display = 'inline-flex';
+  }
+  
   writeLog(`Вхід у систему`);
   renderAll();
   startBackupTimer();
   checkLowStock();
 }
+
 function doLogout() {
   if (!confirm('Вийти із системи?')) return;
   writeLog('Вихід із системи');
@@ -602,7 +663,7 @@ function doLogout() {
   document.getElementById('l-pass').value = '';
 }
 
-// ===================== BACKUP =====================
+// ===================== BACKUP & WRITE LOGIC =====================
 function startBackupTimer() {
   if (backupInterval) clearInterval(backupInterval);
   backupInterval = setInterval(() => {
@@ -611,40 +672,83 @@ function startBackupTimer() {
     }
   }, 15 * 60 * 1000);
 }
+
 async function doBackup(silent = false) {
-  if (!silent) showToast('Збереження резервної копії...', 'info');
+  if (!silent) showToast('Збереження даних...', 'info');
   try {
     const res = await fetch(GAS_URL + "?action=writeAll", {
       method: 'POST',
       body: JSON.stringify(db)
     });
     if (!res.ok) throw new Error();
-    if (!silent) showToast('Дані збережено у Google Sheets', 'success');
+    if (!silent) showToast('Дані успішно збережено!', 'success');
     const status = document.getElementById('backup-status');
-    if (status) status.innerText = 'Останнє збереження: ' + new Date().toLocaleTimeString();
+    if (status) status.innerText = 'Останнє збереження: ' + getFmtDate();
   } catch(e) {
     if (!silent) showToast('Помилка збереження', 'error');
   }
 }
 
-// ===================== LOGS =====================
+function getFmtDate() {
+  return new Date().toLocaleString('uk-UA', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+}
+
 function writeLog(action) {
   db.logs.unshift({
-    time: new Date().toLocaleString('uk-UA'),
+    time: getFmtDate(),
     user: currentUser ? currentUser.name : 'Гість',
     action: action
   });
   if (db.logs.length > 300) db.logs.pop();
 }
 
-// ===================== UTILS =====================
-function openModal(title, content, saveFn) {
+// ===================== UTILS & MODALS =====================
+function showToast(text, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  let icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+  toast.innerHTML = `<span>${icon}</span> <div style="flex:1">${text}</div>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ОНОВЛЕНА, БЕЗПЕЧНА ФУНКЦІЯ ВИКЛИКУ МОДАЛОК
+function openModal(title, content, saveFn, saveBtnText = 'Зберегти') {
   document.getElementById('modal-title').innerText = title;
   document.getElementById('modal-content').innerHTML = content;
-  document.getElementById('modal-save').onclick = () => { saveFn(); closeModal(); };
+  
+  const btn = document.getElementById('modal-save');
+  btn.innerText = saveBtnText;
+  
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  
+  newBtn.onclick = async () => { 
+    if (saveFn) {
+      try {
+        const result = await saveFn();
+        // Якщо функція зберігання повертає явно false (наприклад помилка валідації) - зупиняємось і не закриваємо вікно
+        if (result === false) return; 
+      } catch (err) {
+        console.error(err);
+        showToast('Помилка при збереженні: ' + err.message, 'error');
+        return;
+      }
+    } 
+    // Якщо все окей і це не друк чеку, то закриваємо
+    if (saveBtnText !== '🖨️ Друкувати чек') {
+      closeModal(); 
+    }
+  };
+  
   document.getElementById('modal-bg').classList.add('open');
 }
-function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+
+function closeModal() { 
+  document.getElementById('modal-bg').classList.remove('open'); 
+  window._xmlContent = null; 
+}
 
 // ===================== RENDERERS =====================
 function renderAll() {
@@ -655,13 +759,14 @@ function renderAll() {
   renderUsers();
   renderAnalytics();
   renderLogs();
+  renderSuppliers();
 }
 
 function renderDashboard() {
   const stats = document.getElementById('dash-stats');
-  const today = new Date().toLocaleDateString('uk-UA');
-  const tSales = db.orders.filter(o => o.date.startsWith(today)).reduce((s, o) => s + (+o.total || 0), 0);
-  const tOrders = db.orders.filter(o => o.date.startsWith(today)).length;
+  const today = new Date().toLocaleDateString('uk-UA', {day:'2-digit', month:'2-digit', year:'numeric'});
+  const tSales = db.orders.filter(o => o.date.includes(today)).reduce((s, o) => s + (+o.total || 0), 0);
+  const tOrders = db.orders.filter(o => o.date.includes(today)).length;
   const totalStockVal = db.products.reduce((s, p) => s + ((+p.qty || 0) * (+p.price || 0)), 0);
   const totalCostVal = db.products.reduce((s, p) => s + ((+p.qty || 0) * (+p.cost || 0)), 0);
   
@@ -689,6 +794,16 @@ function renderDashboard() {
   `;
 }
 
+// ===================== STOCK =====================
+function generateSKU() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const existing = new Set((db.products||[]).map(p=>p.code).filter(Boolean));
+  let code;
+  do { code = 'PRD-' + Array.from({length:6}, ()=>chars[Math.floor(Math.random()*chars.length)]).join(''); }
+  while (existing.has(code));
+  return code;
+}
+
 function renderStock() {
   const tbody = document.getElementById('t-stock');
   const query = document.getElementById('stock-search').value.toLowerCase();
@@ -700,36 +815,48 @@ function renderStock() {
   filter.innerHTML = '<option value="">Всі категорії</option>' + cats.map(c => `<option value="${c}" ${c==oldVal?'selected':''}>${c}</option>`).join('');
 
   const filtered = db.products.filter(p => {
-    const match = p.name.toLowerCase().includes(query);
+    const match = p.name.toLowerCase().includes(query) || (p.code||'').toLowerCase().includes(query);
     const catMatch = !cat || p.cat === cat;
     return match && catMatch;
   });
 
-  tbody.innerHTML = filtered.map((p, i) => `
+  tbody.innerHTML = filtered.map((p, i) => {
+    const sup = (db.suppliers||[]).find(s=>s.id===p.supplier);
+    return `
     <tr>
-      <td>${i + 1}</td>
+      <td style="color:var(--muted)">${i + 1}</td>
+      <td><span class="sku-code">${p.code || '—'}</span></td>
       <td style="font-weight:600">${p.name}</td>
       <td><span class="badge badge-gray">${p.cat || '—'}</span></td>
-      <td style="font-weight:700">${p.qty}</td>
+      <td>${sup ? `<span class="supplier-chip">🏭 ${sup.name}</span>` : '—'}</td>
+      <td style="font-weight:700"><span class="badge ${p.qty <= 0 ? 'badge-red' : 'badge-green'}">${p.qty} шт.</span></td>
       <td>${(+p.cost || 0).toLocaleString()} ₴</td>
-      <td>${(+p.price || 0).toLocaleString()} ₴</td>
-      <td style="font-weight:700;color:var(--accent)">${((+p.qty || 0) * (+p.cost || 0)).toLocaleString()} ₴</td>
+      <td style="font-weight:700;color:var(--accent)">${(+p.price || 0).toLocaleString()} ₴</td>
       <td>
         <button class="btn-icon" onclick="openStockModal(${db.products.indexOf(p)})">✏️</button>
-        <button class="btn-icon" style="color:var(--red)" onclick="deleteProduct(${db.products.indexOf(p)})">🗑️</button>
+        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteProduct(${db.products.indexOf(p)})" title="Видалити">🗑️</button>` : ''}
       </td>
     </tr>
-  `).join('');
+  `}).join('');
   
   const sumCost = filtered.reduce((s, p) => s + ((+p.qty || 0) * (+p.cost || 0)), 0);
   document.getElementById('stock-footer').innerText = `Показано ${filtered.length} товарів. Загальна собівартість: ${sumCost.toLocaleString()} ₴`;
 }
 
 function openStockModal(idx = -1) {
-  const p = idx > -1 ? db.products[idx] : { name: '', cat: '', qty: 0, cost: 0, price: 0 };
+  const p = idx > -1 ? db.products[idx] : { name: '', cat: '', qty: 0, cost: 0, price: 0, code: '', supplier: '' };
+  const skuVal = idx > -1 ? (p.code || generateSKU()) : generateSKU();
+  const supOptions = (db.suppliers||[]).map(s=>`<option value="${s.id}" ${p.supplier===s.id?'selected':''}>${s.name}</option>`).join('');
+  
   const content = `
+    <div class="form-row">
+      <div class="form-group"><label>Код товару (SKU)</label><input type="text" id="p-code" value="${skuVal}" readonly style="background:var(--surface);font-family:monospace"></div>
+      <div class="form-group"><label>Категорія</label><input type="text" id="p-cat" value="${p.cat}" list="cat-list"><datalist id="cat-list">${[...new Set(db.products.map(x=>x.cat))].map(c=>`<option value="${c}">`).join('')}</datalist></div>
+    </div>
     <div class="form-group"><label>Назва товару</label><input type="text" id="p-name" value="${p.name}"></div>
-    <div class="form-group"><label>Категорія</label><input type="text" id="p-cat" value="${p.cat}" list="cat-list"><datalist id="cat-list">${[...new Set(db.products.map(x=>x.cat))].map(c=>`<option value="${c}">`).join('')}</datalist></div>
+    <div class="form-group"><label>Постачальник</label>
+      <select id="p-supplier"><option value="">— Без постачальника —</option>${supOptions}</select>
+    </div>
     <div class="form-row">
       <div class="form-group"><label>Кількість</label><input type="number" id="p-qty" value="${p.qty}"></div>
       <div class="form-group"><label>Собівартість</label><input type="number" id="p-cost" value="${p.cost || 0}"></div>
@@ -738,13 +865,16 @@ function openStockModal(idx = -1) {
   `;
   openModal(idx > -1 ? 'Редагувати товар' : 'Додати товар', content, () => {
     const newP = {
+      code: document.getElementById('p-code').value || generateSKU(),
       name: document.getElementById('p-name').value.trim(),
       cat: document.getElementById('p-cat').value.trim(),
+      supplier: document.getElementById('p-supplier').value,
       qty: +document.getElementById('p-qty').value || 0,
       cost: +document.getElementById('p-cost').value || 0,
       price: +document.getElementById('p-price').value || 0
     };
-    if (!newP.name) return;
+    if (!newP.name) { showToast('Введіть назву товару!', 'error'); return false; }
+    
     if (idx > -1) {
       writeLog(`Оновлено товар: ${newP.name}`);
       db.products[idx] = newP;
@@ -754,10 +884,12 @@ function openStockModal(idx = -1) {
     }
     renderAll();
     doBackup(true);
+    return true; // Успішно
   });
 }
 
 function deleteProduct(idx) {
+  if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
   if (!confirm('Видалити цей товар?')) return;
   writeLog(`Видалено товар: ${db.products[idx].name}`);
   db.products.splice(idx, 1);
@@ -770,13 +902,18 @@ function renderOrders() {
   const tbody = document.getElementById('t-orders');
   const query = document.getElementById('order-search').value.toLowerCase();
   
-  const filtered = db.orders.filter(o => 
-    o.client.toLowerCase().includes(query) || 
-    o.product.toLowerCase().includes(query)
-  );
+  const filtered = db.orders.filter(o => {
+    const rId = o.id || String(db.orders.indexOf(o) + 1000).padStart(6, '0');
+    return o.client.toLowerCase().includes(query) || 
+           o.product.toLowerCase().includes(query) ||
+           rId.includes(query);
+  });
 
-  tbody.innerHTML = filtered.map((o, i) => `
+  tbody.innerHTML = filtered.map((o, i) => {
+    const rId = o.id || String(db.orders.indexOf(o) + 1000).padStart(6, '0');
+    return `
     <tr>
+      <td><span class="badge badge-gray">#${rId}</span></td>
       <td style="font-size:.75rem">${o.date}</td>
       <td style="font-weight:600">${o.client}</td>
       <td>${o.phone}</td>
@@ -785,9 +922,12 @@ function renderOrders() {
       <td style="font-weight:700">${(+o.total || 0).toLocaleString()} ₴</td>
       <td><span class="badge badge-purple">${o.manager}</span></td>
       <td><span class="badge badge-green">Завершено</span></td>
-      <td><button class="btn-icon" style="color:var(--red)" onclick="deleteOrder(${db.orders.indexOf(o)})">🗑️</button></td>
+      <td>
+        <button class="btn-icon" title="Друк чеку" onclick="openReceipt(${db.orders.indexOf(o)})">🧾</button>
+        ${currentUser.role === 'admin' ? `<button class="btn-icon" title="Видалити" style="color:var(--red)" onclick="deleteOrder(${db.orders.indexOf(o)})">🗑️</button>` : ''}
+      </td>
     </tr>
-  `).join('');
+  `}).join('');
   
   const totalSum = filtered.reduce((s, o) => s + (+o.total || 0), 0);
   document.getElementById('orders-footer').innerText = `Всього: ${totalSum.toLocaleString()} ₴ за ${filtered.length} замовлень.`;
@@ -795,11 +935,29 @@ function renderOrders() {
 
 function openOrderModal() {
   const content = `
-    <div class="form-group"><label>Клієнт</label><input type="text" id="o-client" placeholder="Ім'я клієнта"></div>
-    <div class="form-group"><label>Телефон</label><input type="text" id="o-phone" placeholder="0XXXXXXXXX"></div>
+    <div class="form-group">
+      <label>Клієнт</label>
+      <select id="o-client-select" onchange="toggleNewClientInputs()" style="width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; outline:none; font-family:'DM Sans',sans-serif;">
+        <option value="">-- Оберіть клієнта зі списку --</option>
+        ${db.clients.map(c => `<option value="${c.name}">${c.name} (${c.phone})</option>`).join('')}
+        <option value="NEW" style="font-weight:bold; color:var(--accent)">➕ Додати нового клієнта...</option>
+      </select>
+    </div>
+    
+    <div id="new-client-fields" style="display:none; padding:12px; background:var(--surface); border-radius:8px; margin-bottom:16px;">
+       <div class="form-row">
+         <div class="form-group" style="margin-bottom:8px"><label>Ім'я та Прізвище</label><input type="text" id="nc-name"></div>
+         <div class="form-group" style="margin-bottom:8px"><label>Телефон</label><input type="text" id="nc-phone"></div>
+       </div>
+       <div class="form-row">
+         <div class="form-group" style="margin-bottom:0"><label>Місто</label><input type="text" id="nc-city"></div>
+         <div class="form-group" style="margin-bottom:0"><label>Відділення НП / Адреса</label><input type="text" id="nc-address"></div>
+       </div>
+    </div>
+
     <div class="form-group">
       <label>Товар</label>
-      <select id="o-product" onchange="updateOrderPrice()">
+      <select id="o-product" onchange="updateOrderPrice()" style="width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; outline:none; font-family:'DM Sans',sans-serif;">
         <option value="">Оберіть товар...</option>
         ${db.products.map(p => `<option value="${p.name}" data-price="${p.price}" data-qty="${p.qty}">${p.name} (Залишок: ${p.qty})</option>`).join('')}
       </select>
@@ -809,27 +967,48 @@ function openOrderModal() {
       <div class="form-group"><label>До сплати</label><input type="number" id="o-total" value="0"></div>
     </div>
   `;
+
   openModal('Новий продаж', content, () => {
-    const cName = document.getElementById('o-client').value.trim();
+    let cName = "";
+    let cPhone = "";
+    const selVal = document.getElementById('o-client-select').value;
+    
+    if (!selVal) { showToast('Оберіть або додайте клієнта!', 'error'); return false; }
+
+    if (selVal === 'NEW') {
+      cName = document.getElementById('nc-name').value.trim();
+      cPhone = document.getElementById('nc-phone').value.trim();
+      const cCity = document.getElementById('nc-city').value.trim();
+      const cAddr = document.getElementById('nc-address').value.trim();
+      
+      if(!cName || !cPhone) { showToast('Заповніть ім\'я та телефон нового клієнта!', 'error'); return false; }
+      
+      db.clients.push({ name: cName, phone: cPhone, email: '', city: cCity, address: cAddr, orders: 0, sum: 0, last: '' });
+    } else {
+      cName = selVal;
+      const ex = db.clients.find(c => c.name === cName);
+      if (ex) cPhone = ex.phone;
+    }
+
     const pName = document.getElementById('o-product').value;
     const qty = +document.getElementById('o-qty').value || 0;
     const total = +document.getElementById('o-total').value || 0;
     
-    if (!cName || !pName || qty <= 0) return;
+    if (!pName) { showToast('Оберіть товар!', 'error'); return false; }
+    if (qty <= 0) { showToast('Кількість має бути більше 0!', 'error'); return false; }
     
     const prod = db.products.find(p => p.name === pName);
     if (prod) {
-      if (prod.qty < qty) {
-        showToast('Недостатньо товару на складі!', 'error');
-        return;
-      }
+      if (prod.qty < qty) { showToast(`Недостатньо товару на складі! В наявності: ${prod.qty}`, 'error'); return false; }
       prod.qty -= qty;
     }
 
+    const orderId = String(Date.now()).slice(-6);
     const order = {
-      date: new Date().toLocaleString('uk-UA'),
+      id: orderId,
+      date: getFmtDate(),
       client: cName,
-      phone: document.getElementById('o-phone').value.trim(),
+      phone: cPhone,
       product: pName,
       qty: qty,
       total: total,
@@ -837,27 +1016,33 @@ function openOrderModal() {
     };
 
     db.orders.unshift(order);
-    writeLog(`Продаж: ${pName} (${qty} шт) клієнту ${cName}`);
+    writeLog(`Продаж: ${pName} (${qty} шт) клієнту ${cName} (Чек #${orderId})`);
     
     let client = db.clients.find(c => c.name === cName);
-    if (!client) {
-      db.clients.push({ name: cName, phone: order.phone, email: '', orders: 1, sum: total, last: order.date });
-    } else {
-      client.orders++;
-      client.sum += total;
+    if (client) {
+      client.orders = (client.orders || 0) + 1;
+      client.sum = (client.sum || 0) + total;
       client.last = order.date;
     }
     
     if (document.getElementById('toggle-sale-notif')?.classList.contains('on')) {
       showToast(`Продаж успішний: ${total} ₴`, 'success');
     }
+    
     renderAll();
     doBackup(true);
+    return true; // Успішно! Вікно закриється
   });
+}
+
+function toggleNewClientInputs() {
+  const val = document.getElementById('o-client-select').value;
+  document.getElementById('new-client-fields').style.display = (val === 'NEW') ? 'block' : 'none';
 }
 
 function updateOrderPrice() {
   const sel = document.getElementById('o-product');
+  if (sel.selectedIndex < 0) return;
   const opt = sel.options[sel.selectedIndex];
   const qty = +document.getElementById('o-qty').value || 0;
   if (opt && opt.dataset.price) {
@@ -866,6 +1051,7 @@ function updateOrderPrice() {
 }
 
 function deleteOrder(idx) {
+  if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
   if (!confirm('Видалити це замовлення? Повернути товар на склад?')) return;
   const o = db.orders[idx];
   const p = db.products.find(x => x.name === o.product);
@@ -874,6 +1060,44 @@ function deleteOrder(idx) {
   db.orders.splice(idx, 1);
   renderAll();
   doBackup(true);
+}
+
+function openReceipt(idx) {
+  const o = db.orders[idx];
+  const c = db.clients.find(x => x.name === o.client) || {};
+  const city = c.city || '—';
+  const addr = c.address || '—';
+  const receiptNum = o.id || String(idx + 1000).padStart(6, '0');
+  
+  const content = `
+    <div class="receipt-wrapper">
+      <div class="receipt-paper" id="receipt-print-area">
+        <div class="r-center r-title">LaVok</div>
+        <div class="r-center r-sub">Магазин де здійснюються мрії<br>Івано-Франківськ</div>
+        <div class="r-line"></div>
+        <div class="r-row"><span>ЧЕК №:</span><span>${receiptNum}</span></div>
+        <div class="r-row"><span>ДАТА:</span><span>${o.date}</span></div>
+        <div class="r-row"><span>КАСИР:</span><span>${o.manager.toUpperCase()}</span></div>
+        <div class="r-line"></div>
+        <div class="r-row r-bold"><span>ОДЕРЖУВАЧ:</span><span>${o.client.toUpperCase()}</span></div>
+        <div class="r-row"><span>ТЕЛЕФОН:</span><span>${o.phone || c.phone || '—'}</span></div>
+        <div class="r-row"><span>МІСТО:</span><span style="text-align:right">${city.toUpperCase()}</span></div>
+        <div class="r-row"><span>АДРЕСА:</span><span style="text-align:right">${addr.toUpperCase()}</span></div>
+        <div class="r-line"></div>
+        <div class="r-row r-bold"><span style="flex:1">ТОВАР</span><span style="width:40px;text-align:center">КІЛ</span><span style="width:70px;text-align:right">СУМА</span></div>
+        <div class="r-row">
+          <span style="flex:1">${o.product}</span>
+          <span style="width:40px;text-align:center">x${o.qty}</span>
+          <span style="width:70px;text-align:right">${(+o.total).toLocaleString()} ₴</span>
+        </div>
+        <div class="r-line"></div>
+        <div class="r-row r-total"><span>ДО СПЛАТИ:</span><span>${(+o.total).toLocaleString()} ₴</span></div>
+        <div class="r-line"></div>
+        <div class="r-center r-sub" style="margin-top:12px; margin-bottom:0">Дякуємо за покупку!<br>Фіскальний чек згенеровано LaVok CRM</div>
+      </div>
+    </div>
+  `;
+  openModal('Фіскальний чек', content, () => { window.print(); }, '🖨️ Друкувати чек');
 }
 
 // ===================== CLIENTS =====================
@@ -885,33 +1109,43 @@ function renderClients() {
   tbody.innerHTML = filtered.map((c, i) => `
     <tr>
       <td><div class="client-row"><div class="client-avatar">${c.name.charAt(0)}</div><strong>${c.name}</strong></div></td>
-      <td>${c.phone}</td>
-      <td>${c.email || '—'}</td>
+      <td>${c.phone}<br><small style="color:var(--muted)">${c.email || ''}</small></td>
+      <td>${c.city || '—'}<br><small style="color:var(--muted)">${c.address || '—'}</small></td>
       <td>${c.orders}</td>
       <td style="font-weight:700">${(+c.sum || 0).toLocaleString()} ₴</td>
       <td style="font-size:.75rem">${c.last}</td>
       <td>
         <button class="btn-icon" onclick="openClientModal(${db.clients.indexOf(c)})">✏️</button>
+        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteClient(${db.clients.indexOf(c)})" title="Видалити">🗑️</button>` : ''}
       </td>
     </tr>
   `).join('');
 }
 
 function openClientModal(idx = -1) {
-  const c = idx > -1 ? db.clients[idx] : { name: '', phone: '', email: '' };
+  const c = idx > -1 ? db.clients[idx] : { name: '', phone: '', email: '', city: '', address: '' };
   const content = `
     <div class="form-group"><label>Ім'я клієнта</label><input type="text" id="c-name" value="${c.name}"></div>
-    <div class="form-group"><label>Телефон</label><input type="text" id="c-phone" value="${c.phone}"></div>
-    <div class="form-group"><label>Email</label><input type="text" id="c-email" value="${c.email}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Телефон</label><input type="text" id="c-phone" value="${c.phone}"></div>
+      <div class="form-group"><label>Email</label><input type="text" id="c-email" value="${c.email || ''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Місто</label><input type="text" id="c-city" placeholder="Напр. Київ" value="${c.city || ''}"></div>
+      <div class="form-group"><label>Відділення НП / Адреса</label><input type="text" id="c-address" placeholder="Напр. Відділення №1" value="${c.address || ''}"></div>
+    </div>
   `;
   openModal(idx > -1 ? 'Редагувати клієнта' : 'Новий клієнт', content, () => {
     const newC = {
       ...c,
       name: document.getElementById('c-name').value.trim(),
       phone: document.getElementById('c-phone').value.trim(),
-      email: document.getElementById('c-email').value.trim()
+      email: document.getElementById('c-email').value.trim(),
+      city: document.getElementById('c-city').value.trim(),
+      address: document.getElementById('c-address').value.trim()
     };
-    if (!newC.name) return;
+    if (!newC.name) { showToast('Введіть ім\'я клієнта!', 'error'); return false; }
+    
     if (idx > -1) db.clients[idx] = newC;
     else {
       newC.orders = 0; newC.sum = 0; newC.last = '—';
@@ -919,7 +1153,17 @@ function openClientModal(idx = -1) {
     }
     renderClients();
     doBackup(true);
+    return true;
   });
+}
+
+function deleteClient(idx) {
+  if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
+  if (!confirm('Видалити цього клієнта з бази?')) return;
+  writeLog(`Видалено клієнта: ${db.clients[idx].name}`);
+  db.clients.splice(idx, 1);
+  renderClients();
+  doBackup(true);
 }
 
 // ===================== TEAM =====================
@@ -928,16 +1172,19 @@ function renderUsers() {
   tbody.innerHTML = db.users.map((u, i) => {
     const uSales = db.orders.filter(o => o.manager === u.name);
     const sum = uSales.reduce((s, o) => s + (+o.total || 0), 0);
+    const roleBadge = u.role==='admin' ? 'badge-owner' : u.role==='administrator' ? 'badge-admin' : 'badge-blue';
+    const roleLabel = u.role==='admin' ? '👑 Власник' : u.role==='administrator' ? '🛡️ Адміністратор' : '💼 Менеджер';
+    
     return `
       <tr>
         <td><strong>${u.name}</strong></td>
         <td>${u.login}</td>
         <td>${currentUser.role === 'admin' ? u.pass : '***'}</td>
-        <td><span class="badge ${u.role === 'admin' ? 'badge-red' : 'badge-blue'}">${u.role}</span></td>
+        <td><span class="badge ${roleBadge}">${roleLabel}</span></td>
         <td>${uSales.length}</td>
         <td style="font-weight:700">${sum.toLocaleString()} ₴</td>
         <td>
-          ${u.login !== 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteUser(${i})">🗑️</button>` : '—'}
+          ${currentUser.role === 'admin' && u.login !== 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteUser(${i})" title="Видалити">🗑️</button>` : (u.login === 'admin' ? '—' : '')}
         </td>
       </tr>
     `;
@@ -946,28 +1193,245 @@ function renderUsers() {
 
 function openManagerModal() {
   const content = `
-    <div class="form-group"><label>Ім'я менеджера</label><input type="text" id="m-name"></div>
+    <div class="form-group"><label>Ім'я співробітника</label><input type="text" id="m-name"></div>
     <div class="form-group"><label>Логін</label><input type="text" id="m-login"></div>
     <div class="form-group"><label>Пароль</label><input type="text" id="m-pass"></div>
+    <div class="form-group"><label>Роль</label>
+      <select id="m-role">
+        <option value="manager">💼 Менеджер</option>
+        <option value="administrator">🛡️ Адміністратор</option>
+        <option value="admin">👑 Власник</option>
+      </select>
+    </div>
   `;
-  openModal('Додати менеджера', content, () => {
+  openModal('Додати в команду', content, () => {
     const n = document.getElementById('m-name').value.trim();
     const l = document.getElementById('m-login').value.trim();
     const p = document.getElementById('m-pass').value.trim();
-    if (!n || !l || !p) return;
-    db.users.push({ name: n, login: l, pass: p, role: 'manager' });
-    writeLog(`Додано менеджера: ${n}`);
+    const r = document.getElementById('m-role').value;
+    
+    if (!n || !l || !p) { showToast('Заповніть всі поля!', 'error'); return false; }
+    
+    db.users.push({ name: n, login: l, pass: p, role: r });
+    writeLog(`Додано нового співробітника: ${n}`);
     renderUsers();
     doBackup(true);
+    return true;
   });
 }
 
 function deleteUser(idx) {
+  if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
   if (!confirm('Видалити цього користувача?')) return;
   writeLog(`Видалено користувача: ${db.users[idx].name}`);
   db.users.splice(idx, 1);
   renderUsers();
   doBackup(true);
+}
+
+// ===================== SUPPLIERS (ПОСТАЧАЛЬНИКИ) =====================
+function renderSuppliers() {
+  const tbody = document.getElementById('t-suppliers');
+  const search = document.getElementById('supplier-search')?.value.toLowerCase() || '';
+  const filtered = (db.suppliers||[]).filter(s => !search || (s.name||'').toLowerCase().includes(search));
+  
+  tbody.innerHTML = filtered.map((s, i) => {
+    return `<tr>
+      <td style="font-weight:600">${s.name||''}</td>
+      <td>${s.contact||'—'}</td>
+      <td>${s.phone||'—'}</td>
+      <td style="font-size:.82rem">${s.email||'—'}</td>
+      <td style="font-size:.82rem;color:var(--muted)">${s.note||'—'}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn-icon" onclick="openSupplierModal(${db.suppliers.indexOf(s)})" title="Редагувати">✏️</button>
+        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteSupplier(${db.suppliers.indexOf(s)})" title="Видалити">🗑️</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Немає постачальників</td></tr>';
+}
+
+function openSupplierModal(idx = -1) {
+  const s = idx > -1 ? db.suppliers[idx] : {name:'',contact:'',phone:'',email:'',note:''};
+  const content = `
+    <div class="form-group"><label>Назва компанії/бренду *</label><input id="m-sup-name" value="${s.name||''}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Контактна особа</label><input id="m-sup-contact" value="${s.contact||''}"></div>
+      <div class="form-group"><label>Телефон</label><input id="m-sup-phone" value="${s.phone||''}"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input id="m-sup-email" value="${s.email||''}"></div>
+    <div class="form-group"><label>Нотатки</label><textarea id="m-sup-note">${s.note||''}</textarea></div>
+  `;
+  openModal(idx > -1 ? 'Редагувати постачальника' : '🏭 Новий постачальник', content, () => {
+    const name = document.getElementById('m-sup-name').value.trim();
+    if (!name) { showToast('Введіть назву постачальника', 'error'); return false; } // Якщо помилка, повертаємо false
+    
+    const item = {
+      id: (idx > -1 && s.id) ? s.id : 'SUP-' + Date.now(),
+      name,
+      contact: document.getElementById('m-sup-contact').value,
+      phone: document.getElementById('m-sup-phone').value,
+      email: document.getElementById('m-sup-email').value,
+      note: document.getElementById('m-sup-note').value
+    };
+    if (idx > -1) db.suppliers[idx] = item; else db.suppliers.push(item);
+    writeLog(`${idx > -1 ? 'Редагування' : 'Додавання'} постачальника: ${name}`);
+    renderAll();
+    doBackup(true);
+    showToast(`✅ Постачальник збережений`, 'success');
+    return true; // Успіх! Вікно закриється
+  });
+}
+
+function deleteSupplier(idx) {
+  if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
+  if (!confirm('Видалити цього постачальника?')) return;
+  writeLog(`Видалено постачальника: ${db.suppliers[idx].name}`);
+  db.suppliers.splice(idx, 1);
+  renderAll();
+  doBackup(true);
+}
+
+// ===================== XML IMPORT =====================
+function openXMLModal() {
+  const supOptions = (db.suppliers||[]).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const content = `
+    <div class="form-group"><label>Постачальник *</label>
+      <select id="m-xml-sup"><option value="">— Оберіть постачальника —</option>${supOptions}</select>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Спочатку додайте його у вкладці "Постачальники"</div>
+    </div>
+    <div class="form-group"><label>Спосіб завантаження</label>
+      <select id="m-xml-mode" onchange="toggleXMLMode()">
+        <option value="file">📁 Файл XML</option>
+        <option value="url">🔗 URL посилання</option>
+        <option value="paste">📋 Вставити XML текст</option>
+      </select>
+    </div>
+    <div id="xml-file-wrap" class="form-group">
+      <div class="xml-drop" id="xml-drop" onclick="document.getElementById('xml-file-input').click()" ondrop="handleXMLDrop(event)" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+        📂 Натисніть або перетягніть XML файл сюди
+      </div>
+      <input type="file" id="xml-file-input" accept=".xml,text/xml" style="display:none" onchange="readXMLFile(this)">
+    </div>
+    <div id="xml-url-wrap" class="form-group" style="display:none"><label>URL файлу XML</label><input id="m-xml-url" placeholder="https://..."></div>
+    <div id="xml-paste-wrap" class="form-group" style="display:none"><label>XML текст</label><textarea id="m-xml-text" style="min-height:120px;font-family:monospace;font-size:.78rem" placeholder="<?xml version=..."></textarea></div>
+    <div id="xml-preview" style="font-size:.82rem;color:var(--muted);margin-top:8px"></div>
+  `;
+  
+  openModal('📂 Імпорт XML каталогу', content, async () => {
+    const supId = document.getElementById('m-xml-sup').value;
+    if (!supId) { showToast('Оберіть постачальника', 'error'); return false; }
+    const mode = document.getElementById('m-xml-mode').value;
+    let xmlText = '';
+    
+    if (mode === 'file') {
+      xmlText = window._xmlContent || '';
+      if (!xmlText) { showToast('Завантажте XML файл', 'error'); return false; }
+    } else if (mode === 'url') {
+      const url = document.getElementById('m-xml-url').value.trim();
+      if (!url) { showToast('Введіть URL', 'error'); return false; }
+      try {
+        const r = await fetch(url);
+        xmlText = await r.text();
+      } catch(e) { showToast('Не вдалося завантажити XML за URL', 'error'); return false; }
+    } else {
+      xmlText = document.getElementById('m-xml-text').value.trim();
+      if (!xmlText) { showToast('Вставте XML текст', 'error'); return false; }
+    }
+    
+    const count = importXMLProducts(xmlText, supId);
+    if (count === 0) { showToast('Не знайдено товарів у XML. Перевірте формат.', 'error'); return false; }
+    
+    writeLog(`XML імпорт: ${count} товарів`);
+    window._xmlContent = null;
+    renderAll();
+    doBackup(true);
+    showToast(`✅ Імпортовано ${count} товарів з XML`, 'success');
+    return true;
+  });
+}
+
+function toggleXMLMode() {
+  const mode = document.getElementById('m-xml-mode').value;
+  document.getElementById('xml-file-wrap').style.display = mode==='file' ? 'block' : 'none';
+  document.getElementById('xml-url-wrap').style.display = mode==='url' ? 'block' : 'none';
+  document.getElementById('xml-paste-wrap').style.display = mode==='paste' ? 'block' : 'none';
+}
+
+function handleXMLDrop(e) {
+  e.preventDefault();
+  document.getElementById('xml-drop').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) readXMLFile({files:[file]});
+}
+
+function readXMLFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    window._xmlContent = e.target.result;
+    document.getElementById('xml-drop').innerHTML = `✅ Завантажено: ${file.name}`;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(window._xmlContent, 'text/xml');
+      const items = doc.querySelectorAll('item,product,offer,товар,product_item');
+      document.getElementById('xml-preview').innerText = `Знайдено приблизно ${items.length} товарів`;
+    } catch(e) {}
+  };
+  reader.readAsText(file);
+}
+
+function importXMLProducts(xmlText, supplierId) {
+  let count = 0;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'text/xml');
+    const tagNames = ['item','product','offer','Product','Item','Offer','товар','позиція'];
+    let items = [];
+    for (const tag of tagNames) {
+      const found = Array.from(doc.querySelectorAll(tag));
+      if (found.length > 0) { items = found; break; }
+    }
+    if (items.length === 0) {
+      const root = doc.documentElement;
+      if (root.children.length > 0) {
+        const firstTag = root.children[0].tagName;
+        items = Array.from(doc.querySelectorAll(firstTag));
+      }
+    }
+    const getVal = (el, ...names) => {
+      for (const n of names) {
+        const child = el.querySelector(n) || el.querySelector(n.toLowerCase());
+        if (child && child.textContent.trim()) return child.textContent.trim();
+        const attr = el.getAttribute(n) || el.getAttribute(n.toLowerCase());
+        if (attr) return attr;
+      }
+      return '';
+    };
+    const existing = new Set((db.products||[]).map(p=>p.name));
+    for (const item of items) {
+      const name = getVal(item,'name','назва','title','productName','product_name','model','description_short') || getVal(item,'наименование');
+      if (!name) continue;
+      const price = parseFloat(getVal(item,'price','ціна','цена','Price','sale_price','retail_price','price_retail').replace(/[^\d.]/g,''))||0;
+      const cost = parseFloat(getVal(item,'cost','cost_price','purchase_price','wholesale_price','price_wholesale','закупочная_цена').replace(/[^\d.]/g,''))||0;
+      const qty = parseInt(getVal(item,'qty','quantity','stock','count','кількість','количество','in_stock','available').replace(/[^\d]/g,''))||0;
+      const cat = getVal(item,'category','cat','categoryName','категорія','категория','type');
+      const code = getVal(item,'id','code','sku','article','articul','productId','product_id') || generateSKU();
+      
+      if (existing.has(name)) {
+        const idx = db.products.findIndex(p=>p.name===name);
+        if (idx>=0) {
+          db.products[idx] = {...db.products[idx], price: price||db.products[idx].price, qty, cost: cost||db.products[idx].cost, supplier: supplierId};
+        }
+      } else {
+        const skuCode = (db.products||[]).find(p=>p.code===code) ? generateSKU() : code;
+        db.products.push({code: skuCode, name, cat, qty, price, cost, supplier: supplierId});
+        existing.add(name);
+      }
+      count++;
+    }
+  } catch(e) { console.error('XML parse error:', e); }
+  return count;
 }
 
 // ===================== ANALYTICS =====================
@@ -977,8 +1441,9 @@ function renderAnalytics() {
   const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
   
   const filtered = db.orders.filter(o => {
-    const [d, t] = o.date.split(', ');
-    const [dd, mm, yyyy] = d.split('.');
+    const parts = o.date.split(', ');
+    const dStr = parts[0]; 
+    const [dd, mm, yyyy] = dStr.split('.');
     return new Date(yyyy, mm-1, dd) >= cutoff;
   });
 
@@ -1055,33 +1520,35 @@ function changeOwnerPass() {
   doBackup(true);
 }
 
-// ===================== NAV =====================
+// ===================== NAVIGATION & UI =====================
 function sv(id, el) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const view = document.getElementById('v-' + id);
   if (view) view.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
+  
+  // Закриття бокового меню на мобільних телефонах
+  if (window.innerWidth <= 900) {
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('show');
+  }
 }
 
-// ===================== TOAST =====================
-function showToast(msg, type = 'info') {
-  const c = document.getElementById('toast-container');
-  const t = document.createElement('div');
-  t.className = 'toast ' + (type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : '');
-  t.innerText = msg;
-  c.appendChild(t);
-  setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateY(8px)';
-    t.style.transition = 'all .3s';
-    setTimeout(() => t.remove(), 300);
-  }, 3500);
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('open');
+  if (sidebar.classList.contains('open')) {
+    overlay.classList.add('show');
+  } else {
+    overlay.classList.remove('show');
+  }
 }
 
 // ===================== NOTIFICATIONS =====================
 function addNotification(title, sub) {
-  notifications.unshift({ title, sub, time: new Date().toLocaleTimeString(), read: false });
+  notifications.unshift({ title, sub, time: new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit'}), read: false });
   updateNotifCount();
 }
 function updateNotifCount() {
@@ -1109,14 +1576,12 @@ function markAllRead() {
   updateNotifCount();
   renderNotifications();
 }
-
 function checkLowStock() {
   const threshold = +document.getElementById('low-stock-threshold').value || 5;
   db.products.forEach(p => {
     if (p.qty <= threshold) addNotification('⚠️ Мало товару', `${p.name}: залишилось ${p.qty} шт.`);
   });
 }
-
 function refreshData() {
   window.location.reload();
 }
