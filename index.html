@@ -55,6 +55,9 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;line-height:1.2}
 .btn-login:hover{background:var(--accent2)}
 .btn-login:active{transform:scale(.99)}
 .login-error{color:#ff6b6b;font-size:.82rem;margin-top:10px;text-align:center;min-height:18px}
+.login-shop-link{text-align:center;margin-top:20px}
+.login-shop-link a{color:rgba(255,255,255,.4);font-size:.82rem;text-decoration:none;transition:color .2s}
+.login-shop-link a:hover{color:var(--accent2)}
 
 /* LAYOUT */
 .layout{display:flex;min-height:100vh}
@@ -76,7 +79,6 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;line-height:1.2}
 .user-role{font-size:.7rem;color:rgba(255,255,255,.4)}
 .logout-btn{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:1rem;padding:4px;transition:color .2s}
 .logout-btn:hover{color:var(--red)}
-
 .sidebar-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; display:none; opacity:0; transition:opacity 0.3s; backdrop-filter:blur(2px); }
 .sidebar-overlay.show { display:block; opacity:1; }
 
@@ -125,7 +127,7 @@ tbody tr:last-child td{border-bottom:none}
 .btn-icon{padding:6px;background:none;border:none;cursor:pointer;border-radius:6px;color:var(--muted);transition:all .15s; display:inline-flex; align-items:center;}
 .btn-icon:hover{background:var(--surface);color:var(--ink)}
 
-/* BADGES & NEW CLASSES */
+/* BADGES */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em; white-space:nowrap;}
 .badge-green{background:var(--green-light);color:#15803d}
 .badge-red{background:var(--red-light);color:#b91c1c}
@@ -178,6 +180,10 @@ tbody tr:last-child td{border-bottom:none}
 .chart-bar:hover{background:var(--accent2)}
 .chart-bar-label{font-size:.62rem;color:var(--muted);white-space:nowrap}
 
+/* PROGRESS BAR */
+.progress-bar{height:6px;background:var(--surface);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease}
+
 /* CLIENTS */
 .client-row{display:flex;align-items:center;gap:10px}
 .client-avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-light);color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -215,6 +221,129 @@ tbody tr:last-child td{border-bottom:none}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 
+/* RECEIPT / ЧЕК */
+.receipt-wrapper { background: #e5e7eb; padding: 20px; display: flex; justify-content: center; border-radius: 8px; margin-bottom: 10px; overflow-x:auto;}
+.receipt-paper { background: #fff; width: 320px; min-width: 300px; padding: 24px; font-family: 'Courier New', Courier, monospace; color: #000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.r-center { text-align: center; }
+.r-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 4px; }
+.r-sub { font-size: .8rem; margin-bottom: 12px; }
+.r-line { border-top: 1px dashed #000; margin: 12px 0; }
+.r-row { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 4px; }
+.r-bold { font-weight: bold; }
+.r-total { font-size: 1.1rem; font-weight: bold; margin-top: 8px; }
+
+/* ===== CHAT STYLES ===== */
+.chat-layout{display:flex;height:calc(100vh - 200px);min-height:400px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card)}
+.chat-sidebar{width:280px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--card);flex-shrink:0}
+.chat-sidebar-header{padding:16px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem}
+.chat-list{flex:1;overflow-y:auto}
+.chat-item{padding:12px 16px;border-bottom:1px solid var(--surface);cursor:pointer;transition:background .15s}
+.chat-item:hover{background:var(--surface)}
+.chat-item.active{background:var(--accent-light);border-left:3px solid var(--accent)}
+.chat-item-name{font-weight:600;font-size:.85rem;margin-bottom:2px}
+.chat-item-last{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item-meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chat-item-time{font-size:.68rem;color:var(--muted2)}
+.chat-unread{background:var(--accent);color:#fff;border-radius:99px;font-size:.65rem;font-weight:700;padding:1px 6px;flex-shrink:0}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-header{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.chat-header-name{font-weight:700;font-size:.95rem}
+.chat-header-sub{font-size:.75rem;color:var(--muted)}
+.chat-source-badge{padding:2px 10px;border-radius:99px;font-size:.68rem;font-weight:700}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.msg{max-width:75%;padding:10px 14px;border-radius:12px;font-size:.875rem;line-height:1.4;word-break:break-word}
+.msg.incoming{background:var(--card);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.outgoing{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg-time{font-size:.65rem;opacity:.6;margin-top:4px}
+.msg-sender{font-size:.68rem;font-weight:700;color:var(--muted);margin-bottom:4px}
+.chat-input-area{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;background:var(--card)}
+.chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;resize:none;max-height:100px;min-height:42px;transition:border-color .15s}
+.chat-input:focus{border-color:var(--accent)}
+.chat-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:.9rem;flex-direction:column;gap:12px}
+.chat-new-btn{padding:8px 16px;background:none;border:1.5px dashed var(--border);color:var(--muted);border-radius:8px;cursor:pointer;font-size:.8rem;font-family:'DM Sans',sans-serif;width:100%;text-align:center;transition:all .15s;margin:8px}
+.chat-new-btn:hover{border-color:var(--accent);color:var(--accent)}
+.chat-ig-badge{background:#e1306c;color:#fff}
+.chat-crm-badge{background:var(--accent-light);color:var(--accent)}
+.chat-no-sel{display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:10px;color:var(--muted)}
+
+/* ===== SHOP STYLES ===== */
+#shop-screen{position:fixed;inset:0;background:#fff;z-index:9998;display:none;flex-direction:column;overflow:hidden}
+#shop-screen.active{display:flex}
+.shop-nav{background:var(--ink);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.shop-nav-logo{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#fff}
+.shop-nav-right{display:flex;align-items:center;gap:12px}
+.shop-search{padding:8px 16px;border:none;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;width:240px}
+.shop-search::placeholder{color:rgba(255,255,255,.4)}
+.shop-cart-btn{background:var(--accent);border:none;color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:.875rem;display:flex;align-items:center;gap:6px;position:relative}
+.shop-cart-count{background:#fff;color:var(--accent);border-radius:99px;font-size:.65rem;font-weight:800;padding:1px 6px;margin-left:4px}
+.shop-body{flex:1;overflow-y:auto;padding:24px}
+.shop-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.shop-cat-btn{padding:7px 16px;border-radius:99px;border:2px solid var(--border);background:var(--card);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;color:var(--ink)}
+.shop-cat-btn.active,.shop-cat-btn:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+.shop-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
+.shop-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--accent)}
+.shop-card-img{width:100%;aspect-ratio:1;background:var(--surface);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:12px}
+.shop-card-cat{font-size:.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.shop-card-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:6px;line-height:1.3}
+.shop-card-stock{font-size:.75rem;color:var(--muted);margin-bottom:10px}
+.shop-card-price{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--ink);margin-bottom:12px}
+.shop-card-btn{width:100%;padding:10px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .15s}
+.shop-card-btn:hover{background:var(--accent2)}
+.shop-card-btn.added{background:var(--green)}
+/* CART PANEL */
+.shop-cart-panel{position:fixed;top:0;right:-100%;width:100%;max-width:400px;height:100vh;background:var(--card);border-left:1px solid var(--border);z-index:10002;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.1);transition:right .25s}
+.shop-cart-panel.open{right:0}
+.shop-cart-header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.shop-cart-list{flex:1;overflow-y:auto;padding:16px}
+.cart-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.cart-item-info{flex:1;min-width:0}
+.cart-item-name{font-weight:600;font-size:.85rem;margin-bottom:2px}
+.cart-item-price{font-size:.8rem;color:var(--muted)}
+.cart-item-qty{display:flex;align-items:center;gap:6px}
+.qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;font-weight:700;transition:all .15s}
+.qty-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cart-qty-val{font-weight:700;min-width:20px;text-align:center;font-size:.9rem}
+.shop-cart-footer{padding:16px;border-top:1px solid var(--border)}
+.cart-total-row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.9rem}
+.cart-total-row.big{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--ink)}
+.cart-checkout-btn{width:100%;padding:14px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:background .15s}
+.cart-checkout-btn:hover{background:var(--accent2)}
+/* CHECKOUT FORM */
+.checkout-form{padding:20px}
+
+/* ===== EXPENSES ===== */
+.exp-cat-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:.72rem;font-weight:700;background:var(--orange-light);color:#b45309}
+
+/* ===== PRODUCT PHOTO ===== */
+.prod-photo-wrap{width:80px;height:80px;border-radius:8px;background:var(--surface);border:1.5px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;flex-shrink:0}
+.prod-photo-wrap img{width:100%;height:100%;object-fit:cover}
+.prod-photo-wrap .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700}
+.prod-photo-wrap:hover .photo-overlay{display:flex}
+.photo-upload-label{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;cursor:pointer;font-size:1.6rem;color:var(--muted2)}
+
+/* ===== SITE CHAT WIDGET ===== */
+/* used by shop.html but referenced from CRM */
+.chat-widget-fab{position:fixed;bottom:28px;right:28px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;font-size:1.5rem;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(91,76,245,.4);z-index:998;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}
+.chat-widget-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(91,76,245,.55)}
+.chat-widget-badge{position:absolute;top:-2px;right:-2px;width:18px;height:18px;background:var(--red);border-radius:50%;font-size:.62rem;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.chat-widget-panel{position:fixed;bottom:96px;right:28px;width:340px;background:var(--card);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.16);z-index:998;display:none;flex-direction:column;overflow:hidden;border:1px solid var(--border);animation:modalIn .2s ease}
+.chat-widget-panel.open{display:flex}
+.chat-widget-head{background:var(--accent);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.chat-widget-head h4{font-family:'Syne',sans-serif;font-size:.95rem}
+.chat-widget-msgs{height:240px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.chat-widget-inp{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--card)}
+.chat-widget-inp input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;outline:none;font-family:'DM Sans',sans-serif}
+.chat-widget-inp input:focus{border-color:var(--accent)}
+.chat-widget-inp button{padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:.82rem;white-space:nowrap}
+.cwmsg{max-width:80%;padding:8px 12px;border-radius:10px;font-size:.82rem;line-height:1.4}
+.cwmsg.in{background:var(--card);border:1px solid var(--border);align-self:flex-start}
+.cwmsg.out{background:var(--accent);color:#fff;align-self:flex-end}
+
+/* ===== SHOP SETTINGS IN CRM ===== */
+.color-swatch{width:32px;height:32px;border-radius:6px;border:2px solid transparent;cursor:pointer;transition:border-color .15s}
+.color-swatch.active,.color-swatch:hover{border-color:var(--ink)}
+
 /* === MOBILE ADAPTATIONS === */
 @media(max-width:900px){
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
@@ -227,6 +356,14 @@ tbody tr:last-child td{border-bottom:none}
   .form-row { grid-template-columns: 1fr; }
   .card { padding: 16px; }
   .search-input { min-width: 100%; }
+  .chat-sidebar { width: 220px; }
+  .chat-layout { height: calc(100vh - 240px); }
+}
+@media(max-width:600px){
+  .chat-sidebar { display: none; }
+  .chat-layout { height: calc(100vh - 200px); }
+  .shop-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .shop-search { width: 140px; }
 }
 @media(max-width:480px){
   .stats-grid { grid-template-columns: 1fr; }
@@ -236,17 +373,6 @@ tbody tr:last-child td{border-bottom:none}
   .btn { width: 100%; justify-content: center; }
   .page-header { flex-direction: column; gap: 12px; align-items: stretch; }
 }
-
-/* RECEIPT / ЧЕК */
-.receipt-wrapper { background: #e5e7eb; padding: 20px; display: flex; justify-content: center; border-radius: 8px; margin-bottom: 10px; overflow-x:auto;}
-.receipt-paper { background: #fff; width: 320px; min-width: 300px; padding: 24px; font-family: 'Courier New', Courier, monospace; color: #000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-.r-center { text-align: center; }
-.r-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 4px; }
-.r-sub { font-size: .8rem; margin-bottom: 12px; }
-.r-line { border-top: 1px dashed #000; margin: 12px 0; }
-.r-row { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 4px; }
-.r-bold { font-weight: bold; }
-.r-total { font-size: 1.1rem; font-weight: bold; margin-top: 8px; }
 
 @media print {
   body * { visibility: hidden !important; }
@@ -275,6 +401,36 @@ tbody tr:last-child td{border-bottom:none}
       <button class="btn-login" onclick="login()">Увійти у систему →</button>
       <div class="login-error" id="login-err"></div>
     </div>
+    <div class="login-shop-link">
+      <a href="#" onclick="openShop();return false;">🛍️ Відкрити магазин</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SHOP SCREEN ===== -->
+<div id="shop-screen">
+  <nav class="shop-nav">
+    <div class="shop-nav-logo">🛍️ LaVok Shop</div>
+    <div class="shop-nav-right">
+      <input type="text" class="shop-search" id="shop-search" placeholder="🔍 Пошук товарів..." oninput="renderShop()">
+      <button class="shop-cart-btn" onclick="toggleShopCart()">
+        🛒 Кошик <span class="shop-cart-count" id="shop-cart-count">0</span>
+      </button>
+      <button class="btn btn-secondary" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)" onclick="closeShop()">✕ Закрити</button>
+    </div>
+  </nav>
+  <div class="shop-body">
+    <div class="shop-cats" id="shop-cats"></div>
+    <div class="shop-grid" id="shop-grid"></div>
+  </div>
+  <!-- Cart panel -->
+  <div class="shop-cart-panel" id="shop-cart-panel">
+    <div class="shop-cart-header">
+      <h3 style="font-family:'Syne',sans-serif">🛒 Кошик</h3>
+      <button class="btn-icon" onclick="toggleShopCart()">✕</button>
+    </div>
+    <div class="shop-cart-list" id="shop-cart-list"></div>
+    <div class="shop-cart-footer" id="shop-cart-footer"></div>
   </div>
 </div>
 
@@ -304,7 +460,6 @@ tbody tr:last-child td{border-bottom:none}
 </div>
 
 <div id="toast-container"></div>
-
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <div id="app" class="layout" style="display:none">
@@ -321,6 +476,11 @@ tbody tr:last-child td{border-bottom:none}
     <div class="nav-item" onclick="sv('orders',this)"><span class="ico">💳</span> Продажі</div>
     <div class="nav-item" onclick="sv('clients',this)"><span class="ico">👤</span> Клієнти</div>
 
+    <!-- Чат доступний для всіх ролей -->
+    <div class="nav-section">Комунікація</div>
+    <div class="nav-item" onclick="sv('chat',this)"><span class="ico">💬</span> Чат <span id="chat-nav-badge" style="display:none;background:var(--red);color:#fff;border-radius:99px;font-size:.6rem;padding:1px 6px;font-weight:700;margin-left:auto">0</span></div>
+    <div class="nav-item" onclick="openShop()"><span class="ico">🛍️</span> Магазин</div>
+
     <div id="suppliers-nav" style="display:none">
       <div class="nav-section">Каталог</div>
       <div class="nav-item" onclick="sv('suppliers',this)"><span class="ico">🏭</span> Постачальники</div>
@@ -330,6 +490,7 @@ tbody tr:last-child td{border-bottom:none}
       <div class="nav-section">Управління</div>
       <div class="nav-item" onclick="sv('team',this)"><span class="ico">👥</span> Команда</div>
       <div class="nav-item" onclick="sv('analytics',this)"><span class="ico">📈</span> Аналітика</div>
+      <div class="nav-item" onclick="sv('expenses',this)"><span class="ico">💸</span> Витрати</div>
       <div class="nav-item" onclick="sv('logs',this)"><span class="ico">📋</span> Журнал дій</div>
       <div class="nav-item" onclick="sv('settings',this)"><span class="ico">⚙️</span> Налаштування</div>
     </div>
@@ -350,7 +511,6 @@ tbody tr:last-child td{border-bottom:none}
 
     <div class="topbar">
       <button class="hamburger" id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-      
       <button class="topbar-btn" onclick="doBackup()" id="backup-btn" title="Зберегти дані в таблицю">💾 <span class="hide-text-mobile">Зберегти</span></button>
       <button class="topbar-btn" onclick="toggleNotif()">
         🔔 <span class="hide-text-mobile">Сповіщення</span>
@@ -358,6 +518,7 @@ tbody tr:last-child td{border-bottom:none}
       </button>
     </div>
 
+    <!-- DASHBOARD -->
     <div id="v-dashboard" class="view active">
       <div class="page-header">
         <div><h2>Дашборд</h2><p id="dash-date"></p></div>
@@ -387,6 +548,7 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- STOCK -->
     <div id="v-stock" class="view">
       <div class="page-header">
         <div><h2>Склад</h2><p>Управління товарами та залишками</p></div>
@@ -404,7 +566,7 @@ tbody tr:last-child td{border-bottom:none}
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>#</th><th>Код (SKU)</th><th>Назва</th><th>Категорія</th><th>Постачальник</th><th>К-сть</th><th>Собівартість</th><th>Ціна</th><th>Дії</th></tr></thead>
+            <thead><tr><th>#</th><th>Фото</th><th>Код (SKU)</th><th>Назва</th><th>Категорія</th><th>Тип / Варіанти</th><th>Постачальник</th><th>К-сть</th><th>Собівартість</th><th>Ціна</th><th>Дії</th></tr></thead>
             <tbody id="t-stock"></tbody>
           </table>
         </div>
@@ -412,6 +574,7 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- ORDERS -->
     <div id="v-orders" class="view">
       <div class="page-header">
         <div><h2>Продажі</h2><p>Всі транзакції та замовлення</p></div>
@@ -434,6 +597,7 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- CLIENTS -->
     <div id="v-clients" class="view">
       <div class="page-header">
         <div><h2>Клієнти</h2><p>База клієнтів та контактів (Дропшипінг)</p></div>
@@ -452,6 +616,31 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- CHAT -->
+    <div id="v-chat" class="view">
+      <div class="page-header">
+        <div><h2>💬 Чат</h2><p>Переписка з клієнтами (CRM + Instagram)</p></div>
+        <button class="btn btn-primary" onclick="openNewChatModal()">+ Новий чат</button>
+      </div>
+      <div class="chat-layout">
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-header">
+            Розмови
+            <span id="chat-total-badge" style="font-size:.72rem;color:var(--muted);font-weight:400"></span>
+          </div>
+          <div class="chat-list" id="chat-list"></div>
+          <button class="chat-new-btn" onclick="openNewChatModal()">+ Нова розмова</button>
+        </div>
+        <div class="chat-main" id="chat-main">
+          <div class="chat-no-sel">
+            <div style="font-size:2rem">💬</div>
+            <div>Оберіть розмову зліва</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEAM -->
     <div id="v-team" class="view">
       <div class="page-header">
         <div><h2>Команда</h2><p>Управління менеджерами та доступами</p></div>
@@ -467,16 +656,19 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- ANALYTICS -->
     <div id="v-analytics" class="view">
       <div class="page-header">
         <div><h2>Аналітика</h2><p>Детальна статистика та звіти</p></div>
         <select id="analytics-period" class="btn btn-secondary" onchange="renderAnalytics()" style="cursor:pointer; width:100%; max-width:200px;">
+          <option value="0">Сьогодні</option>
           <option value="7">Останні 7 днів</option>
           <option value="30" selected>Останні 30 днів</option>
           <option value="90">Останні 90 днів</option>
           <option value="365">Рік</option>
+          <option value="all">Весь час</option>
         </select>
-      </div>
+      </div><!-- /page-header -->
       <div class="stats-grid" id="analytics-stats"></div>
       <div class="grid-2" style="margin-top:16px">
         <div class="card">
@@ -488,8 +680,55 @@ tbody tr:last-child td{border-bottom:none}
           <div id="cat-stats"></div>
         </div>
       </div>
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">📅 Продажі по днях (графік)</div>
+          <div class="chart-bar-wrap" id="analytics-chart" style="height:140px"></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">💸 Прибуток (дохід - собівартість)</div>
+          <div id="profit-stats"></div>
+        </div>
+      </div>
     </div>
 
+    <!-- EXPENSES -->
+    <div id="v-expenses" class="view">
+      <div class="page-header">
+        <div><h2>💸 Витрати</h2><p>Облік витрат бізнесу</p></div>
+        <button class="btn btn-primary" onclick="openExpenseModal()">+ Додати витрату</button>
+      </div>
+      <div class="stats-grid" id="exp-stats"></div>
+      <div class="card">
+        <div class="search-bar">
+          <input class="search-input" placeholder="🔍 Пошук по витратах..." id="exp-search" oninput="renderExpenses()">
+          <select class="search-input" style="max-width:200px" id="exp-cat-filter" onchange="renderExpenses()">
+            <option value="">Всі категорії</option>
+            <option value="Оренда">Оренда</option>
+            <option value="Зарплата">Зарплата</option>
+            <option value="Реклама">Реклама</option>
+            <option value="Закупівля">Закупівля</option>
+            <option value="Доставка">Доставка</option>
+            <option value="Інше">Інше</option>
+          </select>
+          <select class="search-input" style="max-width:160px" id="exp-period-filter" onchange="renderExpenses()">
+            <option value="30">Останні 30 днів</option>
+            <option value="90">Останні 90 днів</option>
+            <option value="365">Рік</option>
+            <option value="all">Весь час</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Дата</th><th>Категорія</th><th>Опис</th><th>Сума</th><th>Хто додав</th><th>Дії</th></tr></thead>
+            <tbody id="t-expenses"></tbody>
+          </table>
+        </div>
+        <div id="exp-footer" style="padding-top:12px;font-size:.8rem;color:var(--muted)"></div>
+      </div>
+    </div>
+
+    <!-- LOGS -->
     <div id="v-logs" class="view">
       <div class="page-header">
         <div><h2>Журнал дій</h2><p>Всі дії в системі з часом та автором</p></div>
@@ -511,6 +750,7 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- SETTINGS -->
     <div id="v-settings" class="view">
       <div class="page-header">
         <div><h2>Налаштування</h2><p>Конфігурація системи</p></div>
@@ -541,6 +781,36 @@ tbody tr:last-child td{border-bottom:none}
               <div class="toggle on" id="toggle-sale-notif" onclick="this.classList.toggle('on')"></div>
             </div>
           </div>
+          <div class="settings-section">
+            <h4>🛍️ Магазин</h4>
+            <div class="settings-row">
+              <div><div style="font-weight:600;font-size:.85rem">Назва магазину</div></div>
+              <input type="text" id="shop-name-setting" value="LaVok Shop" style="width:160px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:.85rem">
+            </div>
+            <div class="settings-row">
+              <div><div style="font-weight:600;font-size:.85rem">Слоган / опис</div></div>
+              <input type="text" id="shop-slogan-setting" value="Якісні товари з доставкою по Україні" style="width:220px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem">
+            </div>
+            <div class="settings-row">
+              <div><div style="font-weight:600;font-size:.85rem">Колір теми</div></div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div class="color-swatch active" style="background:#5b4cf5" onclick="setShopColor('#5b4cf5',this)" title="Фіолетовий"></div>
+                <div class="color-swatch" style="background:#e1306c" onclick="setShopColor('#e1306c',this)" title="Рожевий"></div>
+                <div class="color-swatch" style="background:#22c55e" onclick="setShopColor('#22c55e',this)" title="Зелений"></div>
+                <div class="color-swatch" style="background:#f59e0b" onclick="setShopColor('#f59e0b',this)" title="Помаранчевий"></div>
+                <div class="color-swatch" style="background:#3b82f6" onclick="setShopColor('#3b82f6',this)" title="Синій"></div>
+                <div class="color-swatch" style="background:#0d0f14" onclick="setShopColor('#0d0f14',this)" title="Темний"></div>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div><div style="font-weight:600;font-size:.85rem">Gmail для сповіщень</div><div style="font-size:.75rem;color:var(--muted)">Надсилати чек на цей email після замовлення</div></div>
+              <input type="email" id="shop-notify-email" placeholder="your@gmail.com" style="width:200px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:.85rem">
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="saveShopSettings()">💾 Зберегти налаштування сайту</button>
+              <button class="btn btn-secondary btn-sm" onclick="window.open('shop.html','_blank')">🛍️ Відкрити магазин</button>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="settings-section">
@@ -563,10 +833,27 @@ tbody tr:last-child td{border-bottom:none}
               <div id="backup-status" style="font-size:.78rem;color:var(--muted);margin-top:4px"></div>
             </div>
           </div>
+          <div class="settings-section" style="margin-top:20px">
+            <h4>📷 Instagram & Чат з сайту</h4>
+            <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px">Повідомлення з чату на сайті (shop.html) надходять сюди автоматично через Google Sheets. Instagram Direct потребує Meta Business API.</div>
+            <div class="form-group">
+              <label>Instagram username</label>
+              <input type="text" id="ig-username" placeholder="@your_account">
+            </div>
+            <div class="form-group">
+              <label>Webhook секрет (для Meta API)</label>
+              <input type="text" id="ig-webhook-secret" placeholder="Необов'язково">
+            </div>
+            <div style="font-size:.75rem;padding:10px;background:var(--accent-light);border-radius:8px;color:var(--accent);font-weight:600">
+              ✅ Чат з сайту → CRM: працює через Google Sheets (polling кожні 30 сек)<br>
+              ⚠️ Instagram Direct: потребує Meta Business API (налаштовується окремо)
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- SUPPLIERS -->
     <div id="v-suppliers" class="view">
       <div class="page-header">
         <div><h2>Постачальники</h2><p>Управління постачальниками</p></div>
@@ -590,13 +877,15 @@ tbody tr:last-child td{border-bottom:none}
 
 <script>
 // ===================== CONFIG =====================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxOpd1TVewKpOpppECdbvTmQMePXMu0lM73q3CkGFD4UCzWh1zv9fXU8B1aXlMrK0-PTw/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwUHvWoR08kQ6-o1Bbn9UWNhpKXvEF5ehhwNJJiYi0LxgsUICu6gQ85wERRC-l8cHYeYA/exec";
 
 // ===================== STATE =====================
-let db = { users: [], orders: [], products: [], clients: [], logs: [], suppliers: [] };
+let db = { users: [], orders: [], products: [], clients: [], logs: [], suppliers: [], expenses: [], chats: [] };
 let currentUser = null;
 let notifications = [];
 let backupInterval = null;
+let shopCart = [];
+let activeChatId = null;
 
 // ===================== INIT =====================
 window.onload = async () => {
@@ -604,14 +893,17 @@ window.onload = async () => {
   try {
     const res = await fetch(GAS_URL + "?action=readAll");
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    db = await res.json();
-    ['users','orders','products','clients','logs','suppliers'].forEach(k => { if(!db[k]) db[k] = []; });
+    const raw = await res.json();
+    db = raw;
+    ['users','orders','products','clients','logs','suppliers','expenses','chats'].forEach(k => { if(!db[k]) db[k] = []; });
     if (!db.users.find(u => u.role === 'admin')) {
       db.users.unshift({name:'Власник',login:'admin',pass:'admin',role:'admin'});
     }
   } catch(e) {
     showToast('Не вдалось підключитись до Google Sheets. Перевірте GAS_URL.', 'error');
     db.users = [{name:'Власник',login:'admin',pass:'admin',role:'admin'}];
+    db.expenses = [];
+    db.chats = [];
   }
   document.getElementById('loader').style.opacity = '0';
   setTimeout(() => {
@@ -641,9 +933,11 @@ function login() {
   document.getElementById('u-role').innerText = roleLabel;
   
   if (user.role === 'admin' || user.role === 'administrator') {
-    document.getElementById('owner-nav').style.display = 'block';
     document.getElementById('suppliers-nav').style.display = 'block';
     document.getElementById('xml-import-btn').style.display = 'inline-flex';
+  }
+  if (user.role === 'admin') {
+    document.getElementById('owner-nav').style.display = 'block';
   }
   
   writeLog(`Вхід у систему`);
@@ -690,7 +984,10 @@ async function doBackup(silent = false) {
 }
 
 function getFmtDate() {
-  return new Date().toLocaleString('uk-UA', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  // Ручне форматування — гарантує правильний локальний час без зсуву часового поясу
+  return `${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 
 function writeLog(action) {
@@ -713,7 +1010,6 @@ function showToast(text, type = 'info') {
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// ОНОВЛЕНА, БЕЗПЕЧНА ФУНКЦІЯ ВИКЛИКУ МОДАЛОК
 function openModal(title, content, saveFn, saveBtnText = 'Зберегти') {
   document.getElementById('modal-title').innerText = title;
   document.getElementById('modal-content').innerHTML = content;
@@ -728,7 +1024,6 @@ function openModal(title, content, saveFn, saveBtnText = 'Зберегти') {
     if (saveFn) {
       try {
         const result = await saveFn();
-        // Якщо функція зберігання повертає явно false (наприклад помилка валідації) - зупиняємось і не закриваємо вікно
         if (result === false) return; 
       } catch (err) {
         console.error(err);
@@ -736,7 +1031,6 @@ function openModal(title, content, saveFn, saveBtnText = 'Зберегти') {
         return;
       }
     } 
-    // Якщо все окей і це не друк чеку, то закриваємо
     if (saveBtnText !== '🖨️ Друкувати чек') {
       closeModal(); 
     }
@@ -760,16 +1054,38 @@ function renderAll() {
   renderAnalytics();
   renderLogs();
   renderSuppliers();
+  renderExpenses();
+  renderChatList();
+  updateChatNavBadge();
 }
 
+// ===================== DASHBOARD =====================
 function renderDashboard() {
   const stats = document.getElementById('dash-stats');
-  const today = new Date().toLocaleDateString('uk-UA', {day:'2-digit', month:'2-digit', year:'numeric'});
-  const tSales = db.orders.filter(o => o.date.includes(today)).reduce((s, o) => s + (+o.total || 0), 0);
-  const tOrders = db.orders.filter(o => o.date.includes(today)).length;
+  // ВИПРАВЛЕНО: використовуємо точний об'єкт Date для порівняння (не рядок)
+  const todayStart = dateOnly(new Date());
+  const todayEnd = new Date(todayStart.getTime() + 24*60*60*1000);
+
+  const todayOrders = db.orders.filter(o => {
+    const d = parseOrderDate(o.date);
+    return d >= todayStart && d < todayEnd;
+  });
+  const tSales = todayOrders.reduce((s, o) => s + (+o.total || 0), 0);
+  const tOrders = todayOrders.length;
   const totalStockVal = db.products.reduce((s, p) => s + ((+p.qty || 0) * (+p.price || 0)), 0);
   const totalCostVal = db.products.reduce((s, p) => s + ((+p.qty || 0) * (+p.cost || 0)), 0);
   
+  // Місячний прибуток (продажі - собівартість - витрати)
+  const monthAgo = new Date(); monthAgo.setDate(monthAgo.getDate() - 30);
+  const monthOrders = db.orders.filter(o => parseOrderDate(o.date) >= monthAgo);
+  const monthRevenue = monthOrders.reduce((s, o) => s + (+o.total || 0), 0);
+  const monthCost = monthOrders.reduce((s, o) => {
+    const p = db.products.find(pr => pr.name === o.product);
+    return s + ((+o.qty || 1) * (+p?.cost || 0));
+  }, 0);
+  const monthExpenses = (db.expenses||[]).filter(e => parseOrderDate(e.date) >= monthAgo).reduce((s, e) => s + (+e.amount || 0), 0);
+  const monthProfit = monthRevenue - monthCost - monthExpenses;
+
   stats.innerHTML = `
     <div class="stat-card" style="color:var(--accent)">
       <div class="stat-label">Продажі (сьогодні)</div>
@@ -791,7 +1107,107 @@ function renderDashboard() {
       <div class="stat-value">${db.products.length}</div>
       <div class="stat-sub">Найменувань</div>
     </div>
+    <div class="stat-card" style="color:${monthProfit >= 0 ? 'var(--green)' : 'var(--red)'}">
+      <div class="stat-label">Прибуток (30 днів)</div>
+      <div class="stat-value">${monthProfit.toLocaleString()} ₴</div>
+      <div class="stat-sub">Дохід - собівартість - витрати</div>
+    </div>
   `;
+
+  // SALES CHART - last 7 days — ВИПРАВЛЕНО: точне порівняння дат
+  const days7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const ds = new Date(); ds.setHours(0,0,0,0); ds.setDate(ds.getDate()-i);
+    const de = new Date(ds.getTime() + 24*60*60*1000);
+    const sum = db.orders.filter(o => { const d = parseOrderDate(o.date); return d >= ds && d < de; }).reduce((s, o) => s + (+o.total || 0), 0);
+    days7.push({ label: ds.toLocaleDateString('uk-UA', {weekday:'short'}), sum });
+  }
+  const maxVal = Math.max(...days7.map(d => d.sum), 1);
+  document.getElementById('sales-chart').innerHTML = days7.map(d => `
+    <div class="chart-bar-col">
+      <div style="font-size:.62rem;color:var(--muted);margin-bottom:2px">${d.sum > 0 ? d.sum.toLocaleString() : ''}</div>
+      <div class="chart-bar" style="height:${Math.max(4,(d.sum/maxVal)*80)}px" title="${d.sum.toLocaleString()} ₴"></div>
+      <div class="chart-bar-label">${d.label}</div>
+    </div>
+  `).join('');
+
+  // TOP PRODUCTS
+  const pStats = {};
+  db.orders.forEach(o => { pStats[o.product] = (pStats[o.product] || 0) + (+o.total || 0); });
+  const topP = Object.entries(pStats).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const maxP = Math.max(...topP.map(x=>x[1]), 1);
+  document.getElementById('top-products').innerHTML = topP.length ? topP.map(([name, sum]) => `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:3px">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${name}</span>
+        <strong>${sum.toLocaleString()} ₴</strong>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(sum/maxP)*100}%"></div></div>
+    </div>
+  `).join('') : '<div style="color:var(--muted);font-size:.85rem">Немає даних</div>';
+
+  // LOW STOCK
+  const threshold = +document.getElementById('low-stock-threshold')?.value || 5;
+  const lowStock = db.products.filter(p => +p.qty <= threshold).slice(0, 6);
+  document.getElementById('low-stock-list').innerHTML = lowStock.length ? lowStock.map(p => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--surface)">
+      <span style="font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%">${p.name}</span>
+      <span class="badge ${p.qty <= 0 ? 'badge-red' : 'badge-orange'}">${p.qty} ${p.unit==='kg'?'кг':p.unit==='g'?'г':p.unit==='l'?'л':p.unit==='m'?'м':'шт.'}</span>
+    </div>
+  `).join('') : '<div style="color:var(--muted);font-size:.85rem">Все добре! 🎉</div>';
+
+  // RECENT ORDERS
+  const recent = db.orders.slice(0, 5);
+  document.getElementById('recent-orders').innerHTML = recent.length ? recent.map(o => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--surface)">
+      <div>
+        <div style="font-size:.85rem;font-weight:600">${o.client}</div>
+        <div style="font-size:.75rem;color:var(--muted)">${o.product}</div>
+      </div>
+      <span style="font-weight:700;color:var(--accent)">${(+o.total).toLocaleString()} ₴</span>
+    </div>
+  `).join('') : '<div style="color:var(--muted);font-size:.85rem">Немає продажів</div>';
+}
+
+// ===================== SHOP SETTINGS =====================
+let shopSettings = { name:'LaVok Shop', slogan:'Якісні товари з доставкою по Україні', color:'#5b4cf5', notifyEmail:'' };
+
+function loadShopSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lavok_shop_settings')||'{}');
+    if (s.name) shopSettings.name = s.name;
+    if (s.slogan) shopSettings.slogan = s.slogan;
+    if (s.color) shopSettings.color = s.color;
+    if (s.notifyEmail !== undefined) shopSettings.notifyEmail = s.notifyEmail;
+  } catch(e) {}
+  // Populate fields
+  const n = document.getElementById('shop-name-setting');
+  const sl = document.getElementById('shop-slogan-setting');
+  const em = document.getElementById('shop-notify-email');
+  if (n) n.value = shopSettings.name;
+  if (sl) sl.value = shopSettings.slogan;
+  if (em) em.value = shopSettings.notifyEmail;
+}
+
+function saveShopSettings() {
+  shopSettings.name  = document.getElementById('shop-name-setting')?.value.trim() || shopSettings.name;
+  shopSettings.slogan = document.getElementById('shop-slogan-setting')?.value.trim() || shopSettings.slogan;
+  shopSettings.notifyEmail = document.getElementById('shop-notify-email')?.value.trim() || '';
+  localStorage.setItem('lavok_shop_settings', JSON.stringify(shopSettings));
+  // Save to DB so shop.html can read it
+  if (!db.settings) db.settings = {};
+  db.settings.shopName = shopSettings.name;
+  db.settings.shopSlogan = shopSettings.slogan;
+  db.settings.shopColor = shopSettings.color;
+  db.settings.notifyEmail = shopSettings.notifyEmail;
+  doBackup(true);
+  showToast('✅ Налаштування сайту збережено!', 'success');
+}
+
+function setShopColor(color, el) {
+  shopSettings.color = color;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
 }
 
 // ===================== STOCK =====================
@@ -804,11 +1220,22 @@ function generateSKU() {
   return code;
 }
 
+// Повертає назву одиниці виміру за кодом
+function getUnitLabel(unit) {
+  const map = { pcs:'шт.', kg:'кг', g:'г', l:'л', m:'м' };
+  return map[unit||'pcs'] || 'шт.';
+}
+// Повертає emoji для типу товару
+function getPtypeEmoji(ptype) {
+  const map = { clothing:'👕', weight:'⚖️', book:'📚', pcs:'📦' };
+  return map[ptype||'pcs'] || '📦';
+}
+
 function renderStock() {
   const tbody = document.getElementById('t-stock');
   const query = document.getElementById('stock-search').value.toLowerCase();
   const cat = document.getElementById('stock-cat-filter').value;
-  
+
   const cats = [...new Set(db.products.map(p => p.cat))].filter(Boolean);
   const filter = document.getElementById('stock-cat-filter');
   const oldVal = filter.value;
@@ -822,70 +1249,172 @@ function renderStock() {
 
   tbody.innerHTML = filtered.map((p, i) => {
     const sup = (db.suppliers||[]).find(s=>s.id===p.supplier);
+    const unit = getUnitLabel(p.unit);
+    const ptype = p.ptype || 'pcs';
+    // Інфо про варіанти (розміри)
+    let variantCell = '—';
+    if (ptype === 'clothing' && p.sizes) {
+      variantCell = p.sizes.split(',').map(s=>`<span style="display:inline-block;padding:1px 6px;border:1px solid var(--border);border-radius:4px;font-size:.7rem;margin:1px">${s.trim()}</span>`).join('');
+    } else if (ptype === 'weight') {
+      variantCell = `<span class="badge badge-blue">⚖️ per ${unit}</span>`;
+    } else if (ptype === 'book') {
+      variantCell = '<span class="badge badge-purple">📚 Книга</span>';
+    }
     return `
     <tr>
       <td style="color:var(--muted)">${i + 1}</td>
+      <td>
+        <div class="prod-photo-wrap" onclick="openPhotoUpload(${db.products.indexOf(p)})" title="Натисніть щоб змінити фото">
+          ${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : `<div class="photo-upload-label">📷</div>`}
+          <div class="photo-overlay">Змінити</div>
+        </div>
+      </td>
       <td><span class="sku-code">${p.code || '—'}</span></td>
-      <td style="font-weight:600">${p.name}</td>
+      <td style="font-weight:600">${getPtypeEmoji(ptype)} ${p.name}${p.description?`<div style="font-size:.72rem;color:var(--muted);margin-top:2px">${p.description.substring(0,40)}${p.description.length>40?'…':''}</div>`:''}</td>
       <td><span class="badge badge-gray">${p.cat || '—'}</span></td>
+      <td>${variantCell}</td>
       <td>${sup ? `<span class="supplier-chip">🏭 ${sup.name}</span>` : '—'}</td>
-      <td style="font-weight:700"><span class="badge ${p.qty <= 0 ? 'badge-red' : 'badge-green'}">${p.qty} шт.</span></td>
+      <td style="font-weight:700"><span class="badge ${p.qty <= 0 ? 'badge-red' : p.qty <= 5 ? 'badge-orange' : 'badge-green'}">${p.qty} ${unit}</span></td>
       <td>${(+p.cost || 0).toLocaleString()} ₴</td>
-      <td style="font-weight:700;color:var(--accent)">${(+p.price || 0).toLocaleString()} ₴</td>
+      <td style="font-weight:700;color:var(--accent)">${(+p.price || 0).toLocaleString()} ₴${ptype==='weight'?' / '+unit:''}</td>
       <td>
         <button class="btn-icon" onclick="openStockModal(${db.products.indexOf(p)})">✏️</button>
         ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteProduct(${db.products.indexOf(p)})" title="Видалити">🗑️</button>` : ''}
       </td>
     </tr>
   `}).join('');
-  
+
   const sumCost = filtered.reduce((s, p) => s + ((+p.qty || 0) * (+p.cost || 0)), 0);
   document.getElementById('stock-footer').innerText = `Показано ${filtered.length} товарів. Загальна собівартість: ${sumCost.toLocaleString()} ₴`;
 }
 
 function openStockModal(idx = -1) {
-  const p = idx > -1 ? db.products[idx] : { name: '', cat: '', qty: 0, cost: 0, price: 0, code: '', supplier: '' };
+  const p = idx > -1 ? db.products[idx] : { name:'', cat:'', qty:0, cost:0, price:0, code:'', supplier:'', ptype:'pcs', unit:'pcs', sizes:'', description:'' };
   const skuVal = idx > -1 ? (p.code || generateSKU()) : generateSKU();
   const supOptions = (db.suppliers||[]).map(s=>`<option value="${s.id}" ${p.supplier===s.id?'selected':''}>${s.name}</option>`).join('');
-  
+  const ptype = p.ptype || 'pcs';
+
   const content = `
     <div class="form-row">
       <div class="form-group"><label>Код товару (SKU)</label><input type="text" id="p-code" value="${skuVal}" readonly style="background:var(--surface);font-family:monospace"></div>
-      <div class="form-group"><label>Категорія</label><input type="text" id="p-cat" value="${p.cat}" list="cat-list"><datalist id="cat-list">${[...new Set(db.products.map(x=>x.cat))].map(c=>`<option value="${c}">`).join('')}</datalist></div>
+      <div class="form-group"><label>Категорія</label><input type="text" id="p-cat" value="${p.cat||''}" list="cat-list"><datalist id="cat-list">${[...new Set(db.products.map(x=>x.cat))].map(c=>`<option value="${c}">`).join('')}</datalist></div>
     </div>
     <div class="form-group"><label>Назва товару</label><input type="text" id="p-name" value="${p.name}"></div>
+
+    <div class="form-group"><label>Тип товару</label>
+      <select id="p-ptype" onchange="onPtypeChange()">
+        <option value="pcs"  ${ptype==='pcs'  ?'selected':''}>📦 Штучний (шт.)</option>
+        <option value="clothing" ${ptype==='clothing'?'selected':''}>👕 Одяг / Взуття (розміри)</option>
+        <option value="weight"   ${ptype==='weight'  ?'selected':''}>⚖️ Ваговий (кг / г / л)</option>
+        <option value="book"     ${ptype==='book'    ?'selected':''}>📚 Книга</option>
+      </select>
+    </div>
+
+    <div id="p-sizes-row" class="form-group" style="display:${ptype==='clothing'?'block':'none'}">
+      <label>Розміри (через кому)</label>
+      <input type="text" id="p-sizes" value="${p.sizes||''}" placeholder="XS, S, M, L, XL, XXL або 36, 37, 38, 39, 40">
+      <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Покупець зможе обрати розмір в магазині та при продажі</div>
+    </div>
+
+    <div id="p-unit-row" class="form-group" style="display:${ptype==='weight'?'block':'none'}">
+      <label>Одиниця виміру</label>
+      <select id="p-unit">
+        <option value="kg" ${(p.unit||'pcs')==='kg'?'selected':''}>кг (кілограм)</option>
+        <option value="g"  ${(p.unit||'pcs')==='g' ?'selected':''}>г (грам)</option>
+        <option value="l"  ${(p.unit||'pcs')==='l' ?'selected':''}>л (літр)</option>
+        <option value="m"  ${(p.unit||'pcs')==='m' ?'selected':''}>м (метр)</option>
+      </select>
+    </div>
+
     <div class="form-group"><label>Постачальник</label>
       <select id="p-supplier"><option value="">— Без постачальника —</option>${supOptions}</select>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Кількість</label><input type="number" id="p-qty" value="${p.qty}"></div>
-      <div class="form-group"><label>Собівартість</label><input type="number" id="p-cost" value="${p.cost || 0}"></div>
+      <div class="form-group"><label id="p-qty-lbl">Кількість / Залишок</label><input type="number" id="p-qty" value="${p.qty}" step="0.001" min="0"></div>
+      <div class="form-group"><label>Собівартість (₴)</label><input type="number" id="p-cost" value="${p.cost||0}" step="0.01"></div>
     </div>
-    <div class="form-group"><label>Ціна продажу</label><input type="number" id="p-price" value="${p.price}"></div>
+    <div class="form-group"><label id="p-price-lbl">Ціна продажу (₴)</label><input type="number" id="p-price" value="${p.price}" step="0.01"></div>
+    <div class="form-group"><label>Опис / Нотатки (необов'язково)</label><textarea id="p-description" style="min-height:60px">${p.description||''}</textarea></div>
+    <div class="form-group">
+      <label>🖼️ Фото товару</label>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div id="stock-photo-preview" style="width:72px;height:72px;border-radius:8px;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.8rem;flex-shrink:0">
+          ${p.photo ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">` : '📷'}
+        </div>
+        <div style="flex:1">
+          <input type="text" id="p-photo-url" placeholder="Вставте URL фото або завантажте файл" value="${p.photo&&p.photo.startsWith('http')?p.photo:''}" oninput="previewStockPhotoUrl(this.value)" style="margin-bottom:6px">
+          <input type="file" id="p-photo-file" accept="image/*" onchange="previewStockPhotoFile(this)" style="font-size:.8rem;padding:4px">
+        </div>
+      </div>
+    </div>
   `;
+
   openModal(idx > -1 ? 'Редагувати товар' : 'Додати товар', content, () => {
+    const ptypeVal = document.getElementById('p-ptype').value;
+    const unitVal = ptypeVal === 'weight'
+      ? (document.getElementById('p-unit')?.value || 'kg')
+      : 'pcs';
+
     const newP = {
-      code: document.getElementById('p-code').value || generateSKU(),
-      name: document.getElementById('p-name').value.trim(),
-      cat: document.getElementById('p-cat').value.trim(),
-      supplier: document.getElementById('p-supplier').value,
-      qty: +document.getElementById('p-qty').value || 0,
-      cost: +document.getElementById('p-cost').value || 0,
-      price: +document.getElementById('p-price').value || 0
+      code:        document.getElementById('p-code').value || generateSKU(),
+      name:        document.getElementById('p-name').value.trim(),
+      cat:         document.getElementById('p-cat').value.trim(),
+      supplier:    document.getElementById('p-supplier').value,
+      ptype:       ptypeVal,
+      unit:        unitVal,
+      sizes:       ptypeVal === 'clothing' ? (document.getElementById('p-sizes')?.value.trim()||'') : '',
+      qty:         +document.getElementById('p-qty').value || 0,
+      cost:        +document.getElementById('p-cost').value || 0,
+      price:       +document.getElementById('p-price').value || 0,
+      description: document.getElementById('p-description').value.trim(),
+      photo:       window._stockPhotoBase64 || document.getElementById('p-photo-url')?.value.trim() || p.photo || ''
     };
+    window._stockPhotoBase64 = null;
     if (!newP.name) { showToast('Введіть назву товару!', 'error'); return false; }
-    
-    if (idx > -1) {
-      writeLog(`Оновлено товар: ${newP.name}`);
-      db.products[idx] = newP;
-    } else {
-      writeLog(`Додано новий товар: ${newP.name}`);
-      db.products.push(newP);
-    }
-    renderAll();
-    doBackup(true);
-    return true; // Успішно
+
+    if (idx > -1) { writeLog(`Оновлено товар: ${newP.name}`); db.products[idx] = newP; }
+    else          { writeLog(`Додано новий товар: ${newP.name}`); db.products.push(newP); }
+    renderAll(); doBackup(true); return true;
   });
+
+  // Ініціалізуємо стан після рендеру
+  setTimeout(onPtypeChange, 50);
+}
+
+function onPtypeChange() {
+  const ptype = document.getElementById('p-ptype')?.value || 'pcs';
+  const sizesRow = document.getElementById('p-sizes-row');
+  const unitRow  = document.getElementById('p-unit-row');
+  const qtyLbl   = document.getElementById('p-qty-lbl');
+  const priceLbl = document.getElementById('p-price-lbl');
+  if (sizesRow) sizesRow.style.display = ptype === 'clothing' ? 'block' : 'none';
+  if (unitRow)  unitRow.style.display  = ptype === 'weight'   ? 'block' : 'none';
+  if (qtyLbl)   qtyLbl.innerText = ptype === 'weight' ? 'Залишок (в одиницях виміру)' : 'Кількість (шт.)';
+  if (priceLbl) {
+    const unit = document.getElementById('p-unit')?.value || 'kg';
+    priceLbl.innerText = ptype === 'weight' ? `Ціна за ${getUnitLabel(unit)} (₴)` : 'Ціна продажу (₴)';
+  }
+}
+
+function previewStockPhotoUrl(url) {
+  const prev = document.getElementById('stock-photo-preview');
+  if (!url || !prev) return;
+  prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='❌'">`;
+  window._stockPhotoBase64 = null;
+}
+
+function previewStockPhotoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    window._stockPhotoBase64 = e.target.result;
+    const prev = document.getElementById('stock-photo-preview');
+    if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+    const urlInput = document.getElementById('p-photo-url');
+    if (urlInput) urlInput.value = '';
+  };
+  reader.readAsDataURL(file);
 }
 
 function deleteProduct(idx) {
@@ -901,24 +1430,34 @@ function deleteProduct(idx) {
 function renderOrders() {
   const tbody = document.getElementById('t-orders');
   const query = document.getElementById('order-search').value.toLowerCase();
+  const manFilter = document.getElementById('order-manager-filter').value;
+
+  // Rebuild manager filter
+  const managers = [...new Set(db.orders.map(o => o.manager))].filter(Boolean);
+  const mf = document.getElementById('order-manager-filter');
+  const oldM = mf.value;
+  mf.innerHTML = '<option value="">Всі менеджери</option>' + managers.map(m => `<option value="${m}" ${m==oldM?'selected':''}>${m}</option>`).join('');
   
   const filtered = db.orders.filter(o => {
-    const rId = o.id || String(db.orders.indexOf(o) + 1000).padStart(6, '0');
-    return o.client.toLowerCase().includes(query) || 
-           o.product.toLowerCase().includes(query) ||
+    const rId = o.id || '';
+    const matchQ = (o.client||'').toLowerCase().includes(query) || 
+           (o.product||'').toLowerCase().includes(query) ||
            rId.includes(query);
+    const matchM = !manFilter || o.manager === manFilter;
+    return matchQ && matchM;
   });
 
-  tbody.innerHTML = filtered.map((o, i) => {
+  tbody.innerHTML = filtered.map((o) => {
     const rId = o.id || String(db.orders.indexOf(o) + 1000).padStart(6, '0');
+    const unitLbl = getUnitLabel(o.unit);
     return `
     <tr>
       <td><span class="badge badge-gray">#${rId}</span></td>
       <td style="font-size:.75rem">${o.date}</td>
       <td style="font-weight:600">${o.client}</td>
-      <td>${o.phone}</td>
-      <td>${o.product}</td>
-      <td>${o.qty}</td>
+      <td>${o.phone||'—'}</td>
+      <td>${o.product}${o.variant ? ` <span class="badge badge-purple">${o.variant}</span>` : ''}</td>
+      <td>${o.qty} ${unitLbl !== 'шт.' ? unitLbl : ''}</td>
       <td style="font-weight:700">${(+o.total || 0).toLocaleString()} ₴</td>
       <td><span class="badge badge-purple">${o.manager}</span></td>
       <td><span class="badge badge-green">Завершено</span></td>
@@ -934,121 +1473,171 @@ function renderOrders() {
 }
 
 function openOrderModal() {
+  const productOptions = db.products.map(p => {
+    const unit = getUnitLabel(p.unit);
+    const ptype = p.ptype || 'pcs';
+    return `<option value="${p.name}" data-price="${p.price}" data-qty="${p.qty}" data-ptype="${ptype}" data-unit="${p.unit||'pcs'}" data-sizes="${p.sizes||''}">${getPtypeEmoji(ptype)} ${p.name} (Залишок: ${p.qty} ${unit})</option>`;
+  }).join('');
+
   const content = `
     <div class="form-group">
       <label>Клієнт</label>
-      <select id="o-client-select" onchange="toggleNewClientInputs()" style="width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; outline:none; font-family:'DM Sans',sans-serif;">
+      <select id="o-client-select" onchange="toggleNewClientInputs()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;outline:none;font-family:'DM Sans',sans-serif;">
         <option value="">-- Оберіть клієнта зі списку --</option>
         ${db.clients.map(c => `<option value="${c.name}">${c.name} (${c.phone})</option>`).join('')}
-        <option value="NEW" style="font-weight:bold; color:var(--accent)">➕ Додати нового клієнта...</option>
+        <option value="NEW" style="font-weight:bold;color:var(--accent)">➕ Додати нового клієнта...</option>
       </select>
     </div>
-    
-    <div id="new-client-fields" style="display:none; padding:12px; background:var(--surface); border-radius:8px; margin-bottom:16px;">
-       <div class="form-row">
-         <div class="form-group" style="margin-bottom:8px"><label>Ім'я та Прізвище</label><input type="text" id="nc-name"></div>
-         <div class="form-group" style="margin-bottom:8px"><label>Телефон</label><input type="text" id="nc-phone"></div>
-       </div>
-       <div class="form-row">
-         <div class="form-group" style="margin-bottom:0"><label>Місто</label><input type="text" id="nc-city"></div>
-         <div class="form-group" style="margin-bottom:0"><label>Відділення НП / Адреса</label><input type="text" id="nc-address"></div>
-       </div>
+    <div id="new-client-fields" style="display:none;padding:12px;background:var(--surface);border-radius:8px;margin-bottom:16px;">
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:8px"><label>Ім'я та Прізвище</label><input type="text" id="nc-name"></div>
+        <div class="form-group" style="margin-bottom:8px"><label>Телефон</label><input type="text" id="nc-phone"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0"><label>Місто</label><input type="text" id="nc-city"></div>
+        <div class="form-group" style="margin-bottom:0"><label>Відділення НП / Адреса</label><input type="text" id="nc-address"></div>
+      </div>
     </div>
-
     <div class="form-group">
       <label>Товар</label>
-      <select id="o-product" onchange="updateOrderPrice()" style="width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; outline:none; font-family:'DM Sans',sans-serif;">
+      <select id="o-product" onchange="onOrderProductChange()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;outline:none;font-family:'DM Sans',sans-serif;">
         <option value="">Оберіть товар...</option>
-        ${db.products.map(p => `<option value="${p.name}" data-price="${p.price}" data-qty="${p.qty}">${p.name} (Залишок: ${p.qty})</option>`).join('')}
+        ${productOptions}
       </select>
     </div>
+    <!-- Розміри — з'являються для одягу/взуття -->
+    <div id="o-sizes-row" class="form-group" style="display:none">
+      <label>Оберіть розмір</label>
+      <div id="o-size-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+      <input type="hidden" id="o-variant">
+    </div>
     <div class="form-row">
-      <div class="form-group"><label>Кількість</label><input type="number" id="o-qty" value="1" oninput="updateOrderPrice()"></div>
-      <div class="form-group"><label>До сплати</label><input type="number" id="o-total" value="0"></div>
+      <div class="form-group"><label id="o-qty-lbl">Кількість</label><input type="number" id="o-qty" value="1" step="0.001" min="0.001" oninput="updateOrderTotal()"></div>
+      <div class="form-group"><label>До сплати (₴)</label><input type="number" id="o-total" value="0" step="0.01"></div>
     </div>
   `;
 
   openModal('Новий продаж', content, () => {
-    let cName = "";
-    let cPhone = "";
+    let cName = '', cPhone = '';
     const selVal = document.getElementById('o-client-select').value;
-    
     if (!selVal) { showToast('Оберіть або додайте клієнта!', 'error'); return false; }
-
     if (selVal === 'NEW') {
-      cName = document.getElementById('nc-name').value.trim();
+      cName  = document.getElementById('nc-name').value.trim();
       cPhone = document.getElementById('nc-phone').value.trim();
       const cCity = document.getElementById('nc-city').value.trim();
       const cAddr = document.getElementById('nc-address').value.trim();
-      
-      if(!cName || !cPhone) { showToast('Заповніть ім\'я та телефон нового клієнта!', 'error'); return false; }
-      
-      db.clients.push({ name: cName, phone: cPhone, email: '', city: cCity, address: cAddr, orders: 0, sum: 0, last: '' });
+      if (!cName || !cPhone) { showToast("Заповніть ім'я та телефон нового клієнта!", 'error'); return false; }
+      db.clients.push({ name:cName, phone:cPhone, email:'', city:cCity, address:cAddr, orders:0, sum:0, last:'' });
     } else {
       cName = selVal;
       const ex = db.clients.find(c => c.name === cName);
       if (ex) cPhone = ex.phone;
     }
 
-    const pName = document.getElementById('o-product').value;
-    const qty = +document.getElementById('o-qty').value || 0;
-    const total = +document.getElementById('o-total').value || 0;
-    
-    if (!pName) { showToast('Оберіть товар!', 'error'); return false; }
-    if (qty <= 0) { showToast('Кількість має бути більше 0!', 'error'); return false; }
-    
+    const pName   = document.getElementById('o-product').value;
+    const qty     = +document.getElementById('o-qty').value || 0;
+    const total   = +document.getElementById('o-total').value || 0;
+    const variant = document.getElementById('o-variant')?.value || '';
+
+    if (!pName)  { showToast('Оберіть товар!', 'error'); return false; }
+    if (qty <= 0){ showToast('Кількість має бути більше 0!', 'error'); return false; }
+
+    // Перевірка розміру для одягу
     const prod = db.products.find(p => p.name === pName);
+    if (prod && prod.ptype === 'clothing' && prod.sizes && !variant) {
+      showToast('Оберіть розмір!', 'error'); return false;
+    }
     if (prod) {
-      if (prod.qty < qty) { showToast(`Недостатньо товару на складі! В наявності: ${prod.qty}`, 'error'); return false; }
+      if (prod.qty < qty) { showToast(`Недостатньо на складі! В наявності: ${prod.qty} ${getUnitLabel(prod.unit)}`, 'error'); return false; }
       prod.qty -= qty;
     }
 
     const orderId = String(Date.now()).slice(-6);
     const order = {
-      id: orderId,
-      date: getFmtDate(),
-      client: cName,
-      phone: cPhone,
-      product: pName,
-      qty: qty,
-      total: total,
-      manager: currentUser.name
+      id: orderId, date: getFmtDate(), client: cName, phone: cPhone,
+      product: pName, variant, qty, total,
+      unit: prod?.unit || 'pcs', manager: currentUser.name
     };
-
     db.orders.unshift(order);
-    writeLog(`Продаж: ${pName} (${qty} шт) клієнту ${cName} (Чек #${orderId})`);
-    
-    let client = db.clients.find(c => c.name === cName);
+    writeLog(`Продаж: ${pName}${variant?' ('+variant+')':''} × ${qty}${getUnitLabel(prod?.unit)} клієнту ${cName} (#${orderId})`);
+
+    // Оновлюємо клієнта — ВИПРАВЛЕНО: завжди перераховується у renderClients через recalcClients
+    const client = db.clients.find(c => c.name === cName);
     if (client) {
-      client.orders = (client.orders || 0) + 1;
-      client.sum = (client.sum || 0) + total;
-      client.last = order.date;
+      client.orders = (+client.orders || 0) + 1;
+      client.sum    = (+client.sum   || 0) + total;
+      client.last   = getFmtDate();
     }
-    
+
     if (document.getElementById('toggle-sale-notif')?.classList.contains('on')) {
-      showToast(`Продаж успішний: ${total} ₴`, 'success');
+      showToast(`✅ Продаж: ${pName} — ${total.toLocaleString()} ₴`, 'success');
     }
-    
-    renderAll();
-    doBackup(true);
-    return true; // Успішно! Вікно закриється
+    renderAll(); doBackup(true); return true;
   });
 }
 
+// Оновлює UI при виборі товару (розміри, одиниці, ціна)
+function onOrderProductChange() {
+  const sel = document.getElementById('o-product');
+  if (!sel || sel.selectedIndex < 0) return;
+  const opt = sel.options[sel.selectedIndex];
+  const ptype = opt.dataset.ptype || 'pcs';
+  const unit  = opt.dataset.unit  || 'pcs';
+  const sizes = opt.dataset.sizes || '';
+
+  // Розміри
+  const sizesRow   = document.getElementById('o-sizes-row');
+  const sizeChips  = document.getElementById('o-size-chips');
+  const variantInp = document.getElementById('o-variant');
+  if (ptype === 'clothing' && sizes) {
+    sizesRow.style.display = 'block';
+    if (variantInp) variantInp.value = '';
+    sizeChips.innerHTML = sizes.split(',').map(s => {
+      const sv = s.trim();
+      return `<button type="button" onclick="selectSize(this,'${sv}')" style="padding:5px 12px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-size:.82rem;font-weight:600;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="if(!this.classList.contains('sel'))this.style.borderColor='var(--border)'">${sv}</button>`;
+    }).join('');
+  } else {
+    sizesRow.style.display = 'none';
+    if (variantInp) variantInp.value = '';
+  }
+
+  // Підпис для кількості
+  const qtyLbl = document.getElementById('o-qty-lbl');
+  if (qtyLbl) qtyLbl.innerText = ptype === 'weight' ? `Кількість (${getUnitLabel(unit)})` : 'Кількість (шт.)';
+
+  updateOrderTotal();
+}
+
+function selectSize(btn, val) {
+  btn.closest('#o-size-chips').querySelectorAll('button').forEach(b => {
+    b.classList.remove('sel');
+    b.style.background = 'var(--surface)';
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--ink)';
+  });
+  btn.classList.add('sel');
+  btn.style.background = 'var(--accent)';
+  btn.style.borderColor = 'var(--accent)';
+  btn.style.color = '#fff';
+  document.getElementById('o-variant').value = val;
+}
+
+function updateOrderTotal() {
+  const sel = document.getElementById('o-product');
+  if (!sel || sel.selectedIndex < 0) return;
+  const opt = sel.options[sel.selectedIndex];
+  const qty = +document.getElementById('o-qty').value || 0;
+  if (opt && opt.dataset.price) {
+    document.getElementById('o-total').value = ((+opt.dataset.price) * qty).toFixed(2);
+  }
+}
+
+// Залишаємо для зворотної сумісності
 function toggleNewClientInputs() {
   const val = document.getElementById('o-client-select').value;
   document.getElementById('new-client-fields').style.display = (val === 'NEW') ? 'block' : 'none';
 }
-
-function updateOrderPrice() {
-  const sel = document.getElementById('o-product');
-  if (sel.selectedIndex < 0) return;
-  const opt = sel.options[sel.selectedIndex];
-  const qty = +document.getElementById('o-qty').value || 0;
-  if (opt && opt.dataset.price) {
-    document.getElementById('o-total').value = (+opt.dataset.price) * qty;
-  }
-}
+function updateOrderPrice() { updateOrderTotal(); }
 
 function deleteOrder(idx) {
   if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
@@ -1086,8 +1675,8 @@ function openReceipt(idx) {
         <div class="r-line"></div>
         <div class="r-row r-bold"><span style="flex:1">ТОВАР</span><span style="width:40px;text-align:center">КІЛ</span><span style="width:70px;text-align:right">СУМА</span></div>
         <div class="r-row">
-          <span style="flex:1">${o.product}</span>
-          <span style="width:40px;text-align:center">x${o.qty}</span>
+          <span style="flex:1">${o.product}${o.variant ? ' ('+o.variant+')' : ''}</span>
+          <span style="width:40px;text-align:center">x${o.qty}${o.unit && o.unit !== 'pcs' ? ' '+getUnitLabel(o.unit) : ''}</span>
           <span style="width:70px;text-align:right">${(+o.total).toLocaleString()} ₴</span>
         </div>
         <div class="r-line"></div>
@@ -1101,19 +1690,36 @@ function openReceipt(idx) {
 }
 
 // ===================== CLIENTS =====================
+// Перераховує stats клієнтів із реальних замовлень (виправляє баг з кількістю/датою)
+function recalcClients() {
+  db.clients.forEach(c => {
+    const cOrders = db.orders.filter(o => o.client === c.name);
+    c.orders = cOrders.length;
+    c.sum    = cOrders.reduce((s, o) => s + (+o.total || 0), 0);
+    if (cOrders.length > 0) {
+      // Беремо найновіше замовлення
+      const sorted = [...cOrders].sort((a, b) => parseOrderDate(b.date) - parseOrderDate(a.date));
+      c.last = sorted[0].date;
+    } else if (!c.last) {
+      c.last = '—';
+    }
+  });
+}
+
 function renderClients() {
+  recalcClients(); // завжди синхронізуємо з реальними замовленнями
   const tbody = document.getElementById('t-clients');
   const query = document.getElementById('client-search').value.toLowerCase();
-  const filtered = db.clients.filter(c => c.name.toLowerCase().includes(query) || c.phone.includes(query));
+  const filtered = db.clients.filter(c => (c.name||'').toLowerCase().includes(query) || (c.phone||'').includes(query));
 
-  tbody.innerHTML = filtered.map((c, i) => `
+  tbody.innerHTML = filtered.map((c) => `
     <tr>
-      <td><div class="client-row"><div class="client-avatar">${c.name.charAt(0)}</div><strong>${c.name}</strong></div></td>
-      <td>${c.phone}<br><small style="color:var(--muted)">${c.email || ''}</small></td>
-      <td>${c.city || '—'}<br><small style="color:var(--muted)">${c.address || '—'}</small></td>
-      <td>${c.orders}</td>
-      <td style="font-weight:700">${(+c.sum || 0).toLocaleString()} ₴</td>
-      <td style="font-size:.75rem">${c.last}</td>
+      <td><div class="client-row"><div class="client-avatar">${(c.name||'?').charAt(0).toUpperCase()}</div><strong>${c.name}</strong></div></td>
+      <td>${c.phone||'—'}<br><small style="color:var(--muted)">${c.email||''}</small></td>
+      <td>${c.city||'—'}<br><small style="color:var(--muted)">${c.address||'—'}</small></td>
+      <td><strong style="font-size:1rem">${c.orders||0}</strong></td>
+      <td style="font-weight:700">${(+c.sum||0).toLocaleString()} ₴</td>
+      <td style="font-size:.78rem;color:var(--muted)">${c.last||'—'}</td>
       <td>
         <button class="btn-icon" onclick="openClientModal(${db.clients.indexOf(c)})">✏️</button>
         ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteClient(${db.clients.indexOf(c)})" title="Видалити">🗑️</button>` : ''}
@@ -1229,13 +1835,13 @@ function deleteUser(idx) {
   doBackup(true);
 }
 
-// ===================== SUPPLIERS (ПОСТАЧАЛЬНИКИ) =====================
+// ===================== SUPPLIERS =====================
 function renderSuppliers() {
   const tbody = document.getElementById('t-suppliers');
   const search = document.getElementById('supplier-search')?.value.toLowerCase() || '';
   const filtered = (db.suppliers||[]).filter(s => !search || (s.name||'').toLowerCase().includes(search));
   
-  tbody.innerHTML = filtered.map((s, i) => {
+  tbody.innerHTML = filtered.map((s) => {
     return `<tr>
       <td style="font-weight:600">${s.name||''}</td>
       <td>${s.contact||'—'}</td>
@@ -1263,7 +1869,7 @@ function openSupplierModal(idx = -1) {
   `;
   openModal(idx > -1 ? 'Редагувати постачальника' : '🏭 Новий постачальник', content, () => {
     const name = document.getElementById('m-sup-name').value.trim();
-    if (!name) { showToast('Введіть назву постачальника', 'error'); return false; } // Якщо помилка, повертаємо false
+    if (!name) { showToast('Введіть назву постачальника', 'error'); return false; }
     
     const item = {
       id: (idx > -1 && s.id) ? s.id : 'SUP-' + Date.now(),
@@ -1278,7 +1884,7 @@ function openSupplierModal(idx = -1) {
     renderAll();
     doBackup(true);
     showToast(`✅ Постачальник збережений`, 'success');
-    return true; // Успіх! Вікно закриється
+    return true;
   });
 }
 
@@ -1412,9 +2018,9 @@ function importXMLProducts(xmlText, supplierId) {
     for (const item of items) {
       const name = getVal(item,'name','назва','title','productName','product_name','model','description_short') || getVal(item,'наименование');
       if (!name) continue;
-      const price = parseFloat(getVal(item,'price','ціна','цена','Price','sale_price','retail_price','price_retail').replace(/[^\d.]/g,''))||0;
-      const cost = parseFloat(getVal(item,'cost','cost_price','purchase_price','wholesale_price','price_wholesale','закупочная_цена').replace(/[^\d.]/g,''))||0;
-      const qty = parseInt(getVal(item,'qty','quantity','stock','count','кількість','количество','in_stock','available').replace(/[^\d]/g,''))||0;
+      const price = parseFloat((getVal(item,'price','ціна','цена','Price','sale_price','retail_price','price_retail')||'0').replace(/[^\d.]/g,''))||0;
+      const cost = parseFloat((getVal(item,'cost','cost_price','purchase_price','wholesale_price','price_wholesale','закупочная_цена')||'0').replace(/[^\d.]/g,''))||0;
+      const qty = parseInt((getVal(item,'qty','quantity','stock','count','кількість','количество','in_stock','available')||'0').replace(/[^\d]/g,''))||0;
       const cat = getVal(item,'category','cat','categoryName','категорія','категория','type');
       const code = getVal(item,'id','code','sku','article','articul','productId','product_id') || generateSKU();
       
@@ -1434,54 +2040,287 @@ function importXMLProducts(xmlText, supplierId) {
   return count;
 }
 
-// ===================== ANALYTICS =====================
-function renderAnalytics() {
-  const days = +document.getElementById('analytics-period').value;
-  const now = new Date();
-  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-  
-  const filtered = db.orders.filter(o => {
-    const parts = o.date.split(', ');
-    const dStr = parts[0]; 
-    const [dd, mm, yyyy] = dStr.split('.');
-    return new Date(yyyy, mm-1, dd) >= cutoff;
-  });
+// ===================== ANALYTICS (FIXED) =====================
+function parseOrderDate(dateStr) {
+  if (!dateStr) return new Date(0);
+  try {
+    // Нормалізуємо: прибираємо non-breaking spaces та зайві символи
+    const clean = String(dateStr).replace(/\u202f|\u00a0/g, ' ').trim();
+    // Формат: "дд.мм.рррр, ГГ:ХХ" або "дд.мм.рррр ГГ:ХХ"
+    const m = clean.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})[,\s]+(\d{1,2}):(\d{2})/);
+    if (m) return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5], 0, 0);
+    // Запасний варіант: тільки дата "дд.мм.рррр"
+    const m2 = clean.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (m2) return new Date(+m2[3], +m2[2]-1, +m2[1], 0, 0, 0, 0);
+  } catch(e) {}
+  return new Date(0);
+}
 
-  const total = filtered.reduce((s, o) => s + (+o.total || 0), 0);
-  const avg = filtered.length ? Math.round(total / filtered.length) : 0;
+// Повертає Date з обнуленим часом (для порівняння "сьогодні/вчора/тиждень")
+function dateOnly(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function renderAnalytics() {
+  if (currentUser.role !== 'admin') return;
+  const periodVal = document.getElementById('analytics-period').value;
+  const now = new Date();
+  let cutoff;
+  if (periodVal === 'all') {
+    cutoff = new Date(0);
+  } else if (periodVal === '0') {
+    // Сьогодні: від початку поточного дня
+    cutoff = dateOnly(now);
+  } else {
+    cutoff = new Date(now.getTime() - (+periodVal) * 24 * 60 * 60 * 1000);
+  }
+
+  // ВИПРАВЛЕНО: використовуємо parseOrderDate для точного порівняння
+  const filtered = db.orders.filter(o => parseOrderDate(o.date) >= cutoff);
+
+  const totalRevenue = filtered.reduce((s, o) => s + (+o.total || 0), 0);
+  const avg = filtered.length ? Math.round(totalRevenue / filtered.length) : 0;
+  
+  // Calculate real profit
+  const totalCost = filtered.reduce((s, o) => {
+    const p = db.products.find(pr => pr.name === o.product);
+    return s + ((+o.qty || 1) * (+p?.cost || 0));
+  }, 0);
+  const periodExpenses = (db.expenses||[]).filter(e => parseOrderDate(e.date) >= cutoff).reduce((s, e) => s + (+e.amount || 0), 0);
+  const profit = totalRevenue - totalCost - periodExpenses;
+  const margin = totalRevenue > 0 ? Math.round((profit / totalRevenue) * 100) : 0;
   
   document.getElementById('analytics-stats').innerHTML = `
     <div class="stat-card" style="color:var(--accent)">
       <div class="stat-label">Оборот</div>
-      <div class="stat-value">${total.toLocaleString()} ₴</div>
+      <div class="stat-value">${totalRevenue.toLocaleString()} ₴</div>
+      <div class="stat-sub">${filtered.length} замовлень</div>
     </div>
     <div class="stat-card" style="color:var(--blue)">
       <div class="stat-label">Замовлень</div>
       <div class="stat-value">${filtered.length}</div>
+      <div class="stat-sub">Середній чек: ${avg.toLocaleString()} ₴</div>
     </div>
     <div class="stat-card" style="color:var(--green)">
-      <div class="stat-label">Середній чек</div>
-      <div class="stat-value">${avg.toLocaleString()} ₴</div>
+      <div class="stat-label">Чистий прибуток</div>
+      <div class="stat-value" style="color:${profit>=0?'var(--green)':'var(--red)'}">${profit.toLocaleString()} ₴</div>
+      <div class="stat-sub">Маржа: ${margin}%</div>
     </div>
     <div class="stat-card" style="color:var(--orange)">
       <div class="stat-label">Клієнтів</div>
       <div class="stat-value">${[...new Set(filtered.map(o=>o.client))].length}</div>
+      <div class="stat-sub">Унікальних</div>
+    </div>
+    <div class="stat-card" style="color:var(--red)">
+      <div class="stat-label">Витрати</div>
+      <div class="stat-value">${periodExpenses.toLocaleString()} ₴</div>
+      <div class="stat-sub">За обраний період</div>
     </div>
   `;
 
+  // Manager stats
   const mStats = {};
-  db.users.forEach(u => mStats[u.name] = 0);
-  filtered.forEach(o => { if(mStats[o.manager] !== undefined) mStats[o.manager] += (+o.total || 0); });
+  db.users.forEach(u => mStats[u.name] = {revenue: 0, orders: 0});
+  filtered.forEach(o => { 
+    if(mStats[o.manager] !== undefined) {
+      mStats[o.manager].revenue += (+o.total || 0);
+      mStats[o.manager].orders++;
+    } else {
+      mStats[o.manager] = {revenue: +o.total || 0, orders: 1};
+    }
+  });
   
-  const maxM = Math.max(...Object.values(mStats), 1);
-  document.getElementById('manager-stats').innerHTML = Object.entries(mStats).sort((a,b)=>b[1]-a[1]).map(([name, sum]) => `
+  const maxM = Math.max(...Object.values(mStats).map(x=>x.revenue), 1);
+  document.getElementById('manager-stats').innerHTML = Object.entries(mStats).sort((a,b)=>b[1].revenue-a[1].revenue).map(([name, data]) => `
     <div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px">
-        <span>${name}</span><strong>${sum.toLocaleString()} ₴</strong>
+        <span>${name}</span><strong>${data.revenue.toLocaleString()} ₴ (${data.orders} прод.)</strong>
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${(sum/maxM)*100}%"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(data.revenue/maxM)*100}%"></div></div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:.85rem">Немає даних</div>';
+
+  // Category stats
+  const catMap = {};
+  filtered.forEach(o => {
+    const p = db.products.find(pr => pr.name === o.product);
+    const cat = p?.cat || 'Без категорії';
+    catMap[cat] = (catMap[cat] || 0) + (+o.total || 0);
+  });
+  const maxC = Math.max(...Object.values(catMap), 1);
+  document.getElementById('cat-stats').innerHTML = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).map(([cat, sum]) => `
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px">
+        <span>${cat}</span><strong>${sum.toLocaleString()} ₴</strong>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(sum/maxC)*100}%;background:var(--blue)"></div></div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:.85rem">Немає даних</div>';
+
+  // Daily chart — ВИПРАВЛЕНО: точне порівняння по датах
+  const chartDays = (periodVal === 'all' || +periodVal > 30) ? 30 : (periodVal === '0' ? 1 : +periodVal);
+  const dailyData = [];
+  if (periodVal === '0') {
+    // Для "Сьогодні" — показуємо по годинах
+    for (let h = 0; h < 24; h++) {
+      const ds = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, 0, 0);
+      const de = new Date(ds.getTime() + 3600000);
+      const sum = filtered.filter(o => { const d = parseOrderDate(o.date); return d >= ds && d < de; }).reduce((s, o) => s + (+o.total || 0), 0);
+      dailyData.push({ label: `${String(h).padStart(2,'0')}:00`, sum });
+    }
+  } else {
+    for (let i = chartDays - 1; i >= 0; i--) {
+      const ds = new Date(); ds.setHours(0,0,0,0); ds.setDate(ds.getDate() - i);
+      const de = new Date(ds.getTime() + 24 * 60 * 60 * 1000);
+      const sum = filtered.filter(o => { const d = parseOrderDate(o.date); return d >= ds && d < de; }).reduce((s, o) => s + (+o.total || 0), 0);
+      dailyData.push({ label: i === 0 ? 'Сьогодні' : ds.toLocaleDateString('uk-UA', {day:'2-digit', month:'2-digit'}), sum });
+    }
+  }
+  const visibleDays = dailyData.slice(-14); // показуємо останні 14 стовпців
+  const maxD = Math.max(...visibleDays.map(d => d.sum), 1);
+  document.getElementById('analytics-chart').innerHTML = visibleDays.map(d => `
+    <div class="chart-bar-col">
+      <div style="font-size:.55rem;color:var(--muted);margin-bottom:2px">${d.sum > 0 ? (d.sum/1000).toFixed(0)+'k' : ''}</div>
+      <div class="chart-bar" style="height:${Math.max(3,(d.sum/maxD)*120)}px;background:var(--blue)" title="${d.sum.toLocaleString()} ₴"></div>
+      <div class="chart-bar-label">${d.label}</div>
     </div>
   `).join('');
+
+  // Profit breakdown
+  document.getElementById('profit-stats').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface);border-radius:8px">
+        <span style="font-size:.85rem">📈 Виручка</span>
+        <strong style="color:var(--green)">${totalRevenue.toLocaleString()} ₴</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface);border-radius:8px">
+        <span style="font-size:.85rem">🏷️ Собівартість продаж</span>
+        <strong style="color:var(--orange)">- ${totalCost.toLocaleString()} ₴</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface);border-radius:8px">
+        <span style="font-size:.85rem">💸 Витрати</span>
+        <strong style="color:var(--red)">- ${periodExpenses.toLocaleString()} ₴</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:12px;background:${profit>=0?'var(--green-light)':'var(--red-light)'};border-radius:8px;border:1px solid ${profit>=0?'var(--green)':'var(--red)'}">
+        <span style="font-size:.9rem;font-weight:700">🎯 Чистий прибуток</span>
+        <strong style="color:${profit>=0?'var(--green)':'var(--red)'};font-size:1rem">${profit.toLocaleString()} ₴</strong>
+      </div>
+    </div>
+  `;
+}
+
+// ===================== EXPENSES (ВИТРАТИ) =====================
+function renderExpenses() {
+  if (!document.getElementById('t-expenses')) return;
+  const tbody = document.getElementById('t-expenses');
+  const query = (document.getElementById('exp-search')?.value || '').toLowerCase();
+  const catF = document.getElementById('exp-cat-filter')?.value || '';
+  const periodF = document.getElementById('exp-period-filter')?.value || '30';
+  
+  const now = new Date();
+  const cutoff = periodF === 'all' ? new Date(0) : new Date(now.getTime() - (+periodF) * 24 * 60 * 60 * 1000);
+  
+  const expenses = db.expenses || [];
+  const filtered = expenses.filter(e => {
+    const matchQ = (e.desc||'').toLowerCase().includes(query) || (e.cat||'').toLowerCase().includes(query);
+    const matchC = !catF || e.cat === catF;
+    const matchP = parseOrderDate(e.date) >= cutoff;
+    return matchQ && matchC && matchP;
+  });
+
+  // Sort newest first
+  filtered.sort((a,b) => parseOrderDate(b.date) - parseOrderDate(a.date));
+
+  tbody.innerHTML = filtered.map(e => `
+    <tr>
+      <td style="font-size:.8rem;color:var(--muted)">${e.date||'—'}</td>
+      <td><span class="exp-cat-chip">${e.cat||'Інше'}</span></td>
+      <td>${e.desc||'—'}</td>
+      <td style="font-weight:700;color:var(--red)">- ${(+e.amount||0).toLocaleString()} ₴</td>
+      <td style="font-size:.8rem"><span class="badge badge-gray">${e.author||'—'}</span></td>
+      <td>
+        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteExpense(${expenses.indexOf(e)})" title="Видалити">🗑️</button>` : ''}
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Немає витрат за цей період</td></tr>';
+
+  const total = filtered.reduce((s, e) => s + (+e.amount || 0), 0);
+  document.getElementById('exp-footer').innerText = `Всього: ${total.toLocaleString()} ₴ за ${filtered.length} записів.`;
+
+  // Stats
+  const totalAll = expenses.reduce((s, e) => s + (+e.amount || 0), 0);
+  const thisMonth = expenses.filter(e => parseOrderDate(e.date) >= new Date(now.getTime() - 30*24*60*60*1000)).reduce((s, e) => s + (+e.amount || 0), 0);
+  const catBreak = {};
+  filtered.forEach(e => { catBreak[e.cat||'Інше'] = (catBreak[e.cat||'Інше'] || 0) + (+e.amount || 0); });
+  const topCat = Object.entries(catBreak).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('exp-stats').innerHTML = `
+    <div class="stat-card" style="color:var(--red)">
+      <div class="stat-label">Витрати (фільтр)</div>
+      <div class="stat-value">${total.toLocaleString()} ₴</div>
+      <div class="stat-sub">${filtered.length} записів</div>
+    </div>
+    <div class="stat-card" style="color:var(--orange)">
+      <div class="stat-label">За 30 днів</div>
+      <div class="stat-value">${thisMonth.toLocaleString()} ₴</div>
+    </div>
+    <div class="stat-card" style="color:var(--blue)">
+      <div class="stat-label">Всього витрат</div>
+      <div class="stat-value">${totalAll.toLocaleString()} ₴</div>
+    </div>
+    <div class="stat-card" style="color:var(--muted)">
+      <div class="stat-label">Топ категорія</div>
+      <div class="stat-value" style="font-size:1.1rem">${topCat ? topCat[0] : '—'}</div>
+      <div class="stat-sub">${topCat ? topCat[1].toLocaleString() + ' ₴' : ''}</div>
+    </div>
+  `;
+}
+
+function openExpenseModal(idx = -1) {
+  if (currentUser.role !== 'admin') { showToast('Тільки власник може додавати витрати', 'error'); return; }
+  const e = idx > -1 ? db.expenses[idx] : {cat:'', desc:'', amount:0, date:''};
+  const content = `
+    <div class="form-group">
+      <label>Категорія</label>
+      <select id="e-cat">
+        ${['Оренда','Зарплата','Реклама','Закупівля','Доставка','Інше'].map(c => `<option value="${c}" ${c===e.cat?'selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group"><label>Опис</label><input type="text" id="e-desc" placeholder="Напр. Оренда офісу за квітень" value="${e.desc||''}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Сума (₴)</label><input type="number" id="e-amount" value="${e.amount||0}" min="0"></div>
+      <div class="form-group"><label>Дата (залишіть пустим — сьогодні)</label><input type="text" id="e-date" placeholder="${getFmtDate().split(',')[0]}" value="${e.date||''}"></div>
+    </div>
+  `;
+  openModal(idx > -1 ? 'Редагувати витрату' : '💸 Нова витрата', content, () => {
+    const cat = document.getElementById('e-cat').value;
+    const desc = document.getElementById('e-desc').value.trim();
+    const amount = +document.getElementById('e-amount').value || 0;
+    const dateRaw = document.getElementById('e-date').value.trim();
+    const date = dateRaw || getFmtDate();
+
+    if (!desc) { showToast('Введіть опис витрати!', 'error'); return false; }
+    if (amount <= 0) { showToast('Сума має бути більше 0!', 'error'); return false; }
+
+    const item = { cat, desc, amount, date, author: currentUser.name };
+    if (idx > -1) db.expenses[idx] = item;
+    else db.expenses.unshift(item);
+
+    writeLog(`Витрата: ${cat} — ${desc} (${amount} ₴)`);
+    renderExpenses();
+    doBackup(true);
+    showToast('✅ Витрату збережено', 'success');
+    return true;
+  });
+}
+
+function deleteExpense(idx) {
+  if (currentUser.role !== 'admin') { showToast('Тільки власник може видаляти витрати', 'error'); return; }
+  if (!confirm('Видалити цю витрату?')) return;
+  writeLog(`Видалено витрату: ${db.expenses[idx].desc}`);
+  db.expenses.splice(idx, 1);
+  renderExpenses();
+  doBackup(true);
 }
 
 // ===================== LOGS =====================
@@ -1496,14 +2335,14 @@ function renderLogs() {
   filter.innerHTML = '<option value="">Всі користувачі</option>' + users.map(u => `<option value="${u}" ${u==old?'selected':''}>${u}</option>`).join('');
 
   const filtered = db.logs.filter(l => {
-    return l.action.toLowerCase().includes(query) && (!user || l.user === user);
+    return (l.action||'').toLowerCase().includes(query) && (!user || l.user === user);
   });
 
   tbody.innerHTML = filtered.slice(0, 50).map(l => `
     <tr>
       <td style="color:var(--muted);font-size:.75rem">${l.time}</td>
       <td><span class="badge badge-gray">${l.user}</span></td>
-      <td class="log-action">${l.action}</td>
+      <td>${l.action}</td>
     </tr>
   `).join('');
 }
@@ -1520,6 +2359,383 @@ function changeOwnerPass() {
   doBackup(true);
 }
 
+// ===================== CHAT SYSTEM =====================
+function renderChatList() {
+  const list = document.getElementById('chat-list');
+  if (!list) return;
+  const chats = db.chats || [];
+  document.getElementById('chat-total-badge').innerText = chats.length ? `(${chats.length})` : '';
+
+  if (!chats.length) {
+    list.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:.85rem;text-align:center">Немає розмов</div>';
+    return;
+  }
+
+  list.innerHTML = chats.map(chat => {
+    const lastMsg = chat.messages && chat.messages.length ? chat.messages[chat.messages.length - 1] : null;
+    const unread = (chat.messages||[]).filter(m => !m.read && m.dir === 'in').length;
+    const srcColor = chat.source === 'instagram' ? '#e1306c' : 'var(--accent)';
+    const srcLabel = chat.source === 'instagram' ? '📷 Instagram' : '💬 CRM';
+    return `
+      <div class="chat-item ${activeChatId === chat.id ? 'active' : ''}" onclick="openChat('${chat.id}')">
+        <div class="chat-item-meta">
+          <div class="chat-item-name">${chat.name || 'Невідомий'}</div>
+          ${unread ? `<span class="chat-unread">${unread}</span>` : ''}
+        </div>
+        <div class="chat-item-last">${lastMsg ? lastMsg.text : 'Немає повідомлень'}</div>
+        <div style="display:flex;justify-content:space-between;margin-top:2px">
+          <span style="font-size:.65rem;color:${srcColor};font-weight:700">${srcLabel}</span>
+          <span class="chat-item-time">${lastMsg ? (lastMsg.time||'') : ''}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  updateChatNavBadge();
+}
+
+function updateChatNavBadge() {
+  const total = (db.chats||[]).reduce((s, c) => s + (c.messages||[]).filter(m => !m.read && m.dir === 'in').length, 0);
+  const b = document.getElementById('chat-nav-badge');
+  if (b) { b.innerText = total; b.style.display = total > 0 ? 'inline' : 'none'; }
+}
+
+function openChat(chatId) {
+  activeChatId = chatId;
+  const chat = db.chats.find(c => c.id === chatId);
+  if (!chat) return;
+
+  // Mark as read
+  (chat.messages||[]).forEach(m => { if (m.dir === 'in') m.read = true; });
+  renderChatList();
+
+  const main = document.getElementById('chat-main');
+  const srcLabel = chat.source === 'instagram' ? '📷 Instagram' : '💬 CRM';
+  const srcBg = chat.source === 'instagram' ? '#e1306c' : 'var(--accent)';
+
+  main.innerHTML = `
+    <div class="chat-header">
+      <div class="client-avatar" style="font-size:.9rem">${(chat.name||'?').charAt(0)}</div>
+      <div>
+        <div class="chat-header-name">${chat.name}</div>
+        <div class="chat-header-sub">${chat.phone || chat.username || ''}</div>
+      </div>
+      <span class="chat-source-badge" style="background:${srcBg};color:#fff;margin-left:auto">${srcLabel}</span>
+      ${chat.source === 'instagram' && (chat.username||chat.phone) ? `<a href="https://www.instagram.com/${(chat.username||chat.phone||'').replace('@','').replace('+','')}" target="_blank" rel="noopener" class="btn btn-sm" style="margin-left:8px;background:#e1306c;color:#fff;text-decoration:none;padding:5px 10px;border-radius:6px;font-size:.78rem">📷 Відкрити</a>` : ''}
+    </div>
+    <div class="chat-messages" id="chat-msgs-${chatId}"></div>
+    ${chat.source === 'instagram' ? `<div style="padding:7px 16px;background:#fff8e1;font-size:.73rem;color:#7c6000;border-top:1px solid #ffe082">ℹ️ Повідомлення зберігаються в CRM. Для відправки в Instagram — перейдіть за кнопкою "📷 Відкрити" і напишіть там.</div>` : ''}
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chat-input-${chatId}" placeholder="Написати повідомлення..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg('${chatId}')}"></textarea>
+      <button class="btn btn-primary btn-sm" onclick="sendChatMsg('${chatId}')">Надіслати</button>
+    </div>
+  `;
+
+  renderChatMessages(chatId);
+}
+
+function renderChatMessages(chatId) {
+  const chat = db.chats.find(c => c.id === chatId);
+  if (!chat) return;
+  const container = document.getElementById(`chat-msgs-${chatId}`);
+  if (!container) return;
+
+  container.innerHTML = (chat.messages||[]).map(m => `
+    <div style="display:flex;flex-direction:column;align-items:${m.dir==='out'?'flex-end':'flex-start'}">
+      ${m.dir==='in' ? `<div class="msg-sender">${chat.name}</div>` : ''}
+      <div class="msg ${m.dir==='out'?'outgoing':'incoming'}">
+        ${m.text}
+        <div class="msg-time">${m.time||''}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">Початок розмови</div>';
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function sendChatMsg(chatId) {
+  const input = document.getElementById(`chat-input-${chatId}`);
+  const text = (input?.value || '').trim();
+  if (!text) return;
+
+  const chat = db.chats.find(c => c.id === chatId);
+  if (!chat) return;
+
+  if (!chat.messages) chat.messages = [];
+  chat.messages.push({
+    dir: 'out',
+    text,
+    time: new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit'}),
+    author: currentUser.name,
+    read: true
+  });
+
+  input.value = '';
+  renderChatMessages(chatId);
+  renderChatList();
+  doBackup(true);
+
+  // If instagram chat — show note
+  if (chat.source === 'instagram') {
+    showToast('Повідомлення збережено в CRM. Для реальної відправки в Instagram потрібен Meta API.', 'info');
+  }
+}
+
+function openNewChatModal() {
+  const content = `
+    <div class="form-group">
+      <label>Джерело чату</label>
+      <select id="chat-source" onchange="document.getElementById('ig-username-wrap').style.display=this.value==='instagram'?'block':'none'">
+        <option value="crm">💬 CRM (внутрішній)</option>
+        <option value="instagram">📷 Instagram</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Ім'я клієнта</label>
+      <input type="text" id="chat-new-name" list="chat-clients-list" placeholder="Оберіть або введіть ім'я">
+      <datalist id="chat-clients-list">${db.clients.map(c=>`<option value="${c.name}">`).join('')}</datalist>
+    </div>
+    <div class="form-group"><label>Телефон</label>
+      <input type="text" id="chat-new-phone" placeholder="+380...">
+    </div>
+    <div id="ig-username-wrap" class="form-group" style="display:none">
+      <label>Instagram username (без @)</label>
+      <input type="text" id="chat-new-ig" placeholder="username">
+      <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Використовується для кнопки швидкого переходу в Instagram</div>
+    </div>
+    <div class="form-group"><label>Перше повідомлення (необов'язково)</label>
+      <textarea id="chat-new-msg" placeholder="Введіть повідомлення..."></textarea>
+    </div>
+  `;
+  openModal('💬 Нова розмова', content, () => {
+    const name = document.getElementById('chat-new-name').value.trim();
+    if (!name) { showToast("Введіть ім'я!", 'error'); return false; }
+    const source   = document.getElementById('chat-source').value;
+    const phone    = document.getElementById('chat-new-phone').value.trim();
+    const username = (document.getElementById('chat-new-ig')?.value||'').trim().replace('@','');
+    const firstMsg = document.getElementById('chat-new-msg').value.trim();
+    const chatId   = 'CHAT-' + Date.now();
+    const msgs = firstMsg ? [{
+      dir: 'out', text: firstMsg,
+      time: new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit'}),
+      author: currentUser.name, read: true
+    }] : [];
+    db.chats.unshift({ id: chatId, name, phone, username, source, messages: msgs });
+    writeLog(`Новий чат: ${name} (${source})`);
+    renderChatList(); openChat(chatId); doBackup(true); return true;
+  });
+}
+
+// Simulate incoming message (demo purposes)
+function simulateIncomingMsg(chatId, text) {
+  const chat = db.chats.find(c => c.id === chatId);
+  if (!chat) return;
+  if (!chat.messages) chat.messages = [];
+  chat.messages.push({
+    dir: 'in',
+    text,
+    time: new Date().toLocaleTimeString('uk-UA', {hour:'2-digit',minute:'2-digit'}),
+    read: false
+  });
+  renderChatList();
+  if (activeChatId === chatId) renderChatMessages(chatId);
+  addNotification('💬 Нове повідомлення', `${chat.name}: ${text}`);
+}
+
+// ===================== SHOP =====================
+function openShop() {
+  document.getElementById('shop-screen').classList.add('active');
+  renderShop();
+}
+function closeShop() {
+  document.getElementById('shop-screen').classList.remove('active');
+}
+
+function renderShop() {
+  const search = (document.getElementById('shop-search')?.value || '').toLowerCase();
+  const activeCat = window._shopActiveCat || '';
+  
+  // Build category buttons
+  const cats = ['', ...new Set(db.products.map(p => p.cat).filter(Boolean))];
+  document.getElementById('shop-cats').innerHTML = cats.map(c => `
+    <button class="shop-cat-btn ${activeCat === c ? 'active' : ''}" onclick="setShopCat('${c}')">${c || '🛍️ Всі товари'}</button>
+  `).join('');
+
+  // Filter products
+  const products = db.products.filter(p => {
+    const inCat = !activeCat || p.cat === activeCat;
+    const inSearch = !search || p.name.toLowerCase().includes(search) || (p.cat||'').toLowerCase().includes(search);
+    return inCat && inSearch && +p.qty > 0;
+  });
+
+  const shopName = document.getElementById('shop-name-setting')?.value || 'LaVok Shop';
+  document.querySelector('.shop-nav-logo').innerText = '🛍️ ' + shopName;
+
+  document.getElementById('shop-grid').innerHTML = products.length ? products.map(p => {
+    const inCart = shopCart.find(ci => ci.name === p.name);
+    return `
+      <div class="shop-card">
+        <div class="shop-card-img">${getCatEmoji(p.cat)}</div>
+        <div class="shop-card-cat">${p.cat || 'Товар'}</div>
+        <div class="shop-card-name">${p.name}</div>
+        <div class="shop-card-stock">${p.qty > 10 ? '✅ В наявності' : `⚠️ Залишилось: ${p.qty} шт.`}</div>
+        <div class="shop-card-price">${(+p.price||0).toLocaleString()} ₴</div>
+        <button class="shop-card-btn ${inCart ? 'added' : ''}" onclick="addToCart('${p.name}',${p.price},${p.qty})">
+          ${inCart ? `✅ В кошику (${inCart.qty} шт.)` : '🛒 Додати в кошик'}
+        </button>
+      </div>
+    `;
+  }).join('') : `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:.95rem">Немає товарів у цій категорії</div>`;
+}
+
+function getCatEmoji(cat) {
+  const map = {
+    'Одяг':'👕','Взуття':'👟','Аксесуари':'👜','Електроніка':'📱','Косметика':'💄','Товари для дому':'🏠','Спорт':'⚽','Іграшки':'🧸','Продукти':'🍎'};
+  return map[cat] || '📦';
+}
+
+function setShopCat(cat) {
+  window._shopActiveCat = cat;
+  renderShop();
+}
+
+function addToCart(name, price, maxQty) {
+  const existing = shopCart.find(ci => ci.name === name);
+  if (existing) {
+    if (existing.qty < maxQty) existing.qty++;
+  } else {
+    shopCart.push({ name, price, qty: 1, maxQty });
+  }
+  updateShopCartUI();
+  renderShop();
+  showToast(`✅ Додано: ${name}`, 'success');
+}
+
+function updateShopCartUI() {
+  const total = shopCart.reduce((s, ci) => s + ci.qty, 0);
+  document.getElementById('shop-cart-count').innerText = total;
+
+  const list = document.getElementById('shop-cart-list');
+  list.innerHTML = shopCart.length ? shopCart.map((ci, i) => `
+    <div class="cart-item">
+      <div style="font-size:1.5rem;flex-shrink:0">${getCatEmoji('')}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${ci.name}</div>
+        <div class="cart-item-price">${(+ci.price).toLocaleString()} ₴ / шт.</div>
+      </div>
+      <div class="cart-item-qty">
+        <button class="qty-btn" onclick="changeCartQty(${i},-1)">−</button>
+        <span class="cart-qty-val">${ci.qty}</span>
+        <button class="qty-btn" onclick="changeCartQty(${i},1)">+</button>
+      </div>
+      <button class="btn-icon" style="color:var(--red)" onclick="removeFromCart(${i})">🗑️</button>
+    </div>
+  `).join('') : '<div style="text-align:center;padding:32px;color:var(--muted)">Кошик порожній</div>';
+
+  const subtotal = shopCart.reduce((s, ci) => s + ci.qty * ci.price, 0);
+  const footer = document.getElementById('shop-cart-footer');
+  footer.innerHTML = shopCart.length ? `
+    <div class="cart-total-row"><span>Товарів:</span><span>${shopCart.reduce((s,ci)=>s+ci.qty,0)} шт.</span></div>
+    <div class="cart-total-row big"><span>Разом:</span><span>${subtotal.toLocaleString()} ₴</span></div>
+    <button class="cart-checkout-btn" onclick="openShopCheckout()">Оформити замовлення →</button>
+  ` : '';
+}
+
+function changeCartQty(idx, delta) {
+  shopCart[idx].qty = Math.max(1, Math.min(shopCart[idx].maxQty, shopCart[idx].qty + delta));
+  updateShopCartUI();
+}
+
+function removeFromCart(idx) {
+  shopCart.splice(idx, 1);
+  updateShopCartUI();
+  renderShop();
+}
+
+function toggleShopCart() {
+  document.getElementById('shop-cart-panel').classList.toggle('open');
+  updateShopCartUI();
+}
+
+function openShopCheckout() {
+  if (!shopCart.length) return;
+  document.getElementById('shop-cart-panel').classList.remove('open');
+  
+  const itemsHtml = shopCart.map(ci => `
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--surface);font-size:.875rem">
+      <span>${ci.name} × ${ci.qty}</span>
+      <strong>${(ci.qty * ci.price).toLocaleString()} ₴</strong>
+    </div>
+  `).join('');
+  const total = shopCart.reduce((s, ci) => s + ci.qty * ci.price, 0);
+
+  const content = `
+    <div style="background:var(--surface);border-radius:8px;padding:12px;margin-bottom:16px">
+      ${itemsHtml}
+      <div style="display:flex;justify-content:space-between;padding-top:10px;font-weight:700;font-family:'Syne',sans-serif;font-size:.95rem">
+        <span>Разом:</span><span>${total.toLocaleString()} ₴</span>
+      </div>
+    </div>
+    <div class="form-group"><label>Ваше ім'я *</label><input type="text" id="ch-name" placeholder="Ім'я та Прізвище"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Телефон *</label><input type="text" id="ch-phone" placeholder="+380..."></div>
+      <div class="form-group"><label>Email</label><input type="text" id="ch-email" placeholder="email@..."></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Місто *</label><input type="text" id="ch-city" placeholder="Київ"></div>
+      <div class="form-group"><label>Відділення НП</label><input type="text" id="ch-addr" placeholder="№1"></div>
+    </div>
+  `;
+
+  openModal('🛒 Оформлення замовлення', content, () => {
+    const name = document.getElementById('ch-name').value.trim();
+    const phone = document.getElementById('ch-phone').value.trim();
+    const email = document.getElementById('ch-email').value.trim();
+    const city = document.getElementById('ch-city').value.trim();
+    const addr = document.getElementById('ch-addr').value.trim();
+
+    if (!name || !phone || !city) { showToast('Заповніть обов\'язкові поля!', 'error'); return false; }
+
+    // Add client if not exists
+    let client = db.clients.find(c => c.phone === phone || c.name === name);
+    if (!client) {
+      client = { name, phone, email, city, address: addr, orders: 0, sum: 0, last: '' };
+      db.clients.push(client);
+    }
+
+    // Create an order per item
+    for (const ci of shopCart) {
+      const prod = db.products.find(p => p.name === ci.name);
+      if (prod && prod.qty >= ci.qty) {
+        prod.qty -= ci.qty;
+        const orderId = String(Date.now()).slice(-6);
+        const order = {
+          id: orderId,
+          date: getFmtDate(),
+          client: name,
+          phone,
+          product: ci.name,
+          qty: ci.qty,
+          total: ci.qty * ci.price,
+          manager: 'Магазин'
+        };
+        db.orders.unshift(order);
+        client.orders = (client.orders || 0) + 1;
+        client.sum = (client.sum || 0) + order.total;
+        client.last = order.date;
+      }
+    }
+
+    writeLog(`Замовлення з магазину від ${name} (${phone}), сума: ${total} ₴`);
+    shopCart = [];
+    updateShopCartUI();
+    renderShop();
+    renderAll();
+    doBackup(true);
+    showToast(`✅ Замовлення оформлено! Дякуємо, ${name}!`, 'success');
+    return true;
+  });
+}
+
 // ===================== NAVIGATION & UI =====================
 function sv(id, el) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1528,11 +2744,15 @@ function sv(id, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
   
-  // Закриття бокового меню на мобільних телефонах
   if (window.innerWidth <= 900) {
     document.querySelector('.sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('show');
   }
+
+  // Render on tab switch
+  if (id === 'analytics') renderAnalytics();
+  if (id === 'expenses') renderExpenses();
+  if (id === 'chat') renderChatList();
 }
 
 function toggleSidebar() {
@@ -1577,13 +2797,205 @@ function markAllRead() {
   renderNotifications();
 }
 function checkLowStock() {
-  const threshold = +document.getElementById('low-stock-threshold').value || 5;
+  const threshold = +document.getElementById('low-stock-threshold')?.value || 5;
   db.products.forEach(p => {
-    if (p.qty <= threshold) addNotification('⚠️ Мало товару', `${p.name}: залишилось ${p.qty} шт.`);
+    if (+p.qty <= threshold) addNotification('⚠️ Мало товару', `${p.name}: залишилось ${p.qty} шт.`);
   });
 }
 function refreshData() {
   window.location.reload();
+}
+
+// ===================== PHOTO UPLOAD =====================
+function openPhotoUpload(idx) {
+  if (currentUser.role !== 'admin' && currentUser.role !== 'administrator') {
+    showToast('Тільки адміністратор може змінювати фото', 'error'); return;
+  }
+  const p = db.products[idx];
+  const content = `
+    <div style="text-align:center;margin-bottom:16px">
+      <div id="photo-preview" style="width:160px;height:160px;border-radius:12px;background:var(--surface);border:2px dashed var(--border);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:3rem">
+        ${p.photo ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">` : '📷'}
+      </div>
+      <div style="font-size:.8rem;color:var(--muted)">Натисніть нижче щоб обрати фото</div>
+    </div>
+    <div class="form-group">
+      <label>📁 Завантажити з пристрою</label>
+      <input type="file" id="photo-file" accept="image/*" onchange="previewPhoto(this)" style="padding:8px;border:1.5px solid var(--border);border-radius:8px">
+    </div>
+    <div class="form-group">
+      <label>🔗 Або вставити URL зображення</label>
+      <input type="text" id="photo-url" placeholder="https://example.com/image.jpg" value="${p.photo&&p.photo.startsWith('http')?p.photo:''}" oninput="previewPhotoUrl(this.value)">
+    </div>
+    ${p.photo ? `<div style="margin-top:8px"><button class="btn btn-danger btn-sm" onclick="removePhoto(${idx})">🗑️ Видалити фото</button></div>` : ''}
+  `;
+  openModal('🖼️ Фото товару: ' + p.name, content, () => {
+    const urlVal = document.getElementById('photo-url').value.trim();
+    const fileInput = document.getElementById('photo-file');
+    if (urlVal) {
+      db.products[idx].photo = urlVal;
+      writeLog(`Фото товару: ${p.name} (URL)`);
+      renderStock(); doBackup(true);
+      return true;
+    }
+    if (fileInput.files && fileInput.files[0]) {
+      // Already handled by previewPhoto — photo is in window._photoBase64
+      if (window._photoBase64) {
+        db.products[idx].photo = window._photoBase64;
+        window._photoBase64 = null;
+        writeLog(`Фото товару: ${p.name} (файл)`);
+        renderStock(); doBackup(true);
+        return true;
+      }
+    }
+    // No changes
+    return true;
+  });
+}
+
+function previewPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    window._photoBase64 = e.target.result;
+    const prev = document.getElementById('photo-preview');
+    if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+    const urlInput = document.getElementById('photo-url');
+    if (urlInput) urlInput.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewPhotoUrl(url) {
+  if (!url) return;
+  const prev = document.getElementById('photo-preview');
+  if (prev) prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='❌ Невірне URL'">`;
+  window._photoBase64 = null;
+}
+
+function removePhoto(idx) {
+  db.products[idx].photo = '';
+  writeLog(`Видалено фото товару: ${db.products[idx].name}`);
+  renderStock(); doBackup(true); closeModal();
+  showToast('Фото видалено', 'success');
+}
+
+// ===================== SITE CHAT (shop ↔ CRM via Google Sheets) =====================
+// Polling: CRM читає нові повідомлення з магазину кожні 30 сек
+let siteChatPollInterval = null;
+
+function startSiteChatPolling() {
+  if (siteChatPollInterval) return;
+  siteChatPollInterval = setInterval(pollSiteChat, 30000);
+}
+
+async function pollSiteChat() {
+  try {
+    const res = await fetch(GAS_URL + '?action=readAll');
+    if (!res.ok) return;
+    const fresh = await res.json();
+    const freshChats = fresh.chats || [];
+    let hasNew = false;
+    freshChats.forEach(fc => {
+      if (fc.source !== 'site') return;
+      const existing = db.chats.find(c => c.id === fc.id);
+      if (!existing) {
+        db.chats.unshift(fc);
+        hasNew = true;
+        addNotification('🌐 Повідомлення з сайту', `${fc.name}: ${(fc.messages||[]).slice(-1)[0]?.text || ''}`);
+      } else {
+        // Check new messages
+        const oldLen = (existing.messages||[]).length;
+        const newLen = (fc.messages||[]).length;
+        if (newLen > oldLen) {
+          const newMsgs = fc.messages.slice(oldLen);
+          newMsgs.forEach(m => {
+            existing.messages = existing.messages || [];
+            existing.messages.push(m);
+            if (m.dir === 'in') {
+              hasNew = true;
+              addNotification('🌐 Нове повідомлення з сайту', `${fc.name}: ${m.text}`);
+            }
+          });
+        }
+      }
+    });
+    if (hasNew) {
+      renderChatList();
+      updateChatNavBadge();
+    }
+  } catch(e) {}
+}
+
+// Відправка повідомлення — оновлює БД і магазин бачить відповідь
+async function sendChatMsgToSite(chatId) {
+  const chat = db.chats.find(c => c.id === chatId);
+  if (!chat || chat.source !== 'site') return;
+  // Backup immediately so shop.html polling picks it up
+  await doBackup(true);
+}
+
+// ===================== GMAIL NOTIFICATION =====================
+// Відправляємо через GAS (потрібно налаштувати в Apps Script)
+async function sendGmailReceipt(order) {
+  const email = shopSettings.notifyEmail || db.settings?.notifyEmail;
+  if (!email) return; // Gmail не налаштовано
+  try {
+    await fetch(GAS_URL + '?action=sendEmail', {
+      method: 'POST',
+      body: JSON.stringify({
+        to: email,
+        subject: `Нове замовлення #${order.id} — ${order.client}`,
+        body: `
+Нове замовлення з магазину LaVok!
+
+Чек #${order.id}
+Дата: ${order.date}
+Клієнт: ${order.client}
+Телефон: ${order.phone}
+Товар: ${order.product}${order.variant ? ' (' + order.variant + ')' : ''}
+Кількість: ${order.qty}
+Сума: ${(+order.total).toLocaleString()} ₴
+Місто: —
+
+---
+LaVok CRM
+        `.trim()
+      })
+    });
+  } catch(e) {
+    // Silent — email is optional
+    console.log('Gmail: GAS sendEmail action not configured');
+  }
+}
+
+// ===================== INIT ADDITIONS =====================
+// Override renderAll to load shop settings on first call
+let _shopSettingsLoaded = false;
+const _baseRenderAll = window.renderAll; // save ref
+function renderAll() {
+  if (!_shopSettingsLoaded) { loadShopSettings(); _shopSettingsLoaded = true; }
+  renderDashboard();
+  renderStock();
+  renderOrders();
+  renderClients();
+  renderUsers();
+  renderAnalytics();
+  renderLogs();
+  renderSuppliers();
+  renderExpenses();
+  renderChatList();
+  updateChatNavBadge();
+}
+
+// Override startBackupTimer to also start chat polling
+function startBackupTimer() {
+  if (backupInterval) clearInterval(backupInterval);
+  backupInterval = setInterval(() => {
+    if (document.getElementById('toggle-backup')?.classList.contains('on')) doBackup(true);
+  }, 15 * 60 * 1000);
+  startSiteChatPolling(); // start site chat polling
 }
 </script>
 </body>
