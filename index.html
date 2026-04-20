@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>LaVok CRM Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
 <style>
 :root {
   --ink: #0d0f14;
@@ -479,19 +480,21 @@ tbody tr:last-child td{border-bottom:none}
     <!-- Чат доступний для всіх ролей -->
     <div class="nav-section">Комунікація</div>
     <div class="nav-item" onclick="sv('chat',this)"><span class="ico">💬</span> Чат <span id="chat-nav-badge" style="display:none;background:var(--red);color:#fff;border-radius:99px;font-size:.6rem;padding:1px 6px;font-weight:700;margin-left:auto">0</span></div>
-    <div class="nav-item" onclick="openShop()"><span class="ico">🛍️</span> Магазин</div>
 
-    <div id="suppliers-nav" style="display:none">
-      <div class="nav-section">Каталог</div>
-      <div class="nav-item" onclick="sv('suppliers',this)"><span class="ico">🏭</span> Постачальники</div>
-    </div>
-
-    <div id="owner-nav" style="display:none">
-      <div class="nav-section">Управління</div>
-      <div class="nav-item" onclick="sv('team',this)"><span class="ico">👥</span> Команда</div>
+    <!-- Аналітика + Витрати + Журнал — для admin та administrator -->
+    <div id="admin-nav" style="display:none">
+      <div class="nav-section">Звітність</div>
       <div class="nav-item" onclick="sv('analytics',this)"><span class="ico">📈</span> Аналітика</div>
       <div class="nav-item" onclick="sv('expenses',this)"><span class="ico">💸</span> Витрати</div>
+      <div class="nav-item" onclick="sv('discounts',this)"><span class="ico">🏷️</span> Знижки</div>
       <div class="nav-item" onclick="sv('logs',this)"><span class="ico">📋</span> Журнал дій</div>
+    </div>
+
+    <!-- Постачальники + Команда + Налаштування — тільки для admin (Власника) -->
+    <div id="owner-nav" style="display:none">
+      <div class="nav-section">Адміністрування</div>
+      <div class="nav-item" onclick="sv('suppliers',this)"><span class="ico">🏭</span> Постачальники</div>
+      <div class="nav-item" onclick="sv('team',this)"><span class="ico">👥</span> Команда</div>
       <div class="nav-item" onclick="sv('settings',this)"><span class="ico">⚙️</span> Налаштування</div>
     </div>
 
@@ -512,6 +515,8 @@ tbody tr:last-child td{border-bottom:none}
     <div class="topbar">
       <button class="hamburger" id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
       <button class="topbar-btn" onclick="doBackup()" id="backup-btn" title="Зберегти дані в таблицю">💾 <span class="hide-text-mobile">Зберегти</span></button>
+      <button class="topbar-btn" onclick="openEmailBroadcastModal()" id="broadcast-btn" title="Email розсилка" style="display:none">📧 <span class="hide-text-mobile">Розсилка</span></button>
+      <span id="auto-refresh-indicator" style="font-size:.72rem;color:var(--muted2);display:none">🔄 оновлено</span>
       <button class="topbar-btn" onclick="toggleNotif()">
         🔔 <span class="hide-text-mobile">Сповіщення</span>
         <span class="topbar-badge" id="notif-count" style="display:none">0</span>
@@ -578,7 +583,9 @@ tbody tr:last-child td{border-bottom:none}
     <div id="v-orders" class="view">
       <div class="page-header">
         <div><h2>Продажі</h2><p>Всі транзакції та замовлення</p></div>
-        <button class="btn btn-primary" onclick="openOrderModal()">+ Новий продаж</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="openPOS()">🖥️ Каса / Новий продаж</button>
+        </div>
       </div>
       <div class="card">
         <div class="search-bar">
@@ -589,7 +596,7 @@ tbody tr:last-child td{border-bottom:none}
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>№ Чека</th><th>Дата</th><th>Клієнт</th><th>Телефон</th><th>Товар</th><th>К-сть</th><th>Сума</th><th>Менеджер</th><th>Статус</th><th id="orders-actions-th">Дії</th></tr></thead>
+            <thead><tr><th>№ Чека</th><th>Дата</th><th>Клієнт</th><th>Телефон</th><th>Товар</th><th>К-сть</th><th>Сума</th><th>Оплата</th><th>ТТН</th><th>Менеджер</th><th id="orders-actions-th">Дії</th></tr></thead>
             <tbody id="t-orders"></tbody>
           </table>
         </div>
@@ -728,6 +735,47 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- DISCOUNTS -->
+    <div id="v-discounts" class="view">
+      <div class="page-header">
+        <div><h2>🏷️ Знижки</h2><p>Правила знижок, акції, промо-коди</p></div>
+        <button class="btn btn-primary" onclick="openDiscountModal(-1)">+ Створити знижку</button>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:20px" id="disc-stats"></div>
+
+      <!-- Active discounts -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <span class="card-title">✅ Активні знижки</span>
+          <span id="disc-active-count" style="font-size:.8rem;color:var(--muted)"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Назва</th><th>Тип</th><th>Розмір</th><th>Умови</th><th>Термін</th><th>Пріоритет</th><th>Дії</th></tr></thead>
+            <tbody id="t-discounts-active"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Inactive discounts -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="color:var(--muted)">⏸ Неактивні / завершені</span>
+          <button class="btn btn-sm btn-secondary" onclick="toggleDiscArchive()" id="disc-arch-btn">Показати</button>
+        </div>
+        <div id="disc-archive-wrap" style="display:none">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Назва</th><th>Тип</th><th>Розмір</th><th>Умови</th><th>Термін</th><th>Дії</th></tr></thead>
+              <tbody id="t-discounts-inactive"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- LOGS -->
     <div id="v-logs" class="view">
       <div class="page-header">
@@ -850,6 +898,68 @@ tbody tr:last-child td{border-bottom:none}
             </div>
           </div>
         </div>
+
+        <!-- API КЛЮЧІ -->
+        <div class="card" style="margin-top:16px">
+          <div class="settings-section">
+            <h4>🔑 API Ключі та інтеграції</h4>
+            <div style="font-size:.8rem;color:var(--muted);margin-bottom:14px">
+              Вставте API ключі для зовнішніх сервісів. Система автоматично підтягне їх при потребі — вам не потрібно правити код.
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px" id="api-keys-list"></div>
+
+            <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:8px;border:1.5px dashed var(--border)">
+              <div style="font-weight:600;font-size:.85rem;margin-bottom:8px">+ Додати новий API ключ</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <input id="new-api-label" placeholder="Назва (напр. Monobank API)" style="flex:1;min-width:160px;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:.85rem">
+                <input id="new-api-key" placeholder="Ключ / URL..." style="flex:2;min-width:200px;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:.85rem;font-family:monospace">
+                <button class="btn btn-primary btn-sm" onclick="addAPIKey()">Додати</button>
+              </div>
+            </div>
+            <div style="margin-top:12px">
+              <button class="btn btn-primary" onclick="saveAllAPISettings()">💾 Зберегти всі API налаштування</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- НОВА ПОШТА НАЛАШТУВАННЯ -->
+        <div class="card" style="margin-top:16px">
+          <div class="settings-section">
+            <h4>📦 Нова Пошта — Відправник</h4>
+            <div style="font-size:.8rem;color:var(--muted);margin-bottom:14px">Налаштуйте для автоматичної генерації ТТН. Отримайте API ключ на <a href="https://my.novaposhta.ua" target="_blank" style="color:var(--accent)">my.novaposhta.ua</a></div>
+            <div class="form-group">
+              <label>NP API Ключ *</label>
+              <input type="text" id="np-api-key" placeholder="Ваш особистий ключ НП (32 символи)" style="font-family:monospace">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Ім'я відправника</label>
+                <input type="text" id="np-sender-name" placeholder="ФОП Прізвище Ім'я">
+              </div>
+              <div class="form-group">
+                <label>Телефон відправника</label>
+                <input type="text" id="np-sender-phone" placeholder="+380XXXXXXXXX">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Ref відправника (з кабінету НП)</label>
+              <input type="text" id="np-sender-ref" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="font-family:monospace;font-size:.8rem">
+            </div>
+            <div class="form-group">
+              <label>Ref адреси відправника (з кабінету НП)</label>
+              <input type="text" id="np-sender-address" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="font-family:monospace;font-size:.8rem">
+            </div>
+            <div style="font-size:.75rem;padding:10px;background:#fef3c7;border-radius:8px;color:#92400e;margin-bottom:12px">
+              ℹ️ Ref відправника та Ref адреси можна знайти в особистому кабінеті Нової Пошти → Налаштування → Адреси відправника. Або отримати через NP API метод <code>getCounterparties</code>.
+            </div>
+            <div class="form-group">
+              <label>Email відправника (для листів клієнтам)</label>
+              <input type="email" id="from-email" placeholder="your@gmail.com">
+            </div>
+            <button class="btn btn-primary" onclick="saveNPSettings()">💾 Зберегти налаштування НП</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -875,12 +985,519 @@ tbody tr:last-child td{border-bottom:none}
   </main>
 </div>
 
+<!-- ============ POS КАСА OVERLAY ============ -->
+<div id="pos-overlay">
+  <!-- TOP BAR -->
+  <div class="pos-topbar">
+    <div class="pos-topbar-left">
+      <span class="pos-logo">🖥️ Каса LaVok</span>
+      <span class="pos-topbar-info" id="pos-date"></span>
+      <span class="pos-topbar-info">Касир: <strong id="pos-cashier"></strong></span>
+    </div>
+    <div class="pos-topbar-right">
+      <button class="pos-topbar-btn" onclick="posSyncProducts()" id="pos-sync-btn" title="Оновити товари з Google Sheets">🔄 <span id="pos-sync-label">Оновити</span></button>
+      <button class="pos-topbar-btn" onclick="posClearCart()" title="Очистити кошик">🗑 Очистити</button>
+      <button class="pos-topbar-btn" onclick="closePOS()">✕ Закрити</button>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="pos-body">
+
+    <!-- LEFT: Product catalog -->
+    <div class="pos-catalog">
+      <!-- Search + barcode -->
+      <div class="pos-search-row">
+        <div class="pos-barcode-wrap">
+          <span class="pos-input-icon">🔖</span>
+          <input id="pos-barcode-input" class="pos-barcode-inp" placeholder="Штрих-код або код товару + Enter" onkeydown="handlePOSBarcodeInput(event)">
+        </div>
+        <div class="pos-search-wrap">
+          <span class="pos-input-icon">🔍</span>
+          <input id="pos-search" class="pos-search-inp" placeholder="Пошук товару..." oninput="renderPOSProducts(this.value)">
+        </div>
+      </div>
+
+      <!-- Category filter tabs -->
+      <div class="pos-cats" id="pos-cat-tabs"></div>
+
+      <!-- Product grid -->
+      <div class="pos-prod-grid" id="pos-products-list"></div>
+    </div>
+
+    <!-- RIGHT: Cart + payment -->
+    <div class="pos-checkout">
+      <!-- Cart header -->
+      <div class="pos-cart-header">
+        <span class="pos-cart-title">🛒 Кошик</span>
+        <span class="pos-cart-count" id="pos-cart-count">0 поз.</span>
+      </div>
+
+      <!-- Cart items table -->
+      <div class="pos-cart-body" id="pos-cart-items">
+        <div class="pos-cart-empty">Додайте товари з каталогу</div>
+      </div>
+
+      <!-- Subtotals -->
+      <div class="pos-subtotals" id="pos-subtotals"></div>
+
+      <!-- Client selector -->
+      <div class="pos-client-section">
+        <label class="pos-label">👤 Клієнт</label>
+        <select id="pos-client" class="pos-select" onchange="onPOSClientChange()">
+          <option value="">— Оберіть клієнта —</option>
+        </select>
+        <div id="pos-new-client" style="display:none;margin-top:8px;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <input id="pos-nc-name" class="pos-inp-sm" placeholder="Ім'я *">
+            <input id="pos-nc-phone" class="pos-inp-sm" placeholder="Телефон *">
+          </div>
+        </div>
+      </div>
+
+      <!-- Discount field -->
+      <div class="pos-discount-row">
+        <label class="pos-label">🏷 Знижка</label>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <input id="pos-discount" type="number" min="0" max="100" value="0" class="pos-inp-sm" style="width:70px" oninput="onPOSDiscountChange()"> %
+          <span style="color:#22c55e;font-size:.75rem;font-weight:600" id="pos-discount-amt"></span>
+        </div>
+      </div>
+      <!-- Auto discount badge -->
+      <div id="pos-auto-discount-info" style="display:none;margin:0 14px 6px;padding:7px 10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:8px;font-size:.75rem;color:#22c55e"></div>
+
+      <!-- TOTAL -->
+      <div class="pos-total-bar" id="pos-total-bar">
+        <span>РАЗОМ</span>
+        <span id="pos-total-val">0 ₴</span>
+      </div>
+
+      <!-- Payment buttons -->
+      <div class="pos-pay-btns">
+        <button class="pos-pay-btn pos-pay-cash" onclick="completePOS('cash')">
+          <span class="pos-pay-icon">💵</span>
+          <span class="pos-pay-label">ГОТІВКА</span>
+        </button>
+        <button class="pos-pay-btn pos-pay-card" onclick="completePOS('card')">
+          <span class="pos-pay-icon">💳</span>
+          <span class="pos-pay-label">КАРТКА</span>
+        </button>
+      </div>
+      <button class="pos-pay-btn-cod" onclick="completePOS('cod')">📦 Накладений платіж</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ===== POS TERMINAL STYLES ===== */
+#pos-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #0f1117;
+  z-index: 2000;
+  flex-direction: column;
+  font-family: 'DM Sans', sans-serif;
+}
+#pos-overlay.open { display: flex; }
+
+/* TOP BAR */
+.pos-topbar {
+  background: #1a1d27;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  padding: 0 20px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.pos-topbar-left { display:flex;align-items:center;gap:20px; }
+.pos-logo { font-family:'Syne',sans-serif;font-weight:800;color:#fff;font-size:1.1rem; }
+.pos-topbar-info { font-size:.78rem;color:rgba(255,255,255,.4); }
+.pos-topbar-info strong { color:rgba(255,255,255,.7); }
+.pos-topbar-right { display:flex;gap:8px; }
+.pos-topbar-btn {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.6);
+  padding: 6px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: .8rem;
+  font-weight: 600;
+  transition: all .15s;
+}
+.pos-topbar-btn:hover { background:rgba(255,255,255,.12);color:#fff; }
+
+/* BODY */
+.pos-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* CATALOG (LEFT) */
+.pos-catalog {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0f1117;
+  border-right: 1px solid rgba(255,255,255,.06);
+}
+
+/* Search row */
+.pos-search-row {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #1a1d27;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  flex-shrink: 0;
+}
+.pos-barcode-wrap, .pos-search-wrap {
+  flex: 1;
+  position: relative;
+}
+.pos-input-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: .9rem;
+  pointer-events: none;
+}
+.pos-barcode-inp, .pos-search-inp {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: .85rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color .15s;
+}
+.pos-barcode-inp:focus { border-color: var(--accent); }
+.pos-search-inp:focus { border-color: rgba(255,255,255,.3); }
+.pos-barcode-inp::placeholder, .pos-search-inp::placeholder { color:rgba(255,255,255,.25); }
+
+/* Category tabs */
+.pos-cats {
+  display: flex;
+  gap: 6px;
+  padding: 8px 14px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  background: #1a1d27;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.pos-cats::-webkit-scrollbar { height: 3px; }
+.pos-cats::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15);border-radius:2px; }
+.pos-cat-tab {
+  padding: 5px 14px;
+  border-radius: 99px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.5);
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.pos-cat-tab:hover { background:rgba(255,255,255,.1);color:#fff; }
+.pos-cat-tab.active { background:var(--accent);border-color:var(--accent);color:#fff; }
+
+/* Product grid */
+.pos-prod-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  align-content: start;
+}
+.pos-prod-grid::-webkit-scrollbar { width: 4px; }
+.pos-prod-grid::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1);border-radius:2px; }
+.pos-prod-card {
+  background: #1a1d27;
+  border: 1.5px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.pos-prod-card:hover { border-color:var(--accent);background:#1e2035;transform:translateY(-1px); }
+.pos-prod-card:active { transform:scale(.97); }
+.pos-prod-card-emoji { font-size: 2rem; line-height:1; }
+.pos-prod-card-name {
+  font-weight: 600;
+  font-size: .82rem;
+  color: #fff;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.pos-prod-card-code { font-size:.68rem;color:rgba(255,255,255,.3);font-family:monospace; }
+.pos-prod-card-stock { font-size:.72rem;color:rgba(255,255,255,.35); }
+.pos-prod-card-price {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--accent2);
+  margin-top: 2px;
+}
+.pos-prod-card-add {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0;
+  transition: opacity .15s;
+}
+.pos-prod-card:hover .pos-prod-card-add { opacity: 1; }
+.pos-prod-card.out-of-stock { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+/* CHECKOUT PANEL (RIGHT) */
+.pos-checkout {
+  width: 380px;
+  flex-shrink: 0;
+  background: #13161f;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pos-cart-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.pos-cart-title { font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:.95rem; }
+.pos-cart-count { font-size:.75rem;color:rgba(255,255,255,.35);background:rgba(255,255,255,.07);padding:3px 10px;border-radius:99px; }
+
+/* Cart items */
+.pos-cart-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+  min-height: 0;
+}
+.pos-cart-body::-webkit-scrollbar { width: 3px; }
+.pos-cart-body::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1);border-radius:2px; }
+.pos-cart-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(255,255,255,.2);
+  font-size: .85rem;
+}
+.pos-cart-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  transition: background .1s;
+}
+.pos-cart-row:hover { background: rgba(255,255,255,.03); }
+.pos-cart-row-info { flex: 1; min-width: 0; }
+.pos-cart-row-name {
+  font-weight: 600;
+  font-size: .82rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pos-cart-row-sub { font-size:.7rem;color:rgba(255,255,255,.35);margin-top:1px; }
+.pos-cart-row-variant {
+  display: inline-block;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+.pos-qty-ctrl { display:flex;align-items:center;gap:4px; }
+.pos-qty-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .1s;
+}
+.pos-qty-btn:hover { background:var(--accent);border-color:var(--accent); }
+.pos-qty-num { min-width:24px;text-align:center;font-weight:700;font-size:.85rem;color:#fff; }
+.pos-cart-row-total { font-weight:700;font-size:.85rem;color:var(--accent2);min-width:62px;text-align:right; }
+.pos-cart-del { background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:.9rem;padding:2px;border-radius:4px;transition:color .1s;display:flex;align-items:center; }
+.pos-cart-del:hover { color:var(--red); }
+
+/* Subtotals */
+.pos-subtotals {
+  padding: 10px 14px 0;
+  border-top: 1px solid rgba(255,255,255,.07);
+  flex-shrink: 0;
+}
+.pos-sub-row { display:flex;justify-content:space-between;font-size:.78rem;color:rgba(255,255,255,.4);padding:2px 0; }
+.pos-sub-row.discount { color: #22c55e; }
+
+/* Client & Discount section */
+.pos-client-section {
+  padding: 10px 14px 6px;
+  flex-shrink: 0;
+}
+.pos-discount-row { display:flex;align-items:center;gap:10px;padding:6px 14px;flex-shrink:0; }
+.pos-label { display:block;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px; }
+.pos-select {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: .82rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+}
+.pos-select option { background:#1a1d27; }
+.pos-inp-sm {
+  flex: 1;
+  padding: 7px 10px;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 7px;
+  color: #fff;
+  font-size: .8rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+}
+.pos-inp-sm::placeholder { color:rgba(255,255,255,.25); }
+
+/* Total bar */
+.pos-total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(91,76,245,.15);
+  border: 1px solid rgba(91,76,245,.3);
+  border-radius: 10px;
+  margin: 8px 14px;
+  padding: 10px 14px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+#pos-total-val { color: var(--accent2); font-size:1.35rem; }
+
+/* Payment buttons */
+.pos-pay-btns {
+  display: flex;
+  gap: 8px;
+  padding: 6px 14px 4px;
+  flex-shrink: 0;
+}
+.pos-pay-btn {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all .15s;
+  font-family: 'Syne', sans-serif;
+}
+.pos-pay-btn:active { transform: scale(.96); }
+.pos-pay-icon { font-size: 1.5rem; }
+.pos-pay-label { font-weight: 800; font-size: .8rem; letter-spacing: .04em; }
+.pos-pay-cash { background: linear-gradient(135deg,#16a34a,#22c55e);color:#fff;box-shadow:0 4px 16px rgba(34,197,94,.25); }
+.pos-pay-cash:hover { box-shadow:0 6px 20px rgba(34,197,94,.4); }
+.pos-pay-card { background: linear-gradient(135deg,#3b4bdb,#5b4cf5);color:#fff;box-shadow:0 4px 16px rgba(91,76,245,.25); }
+.pos-pay-card:hover { box-shadow:0 6px 20px rgba(91,76,245,.4); }
+.pos-pay-btn-cod {
+  margin: 4px 14px 12px;
+  padding: 10px;
+  background: rgba(245,158,11,.12);
+  border: 1.5px solid rgba(245,158,11,.3);
+  border-radius: 10px;
+  color: #f59e0b;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: .82rem;
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.pos-pay-btn-cod:hover { background:rgba(245,158,11,.2); }
+
+/* SUCCESS FLASH */
+@keyframes pos-flash { 0%{opacity:0;transform:scale(.9)} 30%{opacity:1;transform:scale(1.02)} 100%{opacity:0;transform:scale(1)} }
+.pos-success-flash {
+  position: fixed;
+  inset: 0;
+  background: rgba(34,197,94,.15);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: pos-flash .6s ease forwards;
+}
+.pos-success-flash-inner {
+  background: #16a34a;
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  padding: 24px 40px;
+  border-radius: 20px;
+  text-align: center;
+}
+</style>
+
 <script>
 // ===================== CONFIG =====================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwUHvWoR08kQ6-o1Bbn9UWNhpKXvEF5ehhwNJJiYi0LxgsUICu6gQ85wERRC-l8cHYeYA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzw9-IjLnfRiWMs42YNY1J_9o5zyCnMLzkINc8mmcPzKAgZM0OzYWUIOFvo6v_wzw5Ohg/exec";
 
 // ===================== STATE =====================
-let db = { users: [], orders: [], products: [], clients: [], logs: [], suppliers: [], expenses: [], chats: [] };
+let db = { users: [], orders: [], products: [], clients: [], logs: [], suppliers: [], expenses: [], chats: [], discounts: [] };
 let currentUser = null;
 let notifications = [];
 let backupInterval = null;
@@ -888,6 +1505,8 @@ let shopCart = [];
 let activeChatId = null;
 
 // ===================== INIT =====================
+let autoRefreshInterval = null;
+
 window.onload = async () => {
   document.getElementById('dash-date').innerText = new Date().toLocaleDateString('uk-UA', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   try {
@@ -895,15 +1514,18 @@ window.onload = async () => {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const raw = await res.json();
     db = raw;
-    ['users','orders','products','clients','logs','suppliers','expenses','chats'].forEach(k => { if(!db[k]) db[k] = []; });
+    ['users','orders','products','clients','logs','suppliers','expenses','chats','discounts'].forEach(k => { if(!db[k]) db[k] = []; });
     if (!db.users.find(u => u.role === 'admin')) {
       db.users.unshift({name:'Власник',login:'admin',pass:'admin',role:'admin'});
     }
+    // ВИПРАВЛЕННЯ: нормалізуємо всі дати відразу після завантаження
+    normalizeAllDates();
   } catch(e) {
     showToast('Не вдалось підключитись до Google Sheets. Перевірте GAS_URL.', 'error');
     db.users = [{name:'Власник',login:'admin',pass:'admin',role:'admin'}];
     db.expenses = [];
     db.chats = [];
+    db.discounts = [];
   }
   document.getElementById('loader').style.opacity = '0';
   setTimeout(() => {
@@ -932,13 +1554,24 @@ function login() {
   const roleLabel = user.role === 'admin' ? '👑 Власник' : user.role === 'administrator' ? '🛡️ Адміністратор' : '💼 Менеджер';
   document.getElementById('u-role').innerText = roleLabel;
   
-  if (user.role === 'admin' || user.role === 'administrator') {
-    document.getElementById('suppliers-nav').style.display = 'block';
+  // Скидаємо всі секції nav
+  document.getElementById('admin-nav').style.display = 'none';
+  document.getElementById('owner-nav').style.display = 'none';
+  document.getElementById('xml-import-btn').style.display = 'none';
+  document.getElementById('broadcast-btn').style.display = 'none';
+
+  if (user.role === 'admin') {
+    // Власник: все доступно
+    document.getElementById('admin-nav').style.display = 'block';
+    document.getElementById('owner-nav').style.display = 'block';
+    document.getElementById('xml-import-btn').style.display = 'inline-flex';
+    document.getElementById('broadcast-btn').style.display = 'flex';
+  } else if (user.role === 'administrator') {
+    // Адміністратор: аналітика, витрати, журнал + XML; БЕЗ постачальників/команди/налаштувань
+    document.getElementById('admin-nav').style.display = 'block';
     document.getElementById('xml-import-btn').style.display = 'inline-flex';
   }
-  if (user.role === 'admin') {
-    document.getElementById('owner-nav').style.display = 'block';
-  }
+  // Менеджер: тільки базові вкладки (Dashboard/Склад/Продажі/Клієнти/Чат) — нічого не показуємо
   
   writeLog(`Вхід у систему`);
   renderAll();
@@ -986,8 +1619,42 @@ async function doBackup(silent = false) {
 function getFmtDate() {
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
-  // Ручне форматування — гарантує правильний локальний час без зсуву часового поясу
   return `${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
+// ВИПРАВЛЕННЯ ДАТИ: Google Sheets може повертати Date об'єкт або рядок у різних форматах
+// Нормалізуємо все в "дд.мм.рррр, ГГ:ХХ"
+function normalizeDateStr(val) {
+  if (!val) return '';
+  // Якщо вже правильний формат "дд.мм.рррр, ГГ:ХХ"
+  if (typeof val === 'string' && /^\d{2}\.\d{2}\.\d{4},\s\d{2}:\d{2}/.test(val.trim())) return val.trim();
+  // Якщо GAS повернув JS Date об'єкт (серіалізований як ISO рядок або число)
+  let d;
+  if (typeof val === 'number') { d = new Date(val); }
+  else if (val instanceof Date) { d = val; }
+  else if (typeof val === 'string') {
+    // Можливі формати: ISO, "MM/DD/YYYY HH:MM:SS", Date.toString()
+    const s = val.trim();
+    // Спробуємо ISO
+    const iso = new Date(s);
+    if (!isNaN(iso.getTime())) { d = iso; }
+  }
+  if (d && !isNaN(d.getTime())) {
+    const pad = n => String(n).padStart(2,'0');
+    return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  // Повертаємо як є якщо не вдалось розпарсити
+  return String(val);
+}
+
+// Нормалізуємо всі дати в БД після завантаження з GAS
+function normalizeAllDates() {
+  (db.orders||[]).forEach(o => { if (o.date) o.date = normalizeDateStr(o.date); });
+  (db.expenses||[]).forEach(e => { if (e.date) e.date = normalizeDateStr(e.date); });
+  (db.logs||[]).forEach(l => { if (l.time) l.time = normalizeDateStr(l.time); });
+  (db.chats||[]).forEach(c => {
+    (c.messages||[]).forEach(m => { /* times are HH:MM, leave as is */ });
+  });
 }
 
 function writeLog(action) {
@@ -1055,6 +1722,7 @@ function renderAll() {
   renderLogs();
   renderSuppliers();
   renderExpenses();
+  renderDiscounts();
   renderChatList();
   updateChatNavBadge();
 }
@@ -1169,39 +1837,129 @@ function renderDashboard() {
   `).join('') : '<div style="color:var(--muted);font-size:.85rem">Немає продажів</div>';
 }
 
-// ===================== SHOP SETTINGS =====================
+// ===================== SHOP SETTINGS (ТІЛЬКИ GOOGLE SHEETS, БЕЗ localStorage) =====================
 let shopSettings = { name:'LaVok Shop', slogan:'Якісні товари з доставкою по Україні', color:'#5b4cf5', notifyEmail:'' };
 
 function loadShopSettings() {
-  try {
-    const s = JSON.parse(localStorage.getItem('lavok_shop_settings')||'{}');
-    if (s.name) shopSettings.name = s.name;
-    if (s.slogan) shopSettings.slogan = s.slogan;
-    if (s.color) shopSettings.color = s.color;
-    if (s.notifyEmail !== undefined) shopSettings.notifyEmail = s.notifyEmail;
-  } catch(e) {}
-  // Populate fields
-  const n = document.getElementById('shop-name-setting');
+  const s = db.settings || {};
+  if (s.shopName)    shopSettings.name        = s.shopName;
+  if (s.shopSlogan)  shopSettings.slogan      = s.shopSlogan;
+  if (s.shopColor)   shopSettings.color       = s.shopColor;
+  if (s.notifyEmail !== undefined) shopSettings.notifyEmail = s.notifyEmail;
+  const n  = document.getElementById('shop-name-setting');
   const sl = document.getElementById('shop-slogan-setting');
   const em = document.getElementById('shop-notify-email');
-  if (n) n.value = shopSettings.name;
+  if (n)  n.value  = shopSettings.name;
   if (sl) sl.value = shopSettings.slogan;
   if (em) em.value = shopSettings.notifyEmail;
+  // Populate NP + API keys UI
+  loadAPISettingsUI();
 }
 
 function saveShopSettings() {
-  shopSettings.name  = document.getElementById('shop-name-setting')?.value.trim() || shopSettings.name;
-  shopSettings.slogan = document.getElementById('shop-slogan-setting')?.value.trim() || shopSettings.slogan;
-  shopSettings.notifyEmail = document.getElementById('shop-notify-email')?.value.trim() || '';
-  localStorage.setItem('lavok_shop_settings', JSON.stringify(shopSettings));
-  // Save to DB so shop.html can read it
+  shopSettings.name        = document.getElementById('shop-name-setting')?.value.trim()  || shopSettings.name;
+  shopSettings.slogan      = document.getElementById('shop-slogan-setting')?.value.trim() || shopSettings.slogan;
+  shopSettings.notifyEmail = document.getElementById('shop-notify-email')?.value.trim()   || '';
   if (!db.settings) db.settings = {};
-  db.settings.shopName = shopSettings.name;
-  db.settings.shopSlogan = shopSettings.slogan;
-  db.settings.shopColor = shopSettings.color;
-  db.settings.notifyEmail = shopSettings.notifyEmail;
+  db.settings.shopName     = shopSettings.name;
+  db.settings.shopSlogan   = shopSettings.slogan;
+  db.settings.shopColor    = shopSettings.color;
+  db.settings.notifyEmail  = shopSettings.notifyEmail;
   doBackup(true);
-  showToast('✅ Налаштування сайту збережено!', 'success');
+  showToast('✅ Налаштування сайту збережено в Google Sheets!', 'success');
+}
+
+// ===================== API КЛЮЧІ =====================
+function renderAPIKeys() {
+  const container = document.getElementById('api-keys-list');
+  if (!container) return;
+  const keys = getStoredAPIKeys();
+  if (!keys.length) {
+    container.innerHTML = '<div style="font-size:.82rem;color:var(--muted);text-align:center;padding:12px">Немає збережених API ключів</div>';
+    return;
+  }
+  container.innerHTML = keys.map((k, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:.82rem">${k.label}</div>
+        <div style="font-family:monospace;font-size:.72rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.key}</div>
+      </div>
+      <button class="btn-icon" onclick="editAPIKey(${i})" title="Редагувати">✏️</button>
+      <button class="btn-icon" style="color:var(--red)" onclick="deleteAPIKey(${i})" title="Видалити">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function getStoredAPIKeys() {
+  if (!db.settings) db.settings = {};
+  let keys = db.settings.apiKeys;
+  if (typeof keys === 'string') { try { keys = JSON.parse(keys); } catch(e) { keys = []; } }
+  return Array.isArray(keys) ? keys : [];
+}
+
+function addAPIKey() {
+  const label = document.getElementById('new-api-label')?.value.trim();
+  const key   = document.getElementById('new-api-key')?.value.trim();
+  if (!label || !key) { showToast('Введіть назву та ключ!', 'error'); return; }
+  const keys = getStoredAPIKeys();
+  keys.push({ label, key });
+  if (!db.settings) db.settings = {};
+  db.settings.apiKeys = keys;
+  document.getElementById('new-api-label').value = '';
+  document.getElementById('new-api-key').value = '';
+  renderAPIKeys();
+  showToast('Ключ додано! Натисніть "Зберегти" щоб записати.', 'info');
+}
+
+function deleteAPIKey(idx) {
+  const keys = getStoredAPIKeys();
+  keys.splice(idx, 1);
+  db.settings.apiKeys = keys;
+  renderAPIKeys();
+}
+
+function editAPIKey(idx) {
+  const keys = getStoredAPIKeys();
+  const k = keys[idx];
+  document.getElementById('new-api-label').value = k.label;
+  document.getElementById('new-api-key').value = k.key;
+  deleteAPIKey(idx);
+}
+
+function getAPIKey(label) {
+  const keys = getStoredAPIKeys();
+  const found = keys.find(k => k.label.toLowerCase().includes(label.toLowerCase()));
+  return found ? found.key : '';
+}
+
+function saveAllAPISettings() {
+  if (!db.settings) db.settings = {};
+  doBackup(true);
+  showToast('✅ API ключі збережено!', 'success');
+}
+
+function saveNPSettings() {
+  if (!db.settings) db.settings = {};
+  db.settings.npApiKey       = document.getElementById('np-api-key')?.value.trim() || '';
+  db.settings.npSenderName   = document.getElementById('np-sender-name')?.value.trim() || '';
+  db.settings.npSenderPhone  = document.getElementById('np-sender-phone')?.value.trim() || '';
+  db.settings.npSenderRef    = document.getElementById('np-sender-ref')?.value.trim() || '';
+  db.settings.npSenderAddress= document.getElementById('np-sender-address')?.value.trim() || '';
+  db.settings.fromEmail      = document.getElementById('from-email')?.value.trim() || '';
+  doBackup(true);
+  showToast('✅ Налаштування Нової Пошти збережено!', 'success');
+}
+
+function loadAPISettingsUI() {
+  if (!db.settings) return;
+  const s = db.settings;
+  if (document.getElementById('np-api-key'))        document.getElementById('np-api-key').value        = s.npApiKey||'';
+  if (document.getElementById('np-sender-name'))    document.getElementById('np-sender-name').value    = s.npSenderName||'';
+  if (document.getElementById('np-sender-phone'))   document.getElementById('np-sender-phone').value   = s.npSenderPhone||'';
+  if (document.getElementById('np-sender-ref'))     document.getElementById('np-sender-ref').value     = s.npSenderRef||'';
+  if (document.getElementById('np-sender-address')) document.getElementById('np-sender-address').value = s.npSenderAddress||'';
+  if (document.getElementById('from-email'))        document.getElementById('from-email').value        = s.fromEmail||'';
+  renderAPIKeys();
 }
 
 function setShopColor(color, el) {
@@ -1279,6 +2037,7 @@ function renderStock() {
       <td style="font-weight:700;color:var(--accent)">${(+p.price || 0).toLocaleString()} ₴${ptype==='weight'?' / '+unit:''}</td>
       <td>
         <button class="btn-icon" onclick="openStockModal(${db.products.indexOf(p)})">✏️</button>
+        <button class="btn-icon" title="Штрих-код" onclick="openBarcodeModal(${db.products.indexOf(p)})">🔖</button>
         ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteProduct(${db.products.indexOf(p)})" title="Видалити">🗑️</button>` : ''}
       </td>
     </tr>
@@ -1311,9 +2070,10 @@ function openStockModal(idx = -1) {
     </div>
 
     <div id="p-sizes-row" class="form-group" style="display:${ptype==='clothing'?'block':'none'}">
-      <label>Розміри (через кому)</label>
-      <input type="text" id="p-sizes" value="${p.sizes||''}" placeholder="XS, S, M, L, XL, XXL або 36, 37, 38, 39, 40">
-      <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Покупець зможе обрати розмір в магазині та при продажі</div>
+      <label>Розміри та кількість по кожному розміру</label>
+      <input type="text" id="p-sizes" value="${p.sizes||''}" placeholder="XS, S, M, L, XL або 36, 37, 38, 39" oninput="renderSizeStockInputs()">
+      <div style="font-size:.72rem;color:var(--muted);margin-top:4px;margin-bottom:8px">Введіть розміри через кому, потім вкажіть кількість для кожного</div>
+      <div id="p-size-stock-rows" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" data-existing='${JSON.stringify(p.sizeStock||{}).replace(/'/g,"&#39;")}'></div>
     </div>
 
     <div id="p-unit-row" class="form-group" style="display:${ptype==='weight'?'block':'none'}">
@@ -1355,6 +2115,21 @@ function openStockModal(idx = -1) {
       ? (document.getElementById('p-unit')?.value || 'kg')
       : 'pcs';
 
+    // Збираємо sizeStock та перераховуємо qty
+    let sizeStockVal = {};
+    let qtyVal = +document.getElementById('p-qty').value || 0;
+    if (ptypeVal === 'clothing') {
+      const sizeStockInputs = document.querySelectorAll('.size-stock-input');
+      sizeStockInputs.forEach(inp => {
+        const sz = inp.dataset.size;
+        const q = +inp.value || 0;
+        if (sz) sizeStockVal[sz] = q;
+      });
+      // Загальна кількість = сума по розмірах (якщо заповнено)
+      const totalSizes = Object.values(sizeStockVal).reduce((s,v)=>s+v,0);
+      if (totalSizes > 0) qtyVal = totalSizes;
+    }
+
     const newP = {
       code:        document.getElementById('p-code').value || generateSKU(),
       name:        document.getElementById('p-name').value.trim(),
@@ -1363,7 +2138,8 @@ function openStockModal(idx = -1) {
       ptype:       ptypeVal,
       unit:        unitVal,
       sizes:       ptypeVal === 'clothing' ? (document.getElementById('p-sizes')?.value.trim()||'') : '',
-      qty:         +document.getElementById('p-qty').value || 0,
+      sizeStock:   ptypeVal === 'clothing' ? sizeStockVal : {},
+      qty:         qtyVal,
       cost:        +document.getElementById('p-cost').value || 0,
       price:       +document.getElementById('p-price').value || 0,
       description: document.getElementById('p-description').value.trim(),
@@ -1378,7 +2154,11 @@ function openStockModal(idx = -1) {
   });
 
   // Ініціалізуємо стан після рендеру
-  setTimeout(onPtypeChange, 50);
+  setTimeout(() => {
+    onPtypeChange();
+    // Якщо одяг — рендеримо поля розмірів з існуючими даними
+    if ((p.ptype || 'pcs') === 'clothing') renderSizeStockInputs();
+  }, 50);
 }
 
 function onPtypeChange() {
@@ -1389,11 +2169,45 @@ function onPtypeChange() {
   const priceLbl = document.getElementById('p-price-lbl');
   if (sizesRow) sizesRow.style.display = ptype === 'clothing' ? 'block' : 'none';
   if (unitRow)  unitRow.style.display  = ptype === 'weight'   ? 'block' : 'none';
-  if (qtyLbl)   qtyLbl.innerText = ptype === 'weight' ? 'Залишок (в одиницях виміру)' : 'Кількість (шт.)';
+  if (qtyLbl)   qtyLbl.innerText = ptype === 'weight' ? 'Залишок (в одиницях виміру)' : ptype === 'clothing' ? 'Загальна к-сть (авто з розмірів)' : 'Кількість (шт.)';
   if (priceLbl) {
     const unit = document.getElementById('p-unit')?.value || 'kg';
     priceLbl.innerText = ptype === 'weight' ? `Ціна за ${getUnitLabel(unit)} (₴)` : 'Ціна продажу (₴)';
   }
+  if (ptype === 'clothing') renderSizeStockInputs();
+}
+
+// Рендерить поля кількості для кожного розміру
+function renderSizeStockInputs(existingStock) {
+  const sizesInput = document.getElementById('p-sizes');
+  const container  = document.getElementById('p-size-stock-rows');
+  if (!sizesInput || !container) return;
+
+  // Якщо existingStock не передано — читаємо з data-existing атрибуту контейнера
+  let stock = existingStock || {};
+  if (!existingStock) {
+    try { stock = JSON.parse(container.dataset.existing || '{}'); } catch(e) { stock = {}; }
+  }
+
+  // Збираємо поточні значення якщо вже є inputs
+  document.querySelectorAll('.size-stock-input').forEach(inp => { if(inp.dataset.size) stock[inp.dataset.size] = +inp.value||0; });
+  const sizes = sizesInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+  if (!sizes.length) { container.innerHTML=''; return; }
+  container.innerHTML = sizes.map(sz => `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface);border-radius:8px;padding:8px 10px;border:1.5px solid var(--border)">
+      <span style="font-size:.7rem;font-weight:700;color:var(--accent)">${sz}</span>
+      <input type="number" class="size-stock-input" data-size="${sz}" value="${stock[sz]||0}" min="0" style="width:60px;text-align:center;padding:4px;border:1px solid var(--border);border-radius:5px;font-size:.85rem" oninput="recalcTotalQty()">
+    </div>
+  `).join('');
+  recalcTotalQty();
+}
+
+function recalcTotalQty() {
+  const inputs = document.querySelectorAll('.size-stock-input');
+  if (!inputs.length) return;
+  const total = Array.from(inputs).reduce((s,i)=>s+(+i.value||0),0);
+  const qtyInp = document.getElementById('p-qty');
+  if (qtyInp) qtyInp.value = total;
 }
 
 function previewStockPhotoUrl(url) {
@@ -1418,7 +2232,7 @@ function previewStockPhotoFile(input) {
 }
 
 function deleteProduct(idx) {
-  if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
+  if (currentUser.role !== 'admin') { showToast('Видалення товарів доступне тільки Власнику', 'error'); return; }
   if (!confirm('Видалити цей товар?')) return;
   writeLog(`Видалено товар: ${db.products[idx].name}`);
   db.products.splice(idx, 1);
@@ -1447,9 +2261,13 @@ function renderOrders() {
     return matchQ && matchM;
   });
 
-  tbody.innerHTML = filtered.map((o) => {
+  tbody.innerHTML = filtered.map(o => {
     const rId = o.id || String(db.orders.indexOf(o) + 1000).padStart(6, '0');
     const unitLbl = getUnitLabel(o.unit);
+    const payIcon = o.payMethod === 'card' ? '💳' : o.payMethod === 'cod' ? '📦' : '💵';
+    const ttnBadge = o.ttn
+      ? `<span style="font-family:monospace;font-size:.72rem;background:var(--green-light);color:#15803d;padding:2px 6px;border-radius:4px">${o.ttn}</span>`
+      : '<span style="color:var(--muted2);font-size:.75rem">—</span>';
     return `
     <tr>
       <td><span class="badge badge-gray">#${rId}</span></td>
@@ -1459,14 +2277,16 @@ function renderOrders() {
       <td>${o.product}${o.variant ? ` <span class="badge badge-purple">${o.variant}</span>` : ''}</td>
       <td>${o.qty} ${unitLbl !== 'шт.' ? unitLbl : ''}</td>
       <td style="font-weight:700">${(+o.total || 0).toLocaleString()} ₴</td>
+      <td>${payIcon}</td>
+      <td>${ttnBadge}</td>
       <td><span class="badge badge-purple">${o.manager}</span></td>
-      <td><span class="badge badge-green">Завершено</span></td>
       <td>
         <button class="btn-icon" title="Друк чеку" onclick="openReceipt(${db.orders.indexOf(o)})">🧾</button>
+        <button class="btn-icon" title="Надіслати чек email" onclick="sendReceiptFromList(${db.orders.indexOf(o)})">📧</button>
         ${currentUser.role === 'admin' ? `<button class="btn-icon" title="Видалити" style="color:var(--red)" onclick="deleteOrder(${db.orders.indexOf(o)})">🗑️</button>` : ''}
       </td>
-    </tr>
-  `}).join('');
+    </tr>`;
+  }).join('');
   
   const totalSum = filtered.reduce((s, o) => s + (+o.total || 0), 0);
   document.getElementById('orders-footer').innerText = `Всього: ${totalSum.toLocaleString()} ₴ за ${filtered.length} замовлень.`;
@@ -1515,6 +2335,38 @@ function openOrderModal() {
       <div class="form-group"><label id="o-qty-lbl">Кількість</label><input type="number" id="o-qty" value="1" step="0.001" min="0.001" oninput="updateOrderTotal()"></div>
       <div class="form-group"><label>До сплати (₴)</label><input type="number" id="o-total" value="0" step="0.01"></div>
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>ТТН Нова Пошта</label>
+        <div style="display:flex;gap:6px">
+          <select id="o-ttn-mode" onchange="toggleTTNMode()" style="width:auto;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.82rem">
+            <option value="manual">✍️ Вручну</option>
+            <option value="auto">🤖 Автоматично (NP API)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="o-ttn-manual-row" class="form-group">
+      <input type="text" id="o-ttn" placeholder="Напр. 20400048799310 (необов'язково)">
+    </div>
+    <div id="o-ttn-auto-row" style="display:none">
+      <div style="padding:10px;background:var(--accent-light);border-radius:8px;font-size:.8rem;color:var(--accent);margin-bottom:8px">
+        🤖 Система автоматично створить ТТН через API Нової Пошти після збереження продажу.<br>
+        Переконайтесь що NP API ключ вказано в Налаштування → API Ключі.
+      </div>
+      <div class="form-group"><label>Вага (кг)</label><input type="number" id="o-np-weight" value="1" min="0.1" step="0.1"></div>
+      <div class="form-group"><label>Оціночна вартість (₴)</label><input type="number" id="o-np-cost" value="0"></div>
+      <div class="form-group"><label>Опис вантажу</label><input type="text" id="o-np-desc" placeholder="Напр. Одяг"></div>
+    </div>
+    <div class="form-group">
+      <label>Спосіб оплати</label>
+      <select id="o-pay-method" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;width:100%">
+        <option value="cash">💵 Готівка</option>
+        <option value="card">💳 Картка</option>
+        <option value="cod">📦 Накладений платіж</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Коментар</label><input type="text" id="o-comment" placeholder="Необов'язково"></div>
   `;
 
   openModal('Новий продаж', content, () => {
@@ -1538,6 +2390,10 @@ function openOrderModal() {
     const qty     = +document.getElementById('o-qty').value || 0;
     const total   = +document.getElementById('o-total').value || 0;
     const variant = document.getElementById('o-variant')?.value || '';
+    const ttnMode = document.getElementById('o-ttn-mode')?.value || 'manual';
+    const ttnManual = document.getElementById('o-ttn')?.value.trim() || '';
+    const payMethod = document.getElementById('o-pay-method')?.value || 'cash';
+    const comment = document.getElementById('o-comment')?.value.trim() || '';
 
     if (!pName)  { showToast('Оберіть товар!', 'error'); return false; }
     if (qty <= 0){ showToast('Кількість має бути більше 0!', 'error'); return false; }
@@ -1550,23 +2406,41 @@ function openOrderModal() {
     if (prod) {
       if (prod.qty < qty) { showToast(`Недостатньо на складі! В наявності: ${prod.qty} ${getUnitLabel(prod.unit)}`, 'error'); return false; }
       prod.qty -= qty;
+      // Зменшуємо кількість по розміру якщо є sizeStock
+      if (variant && prod.sizeStock && typeof prod.sizeStock === 'object' && prod.sizeStock[variant] !== undefined) {
+        prod.sizeStock[variant] = Math.max(0, (prod.sizeStock[variant]||0) - qty);
+      }
     }
 
     const orderId = String(Date.now()).slice(-6);
     const order = {
       id: orderId, date: getFmtDate(), client: cName, phone: cPhone,
       product: pName, variant, qty, total,
-      unit: prod?.unit || 'pcs', manager: currentUser.name
+      unit: prod?.unit || 'pcs', manager: currentUser.name,
+      ttn: ttnManual, payMethod, comment
     };
     db.orders.unshift(order);
     writeLog(`Продаж: ${pName}${variant?' ('+variant+')':''} × ${qty}${getUnitLabel(prod?.unit)} клієнту ${cName} (#${orderId})`);
 
-    // Оновлюємо клієнта — ВИПРАВЛЕНО: завжди перераховується у renderClients через recalcClients
+    // Оновлюємо клієнта
     const client = db.clients.find(c => c.name === cName);
     if (client) {
       client.orders = (+client.orders || 0) + 1;
       client.sum    = (+client.sum   || 0) + total;
       client.last   = getFmtDate();
+
+      // Надсилаємо чек на email клієнту якщо є адреса
+      if (client.email && client.email.includes('@')) {
+        sendClientReceipt(order, client);
+      }
+    }
+
+    // Авто-генерація ТТН через NP API
+    if (ttnMode === 'auto') {
+      const npWeight = +document.getElementById('o-np-weight')?.value || 1;
+      const npCost = +document.getElementById('o-np-cost')?.value || total;
+      const npDesc = document.getElementById('o-np-desc')?.value.trim() || pName;
+      generateNPTTN(order, client, npWeight, npCost, npDesc);
     }
 
     if (document.getElementById('toggle-sale-notif')?.classList.contains('on')) {
@@ -1632,6 +2506,14 @@ function updateOrderTotal() {
   }
 }
 
+function toggleTTNMode() {
+  const mode = document.getElementById('o-ttn-mode')?.value;
+  const manual = document.getElementById('o-ttn-manual-row');
+  const auto   = document.getElementById('o-ttn-auto-row');
+  if (manual) manual.style.display = mode === 'manual' ? 'block' : 'none';
+  if (auto)   auto.style.display   = mode === 'auto'   ? 'block' : 'none';
+}
+
 // Залишаємо для зворотної сумісності
 function toggleNewClientInputs() {
   const val = document.getElementById('o-client-select').value;
@@ -1640,7 +2522,7 @@ function toggleNewClientInputs() {
 function updateOrderPrice() { updateOrderTotal(); }
 
 function deleteOrder(idx) {
-  if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
+  if (currentUser.role !== 'admin') { showToast('Видалення замовлень доступне тільки Власнику', 'error'); return; }
   if (!confirm('Видалити це замовлення? Повернути товар на склад?')) return;
   const o = db.orders[idx];
   const p = db.products.find(x => x.name === o.product);
@@ -1657,16 +2539,18 @@ function openReceipt(idx) {
   const city = c.city || '—';
   const addr = c.address || '—';
   const receiptNum = o.id || String(idx + 1000).padStart(6, '0');
+  const shopName = db.settings?.shopName || 'LaVok';
+  const payLabel = o.payMethod === 'card' ? 'КАРТКА' : o.payMethod === 'cod' ? 'НАКЛАДЕНИЙ ПЛАТІЖ' : 'ГОТІВКА';
   
   const content = `
     <div class="receipt-wrapper">
       <div class="receipt-paper" id="receipt-print-area">
-        <div class="r-center r-title">LaVok</div>
+        <div class="r-center r-title">${shopName}</div>
         <div class="r-center r-sub">Дропшипінг & Рітейл<br>Івано-Франківськ</div>
         <div class="r-line"></div>
         <div class="r-row"><span>ЧЕК №:</span><span>${receiptNum}</span></div>
         <div class="r-row"><span>ДАТА:</span><span>${o.date}</span></div>
-        <div class="r-row"><span>КАСИР:</span><span>${o.manager.toUpperCase()}</span></div>
+        <div class="r-row"><span>КАСИР:</span><span>${(o.manager||'').toUpperCase()}</span></div>
         <div class="r-line"></div>
         <div class="r-row r-bold"><span>ОДЕРЖУВАЧ:</span><span>${o.client.toUpperCase()}</span></div>
         <div class="r-row"><span>ТЕЛЕФОН:</span><span>${o.phone || c.phone || '—'}</span></div>
@@ -1681,15 +2565,1012 @@ function openReceipt(idx) {
         </div>
         <div class="r-line"></div>
         <div class="r-row r-total"><span>ДО СПЛАТИ:</span><span>${(+o.total).toLocaleString()} ₴</span></div>
+        <div class="r-row"><span>ОПЛАТА:</span><span>${payLabel}</span></div>
+        ${o.ttn ? `<div class="r-line"></div><div class="r-row r-bold"><span>ТТН НП:</span><span>${o.ttn}</span></div>` : ''}
         <div class="r-line"></div>
-        <div class="r-center r-sub" style="margin-top:12px; margin-bottom:0">Дякуємо за покупку!<br>Фіскальний чек згенеровано LaVok CRM</div>
+        <div class="r-center r-sub" style="margin-top:12px; margin-bottom:0">Дякуємо за покупку!<br>Фіскальний чек згенеровано ${shopName} CRM</div>
       </div>
     </div>
   `;
   openModal('Фіскальний чек', content, () => { window.print(); }, '🖨️ Друкувати чек');
 }
 
-// ===================== CLIENTS =====================
+function sendReceiptFromList(idx) {
+  const o = db.orders[idx];
+  const client = db.clients.find(c => c.name === o.client);
+  const email = client?.email || '';
+  if (!email) {
+    showToast('У клієнта немає email адреси', 'error');
+    return;
+  }
+  sendClientReceipt(o, client);
+}
+
+// ===================== ВІДПРАВКА ЧЕКУ КЛІЄНТУ НА EMAIL =====================
+async function sendClientReceipt(order, client) {
+  const email = client?.email || '';
+  if (!email || !email.includes('@')) return;
+  const shopName = db.settings?.shopName || 'LaVok Shop';
+  const ttnInfo = order.ttn ? `\n📦 ТТН Нової Пошти: ${order.ttn}` : '';
+  const subject = `Ваше замовлення #${order.id} — ${shopName}`;
+  const body = `Шановний(а) ${order.client},\n\nДякуємо за покупку!\n\n--- ЧЕКА ---\nЧек №: ${order.id}\nДата: ${order.date}\nТовар: ${order.product}${order.variant?' ('+order.variant+')':''}\nКількість: ${order.qty}\nДо сплати: ${(+order.total).toLocaleString()} ₴\nСпосіб оплати: ${order.payMethod==='card'?'Картка':order.payMethod==='cod'?'Накладений платіж':'Готівка'}${ttnInfo}\n------------\n\nЗ повагою,\n${shopName}`;
+  const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)">
+    <div style="background:#5b4cf5;padding:24px;text-align:center"><h1 style="color:#fff;margin:0;font-size:1.5rem">${shopName}</h1><p style="color:rgba(255,255,255,.7);margin:4px 0 0">Дякуємо за покупку!</p></div>
+    <div style="padding:24px">
+      <p>Шановний(а) <strong>${order.client}</strong>,</p>
+      <p>Ваше замовлення успішно прийнято.</p>
+      <div style="background:#f4f5f8;border-radius:8px;padding:16px;margin:16px 0">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8eaef"><span>Чек №</span><strong>#${order.id}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8eaef"><span>Дата</span><span>${order.date}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8eaef"><span>Товар</span><span>${order.product}${order.variant?' ('+order.variant+')':''}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8eaef"><span>Кількість</span><span>${order.qty}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:1.1rem"><span><strong>До сплати</strong></span><strong style="color:#5b4cf5">${(+order.total).toLocaleString()} ₴</strong></div>
+        ${order.ttn ? `<div style="display:flex;justify-content:space-between;padding:6px 0;background:#dcfce7;border-radius:6px;padding:10px;margin-top:8px"><span>📦 ТТН Нової Пошти</span><strong>${order.ttn}</strong></div>` : ''}
+      </div>
+      <p style="color:#6b7280;font-size:.85rem">З повагою,<br><strong>${shopName}</strong></p>
+    </div>
+  </div>`;
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'sendEmail', to: email, subject, body, htmlBody })
+    });
+    showToast(`📧 Чек надіслано на ${email}`, 'success');
+  } catch(e) { console.log('Email error:', e); }
+}
+
+// ===================== НОВА ПОШТА — АВТОМАТИЧНА ТТН =====================
+async function generateNPTTN(order, client, weight, costVal, desc) {
+  const npKey = db.settings?.npApiKey || '';
+  if (!npKey) { showToast('Додайте NP API ключ у Налаштуваннях', 'error'); return; }
+  if (!client) { showToast('Клієнт не знайдений', 'error'); return; }
+  showToast('⏳ Генеруємо ТТН через НП...', 'info');
+
+  // Отримуємо ref міста та відділення отримувача через GAS proxy
+  try {
+    const cityRes = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'npSearch', apiKey: npKey, modelName:'Address', calledMethod:'searchSettlements', methodProperties:{ CityName: client.city||'', Limit:1 } })
+    });
+    const cityData = await cityRes.json();
+    const cityRef = cityData?.data?.[0]?.Addresses?.[0]?.Ref || '';
+
+    const whRes = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'npSearch', apiKey: npKey, modelName:'Address', calledMethod:'getWarehouses', methodProperties:{ CityRef: cityRef, FindByString: client.address||'', Limit:1 } })
+    });
+    const whData = await whRes.json();
+    const warehouseRef = whData?.data?.[0]?.Ref || '';
+
+    const methodProps = {
+      PayerType: 'Recipient',
+      PaymentMethod: order.payMethod === 'cod' ? 'Cash' : 'NonCash',
+      CargoType: 'Parcel',
+      Weight: String(weight),
+      SeatsAmount: '1',
+      Description: desc || order.product,
+      Cost: String(costVal || order.total),
+      ServiceType: 'WarehouseWarehouse',
+      RecipientsPhone: (client.phone||'').replace(/\D/g,'').replace(/^380/,''),
+      RecipientName: client.name,
+      RecipientType: 'PrivatePerson',
+      RecipientAddress: warehouseRef,
+      CityRecipient: cityRef,
+      SenderRef: db.settings?.npSenderRef || '',
+      ContactSender: db.settings?.npSenderName || '',
+      SendersPhone: (db.settings?.npSenderPhone||'').replace(/\D/g,''),
+      SenderAddressRef: db.settings?.npSenderAddress || ''
+    };
+
+    const ttnRes = await fetch(GAS_URL, { method:'POST', body:JSON.stringify({ action:'createTTN', apiKey: npKey, methodProperties: methodProps }) });
+    const ttnData = await ttnRes.json();
+    if (ttnData?.success && ttnData?.data?.[0]?.IntDocNumber) {
+      const ttn = ttnData.data[0].IntDocNumber;
+      const idx = db.orders.findIndex(o => o.id === order.id);
+      if (idx > -1) {
+        db.orders[idx].ttn = ttn;
+        writeLog(`ТТН створено: ${ttn} для #${order.id}`);
+        renderOrders();
+        doBackup(true);
+        showToast(`✅ ТТН створено: ${ttn}`, 'success');
+        // Надсилаємо оновлений чек з ТТН
+        if (client?.email) sendClientReceipt(db.orders[idx], client);
+      }
+    } else {
+      const err = ttnData?.errors?.join(', ') || 'Невідома помилка НП';
+      showToast('❌ НП помилка: ' + err, 'error');
+    }
+  } catch(e) { showToast('Помилка при генерації ТТН: ' + e.message, 'error'); }
+}
+
+// ===================== ШТРИХ-КОД =====================
+function openBarcodeModal(idx) {
+  const p = db.products[idx];
+  if (!p) return;
+  const code = p.code || generateSKU();
+  const content = `
+    <div style="text-align:center;padding:12px">
+      <div style="background:#fff;padding:20px 16px 14px;border-radius:10px;border:1px solid var(--border);display:inline-block;min-width:240px" id="barcode-wrap">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:#0d0f14;margin-bottom:10px;letter-spacing:-.3px">${p.name}</div>
+        ${p.cat ? `<div style="font-size:.68rem;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">${p.cat}</div>` : ''}
+        <svg id="barcode-svg"></svg>
+        <div style="font-family:monospace;font-size:.72rem;margin-top:6px;color:#374151;letter-spacing:.05em">${code}</div>
+        ${p.price ? `<div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:#0d0f14;margin-top:6px">${(+p.price).toLocaleString()} ₴</div>` : ''}
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="printBarcode('${code.replace(/'/g,"\\'")}','${p.name.replace(/'/g,"\\'")}','${(p.cat||'').replace(/'/g,"\\'")}',${+p.price||0})">🖨️ Роздрукувати</button>
+        <button class="btn btn-secondary" onclick="downloadBarcode('${code.replace(/'/g,"\\'")}')">⬇️ Завантажити PNG</button>
+      </div>
+    </div>
+  `;
+  openModal(`🔖 Штрих-код: ${p.name}`, content, null, 'Закрити');
+  setTimeout(() => {
+    try {
+      JsBarcode('#barcode-svg', code, { format:'CODE128', width:2, height:72, displayValue:false, margin:4 });
+    } catch(e) { document.getElementById('barcode-wrap').innerHTML = '<div style="padding:20px;color:var(--red)">Помилка генерації штрих-коду</div>'; }
+  }, 80);
+}
+
+function printBarcode(code, name, cat, price) {
+  const svgEl = document.getElementById('barcode-svg');
+  if (!svgEl) return;
+  const svgHtml = svgEl.outerHTML;
+  const win = window.open('', '_blank', 'width=400,height=320');
+  win.document.write(`<!DOCTYPE html><html><head><title>Штрих-код</title><style>
+    body{font-family:Arial,sans-serif;text-align:center;padding:16px 20px;background:#fff;margin:0}
+    .prod-name{font-family:'Arial Black',Arial,sans-serif;font-size:13px;font-weight:900;color:#0d0f14;margin:0 0 3px}
+    .prod-cat{font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .prod-price{font-size:15px;font-weight:900;color:#0d0f14;margin-top:5px}
+    .code{font-family:monospace;font-size:9px;color:#374151;margin-top:3px;letter-spacing:.05em}
+    @media print{body{padding:8px}}
+  </style></head><body>
+    <div class="prod-name">${name}</div>
+    ${cat?`<div class="prod-cat">${cat}</div>`:''}
+    ${svgHtml}
+    <div class="code">${code}</div>
+    ${price?`<div class="prod-price">${(+price).toLocaleString()} ₴</div>`:''}
+    <script>window.onload=()=>{window.print();window.close()}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+function downloadBarcode(code) {
+  const svgEl = document.getElementById('barcode-svg');
+  if (!svgEl) return;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  const svgData = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgEl.outerHTML)));
+  img.onload = () => {
+    canvas.width = img.width; canvas.height = img.height;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img, 0, 0);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `barcode-${code}.png`;
+    a.click();
+  };
+  img.src = svgData;
+}
+
+// ===================== POS КАСА =====================
+let posCart = [];
+let posBarcodeBuffer = '';
+let posBarcodeTimer = null;
+let posActiveCat = 'all';
+
+function openPOS() {
+  const overlay = document.getElementById('pos-overlay');
+  overlay.classList.add('open');
+  // Date/cashier
+  const posDate = document.getElementById('pos-date');
+  const posCashier = document.getElementById('pos-cashier');
+  if (posDate) posDate.innerText = new Date().toLocaleString('uk-UA', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  if (posCashier) posCashier.innerText = currentUser?.name || '';
+  // Reset
+  posCart = [];
+  posActiveCat = 'all';
+  document.getElementById('pos-discount').value = '0';
+  document.getElementById('pos-search').value = '';
+  document.getElementById('pos-barcode-input').value = '';
+  // Populate clients dropdown
+  const sel = document.getElementById('pos-client');
+  sel.innerHTML = '<option value="">— Оберіть клієнта —</option>' +
+    '<option value="ANON">👤 Анонімний покупець</option>' +
+    db.clients.map(c=>`<option value="${c.name}">${c.name}${c.phone?' ('+c.phone+')':''}</option>`).join('') +
+    '<option value="NEW">➕ Новий клієнт</option>';
+  // Render
+  renderPOSCatTabs();
+  renderPOSProducts('');
+  renderPOSCart();
+  setTimeout(() => document.getElementById('pos-barcode-input')?.focus(), 150);
+}
+
+function closePOS() {
+  document.getElementById('pos-overlay').classList.remove('open');
+  posCart = [];
+}
+
+function posClearCart() {
+  if (!posCart.length) return;
+  if (!confirm('Очистити кошик?')) return;
+  posCart = [];
+  renderPOSCart();
+}
+
+function onPOSClientChange() {
+  const sel = document.getElementById('pos-client');
+  const nc = document.getElementById('pos-new-client');
+  if (nc) nc.style.display = sel.value === 'NEW' ? 'flex' : 'none';
+  autoApplyDiscount();
+}
+
+function renderPOSCatTabs() {
+  const tabs = document.getElementById('pos-cat-tabs');
+  if (!tabs) return;
+  const cats = ['all', ...new Set(db.products.filter(p=>+p.qty>0).map(p=>p.cat||'Без категорії').filter(Boolean))];
+  tabs.innerHTML = cats.map(c => `
+    <div class="pos-cat-tab${c===posActiveCat?' active':''}" onclick="setPOSCat('${c.replace(/'/g,"\\'")}')">
+      ${c==='all'?'📋 Всі':c}
+    </div>
+  `).join('');
+}
+
+function setPOSCat(cat) {
+  posActiveCat = cat;
+  renderPOSCatTabs();
+  renderPOSProducts(document.getElementById('pos-search')?.value || '');
+}
+
+function renderPOSProducts(query) {
+  const q = (query||'').toLowerCase();
+  const list = document.getElementById('pos-products-list');
+  if (!list) return;
+  let prods = db.products.filter(p => {
+    const inStock = +p.qty > 0;
+    const inCat = posActiveCat === 'all' || (p.cat||'Без категорії') === posActiveCat;
+    const matchQ = !q || p.name.toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q) || (p.cat||'').toLowerCase().includes(q);
+    return inStock && inCat && matchQ;
+  });
+  // Also show out-of-stock when searching
+  if (q) {
+    const outOfStock = db.products.filter(p => +p.qty <= 0 && (p.name.toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q)));
+    prods = [...prods, ...outOfStock];
+  }
+  if (!prods.length) {
+    list.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:rgba(255,255,255,.2);font-size:.85rem">Товарів не знайдено</div>';
+    return;
+  }
+  list.innerHTML = prods.map(p => {
+    const outOfStock = +p.qty <= 0;
+    const disc = getBestDiscountForProduct(p);
+    const discLabel = disc ? `<div style="position:absolute;top:6px;left:6px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:800;padding:2px 6px;border-radius:4px;letter-spacing:.03em">−${disc.value}%</div>` : '';
+    const discPrice = disc ? `<div style="display:flex;align-items:center;gap:5px">
+      <span style="text-decoration:line-through;color:rgba(255,255,255,.3);font-size:.75rem">${(+p.price).toLocaleString()}</span>
+      <span class="pos-prod-card-price" style="color:#22c55e">${Math.round(+p.price*(1-disc.value/100)).toLocaleString()} ₴</span>
+    </div>` : `<div class="pos-prod-card-price">${(+p.price).toLocaleString()} ₴</div>`;
+    return `<div class="pos-prod-card${outOfStock?' out-of-stock':''}" onclick="addToPOS('${p.name.replace(/'/g,"\\'")}')">
+      ${discLabel}
+      <div class="pos-prod-card-add">+</div>
+      <div class="pos-prod-card-emoji">${getPtypeEmoji(p.ptype)}</div>
+      <div class="pos-prod-card-name">${p.name}</div>
+      ${p.code?`<div class="pos-prod-card-code">${p.code}</div>`:''}
+      <div class="pos-prod-card-stock">${outOfStock?'❌ Немає':'✅ '+p.qty+' шт.'}</div>
+      ${discPrice}
+    </div>`;
+  }).join('');
+}
+
+function addToPOS(name, qty = 1) {
+  const prod = db.products.find(p => p.name === name);
+  if (!prod || +prod.qty <= 0) { showToast('Товар відсутній на складі', 'error'); return; }
+  if (prod.ptype === 'clothing' && prod.sizes) {
+    selectPOSSize(prod);
+    return;
+  }
+  const existing = posCart.find(c => c.name === name && !c.variant);
+  if (existing) {
+    if (existing.qty >= +prod.qty) { showToast('Максимальна кількість!', 'warning'); return; }
+    existing.qty = Math.min(existing.qty + qty, +prod.qty);
+  } else {
+    posCart.push({ name: prod.name, price: +prod.price, qty, maxQty: +prod.qty, unit: prod.unit||'pcs', variant:'', code: prod.code||'' });
+  }
+  renderPOSCart();
+  // Brief highlight
+  showToast(`+ ${prod.name}`, 'success');
+}
+
+function selectPOSSize(prod) {
+  const sizes = prod.sizes.split(',').map(s=>s.trim()).filter(Boolean);
+  const sizeStock = (prod.sizeStock && typeof prod.sizeStock === 'object') ? prod.sizeStock : {};
+  // If no per-size stock is configured at all, distribute total qty evenly
+  const hasSizeStock = sizes.some(s => sizeStock[s] !== undefined && sizeStock[s] !== '');
+  const sizeButtons = sizes.map(s => {
+    let stock;
+    if (hasSizeStock) {
+      stock = sizeStock[s] !== undefined ? +sizeStock[s] : 0;
+    } else {
+      // No per-size breakdown — use total product qty
+      stock = +prod.qty;
+    }
+    const inCart = posCart.filter(c => c.name === prod.name && c.variant === s).reduce((sum,c)=>sum+c.qty,0);
+    const available = Math.max(0, stock - inCart);
+    return `<button onclick="addToPOSWithSize('${prod.name.replace(/'/g,"\\'")}','${s}');closePOSSizeModal()" 
+      style="padding:12px 18px;border:2px solid ${available>0?'rgba(91,76,245,.4)':'rgba(255,255,255,.1)'};border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;background:${available>0?'rgba(91,76,245,.15)':'rgba(255,255,255,.03)'};color:${available>0?'#fff':'rgba(255,255,255,.3)'};transition:all .15s" 
+      ${available<=0?'disabled':''}>
+      ${s}<br><small style="font-weight:400;font-size:.7rem;color:${available>0?'rgba(255,255,255,.5)':'rgba(255,255,255,.2)'}">${hasSizeStock?available+' шт.':'є'}</small>
+    </button>`;
+  }).join('');
+  const modal = document.createElement('div');
+  modal.id = 'pos-size-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(4px)';
+  modal.innerHTML = `<div style="background:#1a1d27;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;max-width:440px;width:calc(100% - 32px)">
+    <div style="font-family:Syne,sans-serif;font-weight:700;color:#fff;margin-bottom:4px">${prod.name}</div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:18px">Оберіть розмір · Всього на складі: ${prod.qty} шт.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">${sizeButtons}</div>
+    <button onclick="closePOSSizeModal()" style="margin-top:16px;width:100%;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);cursor:pointer;font-weight:600">Скасувати</button>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
+function closePOSSizeModal() { document.getElementById('pos-size-modal')?.remove(); }
+
+function addToPOSWithSize(name, variant) {
+  const prod = db.products.find(p => p.name === name);
+  if (!prod) return;
+  const sizeStock = (prod.sizeStock && typeof prod.sizeStock === 'object') ? prod.sizeStock : {};
+  const hasSizeStock = prod.sizes && prod.sizes.split(',').map(s=>s.trim()).some(s => sizeStock[s] !== undefined && sizeStock[s] !== '');
+  // If per-size stock exists for this variant use it, else use total qty
+  let maxQ;
+  if (hasSizeStock && sizeStock[variant] !== undefined) {
+    maxQ = +sizeStock[variant];
+  } else {
+    maxQ = +prod.qty;
+  }
+  const existing = posCart.find(c => c.name === name && c.variant === variant);
+  if (existing) {
+    if (existing.qty >= maxQ) { showToast('Максимальна кількість!', 'warning'); return; }
+    existing.qty = Math.min(existing.qty + 1, maxQ);
+  } else {
+    posCart.push({ name: prod.name, price: +prod.price, qty: 1, maxQty: maxQ, unit: 'pcs', variant, code: prod.code||'' });
+  }
+  renderPOSCart();
+  showToast(`+ ${prod.name} (${variant})`, 'success');
+}
+
+function changePOSQty(idx, delta) {
+  const item = posCart[idx];
+  if (!item) return;
+  const newQty = item.qty + delta;
+  if (newQty < 1) { removePOSItem(idx); return; }
+  item.qty = Math.min(newQty, item.maxQty);
+  renderPOSCart();
+}
+
+function removePOSItem(idx) { posCart.splice(idx, 1); renderPOSCart(); }
+
+function renderPOSCart() {
+  const list = document.getElementById('pos-cart-items');
+  const countEl = document.getElementById('pos-cart-count');
+  if (!list) return;
+
+  const itemCount = posCart.reduce((s,i)=>s+i.qty,0);
+  if (countEl) countEl.textContent = itemCount + ' поз.';
+
+  if (!posCart.length) {
+    list.innerHTML = '<div class="pos-cart-empty">🛒 Додайте товари з каталогу або скануйте штрих-код</div>';
+    renderPOSSubtotals();
+    return;
+  }
+
+  list.innerHTML = `
+    <div class="pos-cart-row" style="border-bottom:1px solid rgba(255,255,255,.08);padding:6px 14px">
+      <div class="pos-cart-row-info" style="font-size:.68rem;color:rgba(255,255,255,.3);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Товар</div>
+      <div style="font-size:.68rem;color:rgba(255,255,255,.3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;min-width:80px;text-align:center">К-сть</div>
+      <div style="font-size:.68rem;color:rgba(255,255,255,.3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;min-width:62px;text-align:right">Сума</div>
+      <div style="width:20px"></div>
+    </div>
+  ` + posCart.map((item,i)=>`
+    <div class="pos-cart-row">
+      <div class="pos-cart-row-info">
+        <div class="pos-cart-row-name">${item.name}${item.variant?`<span class="pos-cart-row-variant">${item.variant}</span>`:''}</div>
+        <div class="pos-cart-row-sub">${(+item.price).toLocaleString()} ₴ / шт.${item.code?' · '+item.code:''}</div>
+      </div>
+      <div class="pos-qty-ctrl">
+        <button class="pos-qty-btn" onclick="changePOSQty(${i},-1)">−</button>
+        <span class="pos-qty-num">${item.qty}</span>
+        <button class="pos-qty-btn" onclick="changePOSQty(${i},1)">+</button>
+      </div>
+      <div class="pos-cart-row-total">${(item.qty*item.price).toLocaleString()} ₴</div>
+      <button class="pos-cart-del" onclick="removePOSItem(${i})" title="Видалити">✕</button>
+    </div>
+  `).join('');
+
+  renderPOSSubtotals();
+  autoApplyDiscount();
+}
+
+function renderPOSSubtotals() {
+  const sub = document.getElementById('pos-subtotals');
+  const totalEl = document.getElementById('pos-total-val');
+  const discountAmtEl = document.getElementById('pos-discount-amt');
+  if (!sub) return;
+
+  const subtotal = posCart.reduce((s,i)=>s+i.qty*i.price,0);
+  const discPct = Math.min(100, Math.max(0, +(document.getElementById('pos-discount')?.value||0)));
+  const discAmt = Math.round(subtotal * discPct / 100);
+  const total = subtotal - discAmt;
+
+  if (discountAmtEl) discountAmtEl.textContent = discAmt > 0 ? `−${discAmt.toLocaleString()} ₴` : '';
+
+  sub.innerHTML = posCart.length ? `
+    <div class="pos-sub-row"><span>Підсума:</span><span>${subtotal.toLocaleString()} ₴</span></div>
+    ${discAmt>0?`<div class="pos-sub-row discount"><span>Знижка ${discPct}%:</span><span>−${discAmt.toLocaleString()} ₴</span></div>`:''}
+  ` : '';
+
+  if (totalEl) totalEl.textContent = total.toLocaleString() + ' ₴';
+}
+
+async function completePOS(payMethod) {
+  if (!posCart.length) { showToast('Кошик порожній!', 'error'); return; }
+  const sel = document.getElementById('pos-client');
+  let cName = sel?.value || '';
+  let cPhone = '';
+  if (!cName) { showToast('Оберіть клієнта!', 'error'); sel?.focus(); return; }
+  if (cName === 'ANON') {
+    cName  = 'Анонімний покупець';
+    cPhone = '—';
+  } else if (cName === 'NEW') {
+    cName  = document.getElementById('pos-nc-name')?.value.trim();
+    cPhone = document.getElementById('pos-nc-phone')?.value.trim();
+    if (!cName || !cPhone) { showToast("Введіть ім'я та телефон!", 'error'); return; }
+    if (!db.clients.find(c => c.phone === cPhone)) {
+      db.clients.push({ name:cName, phone:cPhone, email:'', city:'', address:'', orders:0, sum:0, last:'' });
+    }
+  } else {
+    const client = db.clients.find(c => c.name === cName);
+    if (client) cPhone = client.phone;
+  }
+
+  const discPct = Math.min(100, Math.max(0, +(document.getElementById('pos-discount')?.value||0)));
+
+  // Validate stock
+  for (const item of posCart) {
+    const prod = db.products.find(p => p.name === item.name);
+    if (prod && +prod.qty < item.qty) { showToast(`Недостатньо на складі: ${item.name} (є ${prod.qty} шт.)`, 'error'); return; }
+  }
+
+  const batchId = String(Date.now()).slice(-6);
+  const allOrderIds = [];
+
+  for (const item of posCart) {
+    const prod = db.products.find(p => p.name === item.name);
+    if (prod) {
+      prod.qty -= item.qty;
+      if (item.variant && prod.sizeStock && prod.sizeStock[item.variant] !== undefined) {
+        prod.sizeStock[item.variant] = Math.max(0, (prod.sizeStock[item.variant]||0) - item.qty);
+      }
+    }
+    const discountedPrice = item.price * (1 - discPct/100);
+    const orderId = batchId + '-' + posCart.indexOf(item);
+    const order = {
+      id: orderId, date: getFmtDate(), client: cName, phone: cPhone,
+      product: item.name, variant: item.variant||'', qty: item.qty,
+      total: Math.round(item.qty * discountedPrice),
+      unit: prod?.unit||'pcs',
+      manager: currentUser.name, payMethod, ttn: '',
+      comment: `Каса #${batchId}${discPct>0?' знижка '+discPct+'%':''}`
+    };
+    db.orders.unshift(order);
+    allOrderIds.push(orderId);
+    // Don't update client stats for anonymous buyer
+    if (cName !== 'Анонімний покупець') {
+      const cl = db.clients.find(c => c.name === cName);
+      if (cl) { cl.orders = (+cl.orders||0)+1; cl.sum = (+cl.sum||0)+order.total; cl.last = order.date; }
+    }
+  }
+
+  const grandTotal = posCart.reduce((s,i)=>s+i.qty*i.price,0) * (1 - discPct/100);
+  writeLog(`Продаж через касу: ${posCart.length} товарів, сума: ${Math.round(grandTotal).toLocaleString()} ₴ (#${batchId})`);
+
+  // Email receipt
+  const client = db.clients.find(c => c.name === cName);
+  if (client?.email) sendPOSReceiptEmail(cName, cPhone, posCart, batchId, payMethod, client.email, discPct);
+
+  // Print receipt
+  printPOSReceipt(cName, cPhone, posCart, batchId, payMethod, discPct);
+
+  // Flash animation
+  const flash = document.createElement('div');
+  flash.className = 'pos-success-flash';
+  flash.innerHTML = `<div class="pos-success-flash-inner">✅ Чек #${batchId}<br><span style="font-size:.9rem;font-weight:400;opacity:.8">${Math.round(grandTotal).toLocaleString()} ₴ · ${payMethod==='card'?'Картка':payMethod==='cod'?'Накладений платіж':'Готівка'}</span></div>`;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 700);
+
+  posCart = [];
+  renderAll();
+  doBackup(true);
+  closePOS();
+  showToast(`✅ Чек #${batchId} — ${Math.round(grandTotal).toLocaleString()} ₴`, 'success');
+}
+
+async function sendPOSReceiptEmail(cName, cPhone, items, batchId, payMethod, email, discPct=0) {
+  if (!email) return;
+  const shopName = db.settings?.shopName || 'LaVok Shop';
+  const subtotal = items.reduce((s,i)=>s+i.qty*i.price,0);
+  const total = Math.round(subtotal * (1 - discPct/100));
+  const itemsHtml = items.map(i=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8eaef"><span>${i.name}${i.variant?' ('+i.variant+')':''} × ${i.qty}</span><strong>${(i.qty*i.price).toLocaleString()} ₴</strong></div>`).join('');
+  const body = `Чек #${batchId} | ${shopName}\nКлієнт: ${cName}\nТовари:\n${items.map(i=>`- ${i.name}${i.variant?' ('+i.variant+')':''} x${i.qty} = ${(i.qty*i.price).toLocaleString()} ₴`).join('\n')}\nРАЗОМ: ${total.toLocaleString()} ₴\nОплата: ${payMethod==='card'?'Картка':payMethod==='cod'?'Накладений платіж':'Готівка'}`;
+  const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:500px"><div style="background:#5b4cf5;padding:20px;text-align:center;color:#fff"><h2 style="margin:0">${shopName}</h2></div><div style="padding:20px"><p>Шановний(а) <strong>${cName}</strong>, дякуємо за покупку!</p><div style="background:#f4f5f8;border-radius:8px;padding:16px;margin:12px 0"><div style="font-weight:700;margin-bottom:8px">Чек #${batchId}</div>${itemsHtml}<div style="display:flex;justify-content:space-between;padding:10px 0;font-size:1.05rem;font-weight:700"><span>РАЗОМ</span><span style="color:#5b4cf5">${total.toLocaleString()} ₴</span></div></div></div></div>`;
+  try {
+    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'sendEmail', to: email, subject:`Чек #${batchId} — ${shopName}`, body, htmlBody }) });
+  } catch(e) {}
+}
+
+function printPOSReceipt(cName, cPhone, items, batchId, payMethod, discPct=0) {
+  const shopName = db.settings?.shopName || 'LaVok Shop';
+  const subtotal = items.reduce((s,i)=>s+i.qty*i.price,0);
+  const discAmt = Math.round(subtotal * discPct / 100);
+  const total = subtotal - discAmt;
+  const payLabel = payMethod==='card'?'КАРТКА':payMethod==='cod'?'НАКЛАДЕНИЙ ПЛАТІЖ':'ГОТІВКА';
+  const win = window.open('', '_blank', 'width=380,height:600');
+  win.document.write(`<!DOCTYPE html><html><head><title>Чек</title><style>
+    body{font-family:'Courier New',monospace;font-size:13px;width:300px;margin:0 auto;padding:10px;background:#fff}
+    .center{text-align:center}.sep{border-top:1px dashed #333;margin:8px 0}.bold{font-weight:700}
+    .row{display:flex;justify-content:space-between;margin:3px 0}.total{font-size:16px;font-weight:700}
+    @media print{body{margin:0;padding:5px;width:280px}}
+  </style></head><body>
+    <div class="center bold" style="font-size:16px">${shopName}</div>
+    <div class="center" style="font-size:11px;margin-bottom:8px">Дропшипінг & Рітейл</div>
+    <div class="sep"></div>
+    <div class="row"><span>ЧЕК №:</span><span>${batchId}</span></div>
+    <div class="row"><span>ДАТА:</span><span>${getFmtDate()}</span></div>
+    <div class="row"><span>КАСИР:</span><span>${currentUser.name.toUpperCase()}</span></div>
+    <div class="sep"></div>
+    <div class="row bold"><span>КЛІЄНТ:</span><span>${cName.toUpperCase()}</span></div>
+    <div class="row"><span>ТЕЛЕФОН:</span><span>${cPhone}</span></div>
+    <div class="sep"></div>
+    <div class="row bold"><span style="flex:1">ТОВАР</span><span style="width:30px;text-align:center">КІЛ</span><span style="width:70px;text-align:right">СУМА</span></div>
+    ${items.map(i=>`<div class="row"><span style="flex:1;overflow:hidden">${i.name}${i.variant?' ('+i.variant+')':''}</span><span style="width:30px;text-align:center">x${i.qty}</span><span style="width:70px;text-align:right">${(i.qty*i.price).toLocaleString()}</span></div>`).join('')}
+    <div class="sep"></div>
+    ${discAmt>0?`<div class="row"><span>ПІДСУМА:</span><span>${subtotal.toLocaleString()} ₴</span></div><div class="row"><span>ЗНИЖКА ${discPct}%:</span><span>-${discAmt.toLocaleString()} ₴</span></div>`:''}
+    <div class="row total"><span>ДО СПЛАТИ:</span><span>${total.toLocaleString()} ₴</span></div>
+    <div class="row"><span>ОПЛАТА:</span><span>${payLabel}</span></div>
+    <div class="sep"></div>
+    <div class="center" style="margin-top:12px;font-size:11px">Дякуємо за покупку!<br>LaVok CRM</div>
+    <script>window.onload=()=>{window.print();setTimeout(window.close,1000)}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// Обробка сканування штрих-коду (POS)
+function handlePOSBarcodeInput(e) {
+  clearTimeout(posBarcodeTimer);
+  posBarcodeBuffer += e.key !== 'Enter' ? (e.key.length===1?e.key:'') : '';
+  if (e.key === 'Enter') {
+    const code = posBarcodeBuffer.trim();
+    posBarcodeBuffer = '';
+    if (code) {
+      const prod = db.products.find(p => p.code === code || p.name === code);
+      if (prod && +prod.qty > 0) {
+        addToPOS(prod.name);
+        document.getElementById('pos-barcode-input').value = '';
+        document.getElementById('pos-search').value = '';
+      } else {
+        showToast(`Товар "${code}" не знайдений або відсутній`, 'error');
+        document.getElementById('pos-barcode-input').value = '';
+      }
+    }
+  } else {
+    posBarcodeTimer = setTimeout(() => { posBarcodeBuffer = ''; }, 200);
+  }
+}
+// ===================== POS — SYNC PRODUCTS FROM GOOGLE SHEETS =====================
+async function posSyncProducts() {
+  const btn = document.getElementById('pos-sync-btn');
+  const lbl = document.getElementById('pos-sync-label');
+  if (btn) btn.disabled = true;
+  if (lbl) lbl.textContent = '...';
+  try {
+    const res = await fetch(GAS_URL + '?action=readAll');
+    if (!res.ok) throw new Error();
+    const fresh = await res.json();
+    if (fresh.products) db.products = fresh.products;
+    if (fresh.discounts) db.discounts = fresh.discounts || [];
+    if (fresh.clients)  db.clients  = fresh.clients;
+    normalizeAllDates();
+    // Refresh POS catalog
+    renderPOSCatTabs();
+    renderPOSProducts(document.getElementById('pos-search')?.value || '');
+    // Re-populate client dropdown
+    const sel = document.getElementById('pos-client');
+    const curVal = sel?.value;
+    if (sel) {
+      sel.innerHTML = '<option value="">— Оберіть клієнта —</option>' +
+        '<option value="ANON">👤 Анонімний покупець</option>' +
+        db.clients.map(c=>`<option value="${c.name}">${c.name}${c.phone?' ('+c.phone+')':''}</option>`).join('') +
+        '<option value="NEW">➕ Новий клієнт</option>';
+      if (curVal) sel.value = curVal;
+    }
+    showToast('✅ Товари оновлено з Google Sheets', 'success');
+  } catch(e) {
+    showToast('❌ Не вдалось оновити. Перевірте з\'єднання.', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+    if (lbl) lbl.textContent = 'Оновити';
+  }
+}
+
+// ===================== DISCOUNT ENGINE =====================
+// Discount object schema:
+// { id, name, type:'percent'|'fixed', value:number,
+//   minQty:number, minAmount:number,
+//   productCodes:[] (array of SKU codes, empty=all),
+//   categories:[]  (array of category names, empty=all),
+//   clientNames:[] (array of client names, empty=all),
+//   startDate:'', endDate:'',
+//   active:true, priority:1(higher=better), note:'' }
+
+function getActiveDiscounts() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return (db.discounts||[]).filter(d => {
+    if (!d.active && d.active !== true && d.active !== 'true' && d.active !== 1) return false;
+    if (d.startDate) {
+      const s = parseDateToObj(d.startDate);
+      if (s && s > today) return false;
+    }
+    if (d.endDate) {
+      const e = parseDateToObj(d.endDate);
+      if (e) { e.setHours(23,59,59,999); if (e < today) return false; }
+    }
+    return true;
+  }).sort((a,b) => (+b.priority||0)-(+a.priority||0));
+}
+
+function parseDateToObj(str) {
+  if (!str) return null;
+  // dd.mm.yyyy or yyyy-mm-dd
+  if (/^\d{2}\.\d{2}\.\d{4}/.test(str)) {
+    const [d,m,y] = str.split('.');
+    return new Date(+y, +m-1, +d);
+  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    const [y,m,d] = str.split('-');
+    return new Date(+y, +m-1, +d);
+  }
+  const d = new Date(str);
+  return isNaN(d) ? null : d;
+}
+
+// Returns the single best discount applicable to a product object (for catalog display)
+function getBestDiscountForProduct(prod) {
+  const active = getActiveDiscounts().filter(d => d.type === 'percent');
+  for (const d of active) {
+    const codes = parseJsonArr(d.productCodes);
+    const cats  = parseJsonArr(d.categories);
+    if (codes.length && !codes.includes(prod.code) && !codes.includes(prod.name)) continue;
+    if (cats.length  && !cats.includes(prod.cat)) continue;
+    return d; // highest priority first
+  }
+  return null;
+}
+
+// Evaluate all applicable discounts for the current cart + client
+// Returns { discountPct, discountAmt, appliedRules:[] }
+function evaluateCartDiscounts(cartItems, clientName) {
+  const subtotal = cartItems.reduce((s,i)=>s+i.qty*i.price, 0);
+  const totalQty = cartItems.reduce((s,i)=>s+i.qty, 0);
+  const active = getActiveDiscounts();
+  let bestPct = 0;
+  let appliedRules = [];
+
+  for (const d of active) {
+    // Check client restriction
+    const clients = parseJsonArr(d.clientNames);
+    if (clients.length && !clients.includes(clientName)) continue;
+
+    // Check min amount
+    if (+d.minAmount > 0 && subtotal < +d.minAmount) continue;
+    // Check min qty
+    if (+d.minQty > 0 && totalQty < +d.minQty) continue;
+
+    // Check product/category filter
+    const codes = parseJsonArr(d.productCodes);
+    const cats  = parseJsonArr(d.categories);
+    const cartMatches = cartItems.some(item => {
+      const prod = db.products.find(p=>p.name===item.name);
+      if (codes.length && !codes.includes(prod?.code) && !codes.includes(item.name)) return false;
+      if (cats.length  && !cats.includes(prod?.cat)) return false;
+      return true;
+    });
+    if ((codes.length || cats.length) && !cartMatches) continue;
+
+    // Calculate effective % for this rule
+    let effPct = 0;
+    if (d.type === 'percent') {
+      effPct = +d.value;
+    } else if (d.type === 'fixed') {
+      // Convert fixed amount to % of subtotal
+      effPct = subtotal > 0 ? Math.min(100, (+d.value / subtotal) * 100) : 0;
+    }
+    if (effPct > bestPct) {
+      bestPct = effPct;
+      appliedRules = [d];
+    }
+  }
+
+  const discountAmt = Math.round(subtotal * bestPct / 100);
+  return { discountPct: bestPct, discountAmt, appliedRules };
+}
+
+function parseJsonArr(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  try { const p = JSON.parse(val); return Array.isArray(p) ? p.filter(Boolean) : []; } catch { return []; }
+}
+
+// Called when user changes discount field manually OR when cart/client changes
+function onPOSDiscountChange() {
+  renderPOSSubtotals();
+}
+
+// Auto-apply best discount based on cart + client, called on cart/client changes
+function autoApplyDiscount() {
+  const clientName = document.getElementById('pos-client')?.value || '';
+  const { discountPct, appliedRules } = evaluateCartDiscounts(posCart, clientName);
+  const infoEl = document.getElementById('pos-auto-discount-info');
+  const discInput = document.getElementById('pos-discount');
+
+  // Only auto-apply if it's BETTER than what the user manually entered
+  const manualPct = +(discInput?.value||0);
+  if (discountPct > manualPct) {
+    if (discInput) discInput.value = discountPct.toFixed(2).replace(/\.00$/,'');
+    if (infoEl && appliedRules.length) {
+      infoEl.style.display = 'block';
+      infoEl.innerHTML = `✨ Авто-знижка: <strong>${appliedRules[0].name}</strong> — −${discountPct}%`;
+    }
+  } else if (discountPct === 0 && manualPct === 0) {
+    if (infoEl) infoEl.style.display = 'none';
+  }
+  renderPOSSubtotals();
+}
+
+// ===================== DISCOUNT MANAGEMENT UI =====================
+function renderDiscounts() {
+  const active   = (db.discounts||[]).filter(d => d.active===true||d.active==='true'||d.active===1);
+  const inactive = (db.discounts||[]).filter(d => !active.includes(d));
+
+  // Stats
+  const statsEl = document.getElementById('disc-stats');
+  if (statsEl) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const expiring = active.filter(d => {
+      if (!d.endDate) return false;
+      const e = parseDateToObj(d.endDate); if (!e) return false;
+      const diff = (e-today)/(1000*60*60*24);
+      return diff >= 0 && diff <= 7;
+    });
+    statsEl.innerHTML = `
+      <div class="stat-card"><div class="stat-label">Активних знижок</div><div class="stat-value">${active.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Неактивних</div><div class="stat-value">${inactive.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Закінчуються за 7 днів</div><div class="stat-value" style="color:var(--orange)">${expiring.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Всього правил</div><div class="stat-value">${(db.discounts||[]).length}</div></div>
+    `;
+  }
+
+  const countEl = document.getElementById('disc-active-count');
+  if (countEl) countEl.textContent = active.length + ' шт.';
+
+  const renderRow = (d, i) => {
+    const codes = parseJsonArr(d.productCodes);
+    const cats  = parseJsonArr(d.categories);
+    const clnts = parseJsonArr(d.clientNames);
+    const conditions = [];
+    if (+d.minAmount>0) conditions.push(`від ${(+d.minAmount).toLocaleString()} ₴`);
+    if (+d.minQty>0)    conditions.push(`від ${d.minQty} шт.`);
+    if (codes.length)   conditions.push(`товари: ${codes.slice(0,2).join(', ')}${codes.length>2?'…':''}`);
+    if (cats.length)    conditions.push(`кат.: ${cats.slice(0,2).join(', ')}${cats.length>2?'…':''}`);
+    if (clnts.length)   conditions.push(`клієнти: ${clnts.slice(0,2).join(', ')}${clnts.length>2?'…':''}`);
+    const typeLabel = d.type==='percent' ? `<span class="badge badge-purple">−${d.value}%</span>` : `<span class="badge badge-blue">−${(+d.value).toLocaleString()} ₴</span>`;
+    const dateStr = [d.startDate, d.endDate].filter(Boolean).join(' → ') || '∞ Безстроково';
+    const idx = (db.discounts||[]).indexOf(d);
+    return `<tr>
+      <td><strong>${d.name}</strong>${d.note?`<br><small style="color:var(--muted)">${d.note}</small>`:''}</td>
+      <td>${d.type==='percent'?'Відсоток':'Фіксована сума'}</td>
+      <td>${typeLabel}</td>
+      <td style="font-size:.78rem;color:var(--muted)">${conditions.join(', ')||'На всі'}</td>
+      <td style="font-size:.78rem">${dateStr}</td>
+      ${i===undefined?'':`<td><span class="badge badge-gray">P${d.priority||1}</span></td>`}
+      <td>
+        <button class="btn-icon" onclick="openDiscountModal(${idx})" title="Редагувати">✏️</button>
+        <button class="btn-icon" onclick="toggleDiscount(${idx})" title="${d.active?'Вимкнути':'Увімкнути'}">${d.active?'⏸':'▶️'}</button>
+        <button class="btn-icon" style="color:var(--red)" onclick="deleteDiscount(${idx})" title="Видалити">🗑️</button>
+      </td>
+    </tr>`;
+  };
+
+  const taEl = document.getElementById('t-discounts-active');
+  if (taEl) taEl.innerHTML = active.length ? active.map(d=>renderRow(d)).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Активних знижок немає. Створіть першу!</td></tr>';
+
+  const tiEl = document.getElementById('t-discounts-inactive');
+  if (tiEl) tiEl.innerHTML = inactive.length ? inactive.map(d=>renderRow(d,'arch')).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Немає</td></tr>';
+}
+
+let _discArchVisible = false;
+function toggleDiscArchive() {
+  _discArchVisible = !_discArchVisible;
+  const wrap = document.getElementById('disc-archive-wrap');
+  const btn  = document.getElementById('disc-arch-btn');
+  if (wrap) wrap.style.display = _discArchVisible ? 'block' : 'none';
+  if (btn)  btn.textContent = _discArchVisible ? 'Сховати' : 'Показати';
+}
+
+function toggleDiscount(idx) {
+  const d = db.discounts[idx];
+  if (!d) return;
+  d.active = !(d.active===true||d.active==='true'||d.active===1);
+  renderDiscounts();
+  doBackup(true);
+  showToast(d.active ? '✅ Знижку увімкнено' : '⏸ Знижку вимкнено', 'success');
+}
+
+function deleteDiscount(idx) {
+  if (!confirm(`Видалити знижку "${db.discounts[idx]?.name}"?`)) return;
+  writeLog(`Видалено знижку: ${db.discounts[idx].name}`);
+  db.discounts.splice(idx, 1);
+  renderDiscounts();
+  doBackup(true);
+  showToast('Знижку видалено', 'success');
+}
+
+function openDiscountModal(idx) {
+  const d = idx > -1 ? db.discounts[idx] : {
+    name:'', type:'percent', value:10, minQty:0, minAmount:0,
+    productCodes:[], categories:[], clientNames:[],
+    startDate:'', endDate:'', active:true, priority:1, note:''
+  };
+
+  // Build category and client options
+  const allCats = [...new Set((db.products||[]).map(p=>p.cat).filter(Boolean))];
+  const catOptions = allCats.map(c=>`<label style="display:flex;align-items:center;gap:6px;font-size:.8rem;padding:3px 0;cursor:pointer"><input type="checkbox" class="disc-cat-cb" value="${c}" ${parseJsonArr(d.categories).includes(c)?'checked':''}> ${c}</label>`).join('');
+  const codeOptions = (db.products||[]).map(p=>`<option value="${p.code||p.name}">${p.name}${p.code?' ('+p.code+')':''}</option>`).join('');
+
+  const content = `
+    <div class="form-group"><label>Назва знижки *</label><input type="text" id="d-name" value="${d.name}" placeholder="Напр. Літній розпродаж"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Тип</label>
+        <select id="d-type" onchange="onDiscTypeChange()">
+          <option value="percent" ${d.type==='percent'?'selected':''}>% Відсоток від суми</option>
+          <option value="fixed"   ${d.type==='fixed'  ?'selected':''}>₴ Фіксована сума</option>
+        </select>
+      </div>
+      <div class="form-group"><label id="d-value-lbl">${d.type==='fixed'?'Сума (₴)':'Розмір знижки (%)'}</label>
+        <input type="number" id="d-value" min="0" max="${d.type==='percent'?100:999999}" value="${d.value}" placeholder="${d.type==='percent'?'Напр. 10':'Напр. 50'}">
+      </div>
+    </div>
+
+    <div style="background:var(--surface);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📋 Умови застосування</div>
+      <div class="form-row">
+        <div class="form-group"><label>Мін. сума замовлення (₴)</label><input type="number" id="d-min-amount" min="0" value="${d.minAmount||0}" placeholder="0 = без обмеження"></div>
+        <div class="form-group"><label>Мін. кількість товарів</label><input type="number" id="d-min-qty" min="0" value="${d.minQty||0}" placeholder="0 = без обмеження"></div>
+      </div>
+
+      <div class="form-group"><label>Застосовувати до товарів (SKU) — порожньо = всі</label>
+        <select id="d-product-codes" multiple style="height:90px;width:100%;font-size:.82rem">
+          ${codeOptions}
+        </select>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:3px">Ctrl+клік для вибору декількох</div>
+      </div>
+
+      <div class="form-group"><label>Застосовувати до категорій — порожньо = всі</label>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;max-height:80px;overflow-y:auto;padding:4px;border:1.5px solid var(--border);border-radius:8px;background:var(--card)">
+          ${catOptions || '<span style="color:var(--muted);font-size:.8rem">Категорій ще немає</span>'}
+        </div>
+      </div>
+
+      <div class="form-group"><label>Тільки для клієнтів — порожньо = всі</label>
+        <select id="d-clients" multiple style="height:70px;width:100%;font-size:.82rem">
+          ${(db.clients||[]).map(c=>`<option value="${c.name}" ${parseJsonArr(d.clientNames).includes(c.name)?'selected':''}>${c.name}${c.phone?' ('+c.phone+')':''}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    <div style="background:var(--surface);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📅 Термін дії</div>
+      <div class="form-row">
+        <div class="form-group"><label>Дата початку</label><input type="date" id="d-start" value="${toInputDate(d.startDate)}"></div>
+        <div class="form-group"><label>Дата закінчення</label><input type="date" id="d-end" value="${toInputDate(d.endDate)}"></div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group"><label>Пріоритет (1–10, більше = вищий)</label><input type="number" id="d-priority" min="1" max="10" value="${d.priority||1}"></div>
+      <div class="form-group"><label>Статус</label>
+        <select id="d-active">
+          <option value="true"  ${(d.active===true||d.active==='true'||d.active===1)?'selected':''}>✅ Активна</option>
+          <option value="false" ${(!d.active||d.active==='false'||d.active===0)?'selected':''}>⏸ Неактивна</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Нотатка (необов'язково)</label><input type="text" id="d-note" value="${d.note||''}" placeholder="Внутрішня примітка"></div>
+  `;
+
+  openModal(idx > -1 ? '✏️ Редагувати знижку' : '➕ Нова знижка', content, () => {
+    const name = document.getElementById('d-name').value.trim();
+    if (!name) { showToast('Введіть назву знижки!', 'error'); return false; }
+    const val = +document.getElementById('d-value').value || 0;
+    if (val <= 0) { showToast('Вкажіть розмір знижки!', 'error'); return false; }
+
+    // Collect selected product codes
+    const selCodes = [...document.getElementById('d-product-codes').selectedOptions].map(o=>o.value);
+    const selCats  = [...document.querySelectorAll('.disc-cat-cb:checked')].map(cb=>cb.value);
+    const selClnts = [...document.getElementById('d-clients').selectedOptions].map(o=>o.value);
+
+    const newD = {
+      id:           idx > -1 ? d.id : ('D'+Date.now()),
+      name,
+      type:         document.getElementById('d-type').value,
+      value:        val,
+      minQty:       +document.getElementById('d-min-qty').value || 0,
+      minAmount:    +document.getElementById('d-min-amount').value || 0,
+      productCodes: selCodes,
+      categories:   selCats,
+      clientNames:  selClnts,
+      startDate:    fromInputDate(document.getElementById('d-start').value),
+      endDate:      fromInputDate(document.getElementById('d-end').value),
+      active:       document.getElementById('d-active').value === 'true',
+      priority:     +document.getElementById('d-priority').value || 1,
+      note:         document.getElementById('d-note').value.trim()
+    };
+
+    if (idx > -1) { db.discounts[idx] = newD; writeLog(`Оновлено знижку: ${name}`); }
+    else          { db.discounts.push(newD);  writeLog(`Створено знижку: ${name}`); }
+    renderDiscounts();
+    doBackup(true);
+    showToast(idx > -1 ? '✅ Знижку оновлено' : '✅ Знижку створено', 'success');
+    return true;
+  }, idx > -1 ? '💾 Зберегти' : '➕ Створити знижку');
+
+  // Pre-select items
+  setTimeout(() => {
+    const selCodesEl = document.getElementById('d-product-codes');
+    const existingCodes = parseJsonArr(d.productCodes);
+    if (selCodesEl && existingCodes.length) {
+      [...selCodesEl.options].forEach(o => { if (existingCodes.includes(o.value)) o.selected = true; });
+    }
+    onDiscTypeChange();
+  }, 50);
+}
+
+function onDiscTypeChange() {
+  const type = document.getElementById('d-type')?.value;
+  const lbl  = document.getElementById('d-value-lbl');
+  const inp  = document.getElementById('d-value');
+  if (lbl) lbl.textContent = type==='fixed' ? 'Сума знижки (₴)' : 'Розмір знижки (%)';
+  if (inp) inp.max = type==='percent' ? '100' : '999999';
+}
+
+function toInputDate(str) {
+  if (!str) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0,10);
+  if (/^\d{2}\.\d{2}\.\d{4}/.test(str)) {
+    const [d,m,y] = str.split('.');
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+  return '';
+}
+function fromInputDate(str) {
+  if (!str) return '';
+  // Store as dd.mm.yyyy
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    const [y,m,d] = str.split('-');
+    return `${d}.${m}.${y}`;
+  }
+  return str;
+}
+
 // Перераховує stats клієнтів із реальних замовлень (виправляє баг з кількістю/датою)
 function recalcClients() {
   db.clients.forEach(c => {
@@ -1764,7 +3645,7 @@ function openClientModal(idx = -1) {
 }
 
 function deleteClient(idx) {
-  if (currentUser.role !== 'admin') { showToast('У вас немає прав для видалення', 'error'); return; }
+  if (currentUser.role !== 'admin') { showToast('Видалення клієнтів доступне тільки Власнику', 'error'); return; }
   if (!confirm('Видалити цього клієнта з бази?')) return;
   writeLog(`Видалено клієнта: ${db.clients[idx].name}`);
   db.clients.splice(idx, 1);
@@ -2062,7 +3943,7 @@ function dateOnly(d) {
 }
 
 function renderAnalytics() {
-  if (currentUser.role !== 'admin') return;
+  if (currentUser.role !== 'admin' && currentUser.role !== 'administrator') return;
   const periodVal = document.getElementById('analytics-period').value;
   const now = new Date();
   let cutoff;
@@ -2239,7 +4120,10 @@ function renderExpenses() {
       <td style="font-weight:700;color:var(--red)">- ${(+e.amount||0).toLocaleString()} ₴</td>
       <td style="font-size:.8rem"><span class="badge badge-gray">${e.author||'—'}</span></td>
       <td>
-        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteExpense(${expenses.indexOf(e)})" title="Видалити">🗑️</button>` : ''}
+        ${currentUser.role === 'admin' ? `
+          <button class="btn-icon" onclick="openExpenseModal(${expenses.indexOf(e)})" title="Редагувати">✏️</button>
+          <button class="btn-icon" style="color:var(--red)" onclick="deleteExpense(${expenses.indexOf(e)})" title="Видалити">🗑️</button>
+        ` : ''}
       </td>
     </tr>
   `).join('') || '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Немає витрат за цей період</td></tr>';
@@ -2277,7 +4161,9 @@ function renderExpenses() {
 }
 
 function openExpenseModal(idx = -1) {
-  if (currentUser.role !== 'admin') { showToast('Тільки власник може додавати витрати', 'error'); return; }
+  // Власник: повний доступ. Адміністратор: тільки додавати (idx === -1). Менеджер: немає доступу.
+  if (currentUser.role === 'manager') { showToast('У вас немає доступу до витрат', 'error'); return; }
+  if (currentUser.role === 'administrator' && idx > -1) { showToast('Адміністратор може тільки додавати витрати', 'error'); return; }
   const e = idx > -1 ? db.expenses[idx] : {cat:'', desc:'', amount:0, date:''};
   const content = `
     <div class="form-group">
@@ -2329,12 +4215,19 @@ function renderLogs() {
   const query = document.getElementById('log-search').value.toLowerCase();
   const user = document.getElementById('log-user-filter').value;
   
-  const users = [...new Set(db.logs.map(l => l.user))];
+  // Адміністратор бачить тільки свої дії та дії Менеджерів — НЕ дії Власника
+  let logsSource = db.logs;
+  if (currentUser.role === 'administrator') {
+    const ownerNames = db.users.filter(u => u.role === 'admin').map(u => u.name);
+    logsSource = db.logs.filter(l => !ownerNames.includes(l.user));
+  }
+  
+  const users = [...new Set(logsSource.map(l => l.user))];
   const filter = document.getElementById('log-user-filter');
   const old = filter.value;
   filter.innerHTML = '<option value="">Всі користувачі</option>' + users.map(u => `<option value="${u}" ${u==old?'selected':''}>${u}</option>`).join('');
 
-  const filtered = db.logs.filter(l => {
+  const filtered = logsSource.filter(l => {
     return (l.action||'').toLowerCase().includes(query) && (!user || l.user === user);
   });
 
@@ -2538,7 +4431,7 @@ function simulateIncomingMsg(chatId, text) {
   });
   renderChatList();
   if (activeChatId === chatId) renderChatMessages(chatId);
-  addNotification('💬 Нове повідомлення', `${chat.name}: ${text}`);
+  addNotification('💬 Нове повідомлення', `${chat.name}: ${text}`, 'chat');
 }
 
 // ===================== SHOP =====================
@@ -2751,8 +4644,10 @@ function sv(id, el) {
 
   // Render on tab switch
   if (id === 'analytics') renderAnalytics();
-  if (id === 'expenses') renderExpenses();
-  if (id === 'chat') renderChatList();
+  if (id === 'expenses')  renderExpenses();
+  if (id === 'discounts') renderDiscounts();
+  if (id === 'chat')      renderChatList();
+  if (id === 'settings')  loadAPISettingsUI();
 }
 
 function toggleSidebar() {
@@ -2767,8 +4662,8 @@ function toggleSidebar() {
 }
 
 // ===================== NOTIFICATIONS =====================
-function addNotification(title, sub) {
-  notifications.unshift({ title, sub, time: new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit'}), read: false });
+function addNotification(title, sub, link) {
+  notifications.unshift({ title, sub, link: link||'', time: new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit'}), read: false });
   updateNotifCount();
 }
 function updateNotifCount() {
@@ -2779,13 +4674,25 @@ function updateNotifCount() {
 }
 function renderNotifications() {
   const list = document.getElementById('notif-list');
-  list.innerHTML = notifications.map(n => `
-    <div class="notif-item ${n.read ? '' : 'unread'}">
+  list.innerHTML = notifications.length ? notifications.map((n, i) => `
+    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="onNotifClick(${i})" style="cursor:pointer">
       <div class="notif-item-title">${n.title}</div>
       <div class="notif-item-sub">${n.sub}</div>
       <div class="notif-item-time">${n.time}</div>
     </div>
-  `).join('');
+  `).join('') : '<div style="padding:20px;text-align:center;color:var(--muted);font-size:.85rem">Немає сповіщень</div>';
+}
+function onNotifClick(idx) {
+  const n = notifications[idx];
+  n.read = true;
+  updateNotifCount();
+  renderNotifications();
+  // Навігація за посиланням сповіщення
+  if (n.link) {
+    const navItem = document.querySelector(`.nav-item[onclick*="sv('${n.link}'"]`);
+    sv(n.link, navItem);
+    toggleNotif();
+  }
 }
 function toggleNotif() {
   document.getElementById('notif-panel').classList.toggle('open');
@@ -2799,7 +4706,7 @@ function markAllRead() {
 function checkLowStock() {
   const threshold = +document.getElementById('low-stock-threshold')?.value || 5;
   db.products.forEach(p => {
-    if (+p.qty <= threshold) addNotification('⚠️ Мало товару', `${p.name}: залишилось ${p.qty} шт.`);
+    if (+p.qty <= threshold) addNotification('⚠️ Мало товару', `${p.name}: залишилось ${p.qty} шт.`, 'stock');
   });
 }
 function refreshData() {
@@ -2903,7 +4810,7 @@ async function pollSiteChat() {
       if (!existing) {
         db.chats.unshift(fc);
         hasNew = true;
-        addNotification('🌐 Повідомлення з сайту', `${fc.name}: ${(fc.messages||[]).slice(-1)[0]?.text || ''}`);
+        addNotification('🌐 Повідомлення з сайту', `${fc.name}: ${(fc.messages||[]).slice(-1)[0]?.text || ''}`, 'chat');
       } else {
         // Check new messages
         const oldLen = (existing.messages||[]).length;
@@ -2915,7 +4822,7 @@ async function pollSiteChat() {
             existing.messages.push(m);
             if (m.dir === 'in') {
               hasNew = true;
-              addNotification('🌐 Нове повідомлення з сайту', `${fc.name}: ${m.text}`);
+              addNotification('🌐 Нове повідомлення з сайту', `${fc.name}: ${m.text}`, 'chat');
             }
           });
         }
@@ -2970,10 +4877,90 @@ LaVok CRM
   }
 }
 
+// ===================== AUTO-REFRESH FROM GOOGLE SHEETS =====================
+// Тихе оновлення всіх даних з GAS кожні 2 хвилини без перезавантаження сторінки
+async function silentRefresh() {
+  if (!currentUser) return; // тільки якщо залоговано
+  try {
+    const res = await fetch(GAS_URL + '?action=readAll');
+    if (!res.ok) return;
+    const fresh = await res.json();
+    ['orders','products','clients','logs','suppliers','expenses','chats','discounts'].forEach(k => {
+      if (fresh[k]) db[k] = fresh[k];
+    });
+    // Нормалізуємо дати після отримання
+    normalizeAllDates();
+    // Оновлюємо інтерфейс тихо (без спалаху)
+    renderDashboard();
+    renderOrders();
+    renderStock();
+    renderClients();
+    renderChatList();
+    updateChatNavBadge();
+    if (document.getElementById('v-analytics')?.classList.contains('active'))  renderAnalytics();
+    if (document.getElementById('v-expenses')?.classList.contains('active'))   renderExpenses();
+    if (document.getElementById('v-discounts')?.classList.contains('active'))  renderDiscounts();
+    if (document.getElementById('v-logs')?.classList.contains('active'))       renderLogs();
+    // Перевіряємо нові замовлення з сайту
+    checkNewOrders(fresh);
+  } catch(e) {} // тихо ігноруємо помилки
+}
+
+let _lastOrderCount = 0;
+function checkNewOrders(fresh) {
+  const newCount = (fresh.orders||[]).length;
+  if (_lastOrderCount > 0 && newCount > _lastOrderCount) {
+    const diff = newCount - _lastOrderCount;
+    const newest = (fresh.orders||[]).slice(0, diff);
+    newest.forEach(o => {
+      if (o.manager === 'Магазин' || o.manager === 'Сайт') {
+        addNotification('🛒 Нове замовлення з сайту', `${o.client}: ${o.product} — ${(+o.total||0).toLocaleString()} ₴`, 'orders');
+      }
+    });
+  }
+  _lastOrderCount = newCount;
+}
+
+// ===================== EMAIL BROADCAST (РОЗСИЛКА) =====================
+function openEmailBroadcastModal() {
+  if (currentUser.role !== 'admin') { showToast('Тільки власник може робити розсилку', 'error'); return; }
+  const emails = db.clients.filter(c => c.email && c.email.includes('@')).map(c => c.email);
+  const content = `
+    <div style="padding:10px;background:var(--accent-light);border-radius:8px;margin-bottom:16px;font-size:.82rem;color:var(--accent)">
+      📧 Буде надіслано на <strong>${emails.length}</strong> email адрес клієнтів
+    </div>
+    ${emails.length === 0 ? '<div style="color:var(--red);font-size:.82rem;margin-bottom:16px">⚠️ Немає клієнтів з email адресами в базі</div>' : ''}
+    <div class="form-group"><label>Тема листа</label>
+      <input type="text" id="bc-subject" placeholder="Напр. Спеціальна знижка 20% для вас!"></div>
+    <div class="form-group"><label>Текст листа</label>
+      <textarea id="bc-body" style="min-height:120px" placeholder="Шановний клієнте,&#10;&#10;Повідомляємо вас про..."></textarea></div>
+    <div style="font-size:.75rem;color:var(--muted)">Лист буде відправлено кожному клієнту окремо через Gmail (GAS MailApp)</div>
+  `;
+  openModal('📧 Email розсилка', content, async () => {
+    const subject = document.getElementById('bc-subject').value.trim();
+    const body    = document.getElementById('bc-body').value.trim();
+    if (!subject || !body) { showToast('Введіть тему та текст листа!', 'error'); return false; }
+    if (emails.length === 0) { showToast('Немає клієнтів з email!', 'error'); return false; }
+    showToast(`⏳ Надсилання на ${emails.length} адрес...`, 'info');
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action:'sendEmail', to: emails.join(','), subject, body })
+      });
+      writeLog(`Email розсилка: "${subject}" → ${emails.length} адрес`);
+      doBackup(true);
+      showToast(`✅ Розсилку надіслано на ${emails.length} адрес!`, 'success');
+      return true;
+    } catch(e) {
+      showToast('Помилка при відправці. Перевірте GAS налаштування.', 'error');
+      return false;
+    }
+  }, '📧 Надіслати розсилку');
+}
+
 // ===================== INIT ADDITIONS =====================
-// Override renderAll to load shop settings on first call
+// Override renderAll to load shop settings from GAS on first call
 let _shopSettingsLoaded = false;
-const _baseRenderAll = window.renderAll; // save ref
 function renderAll() {
   if (!_shopSettingsLoaded) { loadShopSettings(); _shopSettingsLoaded = true; }
   renderDashboard();
@@ -2989,13 +4976,19 @@ function renderAll() {
   updateChatNavBadge();
 }
 
-// Override startBackupTimer to also start chat polling
+// Override startBackupTimer: додаємо авто-оновлення кожні 2 хв + polling чату
 function startBackupTimer() {
   if (backupInterval) clearInterval(backupInterval);
   backupInterval = setInterval(() => {
     if (document.getElementById('toggle-backup')?.classList.contains('on')) doBackup(true);
   }, 15 * 60 * 1000);
-  startSiteChatPolling(); // start site chat polling
+
+  // Авто-оновлення даних з Google Sheets кожні 2 хвилини
+  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+  autoRefreshInterval = setInterval(silentRefresh, 2 * 60 * 1000);
+  _lastOrderCount = db.orders.length; // ініціалізуємо лічильник
+
+  startSiteChatPolling(); // polling чату з сайту
 }
 </script>
 </body>
