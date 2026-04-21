@@ -558,7 +558,7 @@ tbody tr:last-child td{border-bottom:none}
       <div class="page-header">
         <div><h2>Склад</h2><p>Управління товарами та залишками</p></div>
         <div style="display:flex;gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-secondary" id="xml-import-btn" onclick="openXMLModal()" style="display:none">📂 Імпорт XML</button>
+          <button class="btn btn-secondary" id="xml-import-btn" onclick="openXMLModal()" style="display:none">📂 Імпорт товарів</button>
           <button class="btn btn-primary" onclick="openStockModal()">+ Додати товар</button>
         </div>
       </div>
@@ -2849,13 +2849,36 @@ function renderPOSProducts(query) {
       <span style="text-decoration:line-through;color:rgba(255,255,255,.3);font-size:.75rem">${(+p.price).toLocaleString()}</span>
       <span class="pos-prod-card-price" style="color:#22c55e">${Math.round(+p.price*(1-disc.value/100)).toLocaleString()} ₴</span>
     </div>` : `<div class="pos-prod-card-price">${(+p.price).toLocaleString()} ₴</div>`;
+
+    // Build stock line — show per-size breakdown if clothing
+    let stockLine = '';
+    if (outOfStock) {
+      stockLine = '<div class="pos-prod-card-stock" style="color:var(--red)">❌ Немає</div>';
+    } else if (p.ptype === 'clothing' && p.sizes) {
+      const sizeStock = (p.sizeStock && typeof p.sizeStock === 'object') ? p.sizeStock : {};
+      const sizes = p.sizes.split(',').map(s=>s.trim()).filter(Boolean);
+      const hasSS = sizes.some(s => sizeStock[s] !== undefined && sizeStock[s] !== '');
+      if (hasSS) {
+        const sizeParts = sizes.map(s => {
+          const q = +sizeStock[s] || 0;
+          return `<span style="color:${q>0?'rgba(255,255,255,.55)':'rgba(255,255,255,.2)'};font-size:.62rem">${s}:${q}</span>`;
+        }).join(' ');
+        stockLine = `<div class="pos-prod-card-stock" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:2px">${sizeParts}</div>`;
+      } else {
+        stockLine = `<div class="pos-prod-card-stock">✅ ${p.qty} шт.</div>`;
+      }
+    } else {
+      const unitLabel = {pcs:'шт.',kg:'кг',g:'г',l:'л',m:'м'}[p.unit||'pcs']||'шт.';
+      stockLine = `<div class="pos-prod-card-stock">✅ ${p.qty} ${unitLabel}</div>`;
+    }
+
     return `<div class="pos-prod-card${outOfStock?' out-of-stock':''}" onclick="addToPOS('${p.name.replace(/'/g,"\\'")}')">
       ${discLabel}
       <div class="pos-prod-card-add">+</div>
       <div class="pos-prod-card-emoji">${getPtypeEmoji(p.ptype)}</div>
       <div class="pos-prod-card-name">${p.name}</div>
       ${p.code?`<div class="pos-prod-card-code">${p.code}</div>`:''}
-      <div class="pos-prod-card-stock">${outOfStock?'❌ Немає':'✅ '+p.qty+' шт.'}</div>
+      ${stockLine}
       ${discPrice}
     </div>`;
   }).join('');
@@ -2898,7 +2921,7 @@ function selectPOSSize(prod) {
     return `<button onclick="addToPOSWithSize('${prod.name.replace(/'/g,"\\'")}','${s}');closePOSSizeModal()" 
       style="padding:12px 18px;border:2px solid ${available>0?'rgba(91,76,245,.4)':'rgba(255,255,255,.1)'};border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;background:${available>0?'rgba(91,76,245,.15)':'rgba(255,255,255,.03)'};color:${available>0?'#fff':'rgba(255,255,255,.3)'};transition:all .15s" 
       ${available<=0?'disabled':''}>
-      ${s}<br><small style="font-weight:400;font-size:.7rem;color:${available>0?'rgba(255,255,255,.5)':'rgba(255,255,255,.2)'}">${hasSizeStock?available+' шт.':'є'}</small>
+      ${s}<br><small style="font-weight:400;font-size:.7rem;color:${available>0?'rgba(255,255,255,.5)':'rgba(255,255,255,.2)'}">${available} шт.</small>
     </button>`;
   }).join('');
   const modal = document.createElement('div');
@@ -3778,97 +3801,342 @@ function deleteSupplier(idx) {
   doBackup(true);
 }
 
-// ===================== XML IMPORT =====================
+// ===================== UNIVERSAL PRODUCT IMPORT =====================
 function openXMLModal() {
   const supOptions = (db.suppliers||[]).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
   const content = `
-    <div class="form-group"><label>Постачальник *</label>
-      <select id="m-xml-sup"><option value="">— Оберіть постачальника —</option>${supOptions}</select>
-      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Спочатку додайте його у вкладці "Постачальники"</div>
+    <div class="form-group"><label>Постачальник</label>
+      <select id="m-xml-sup"><option value="">— Без постачальника —</option>${supOptions}</select>
     </div>
-    <div class="form-group"><label>Спосіб завантаження</label>
-      <select id="m-xml-mode" onchange="toggleXMLMode()">
-        <option value="file">📁 Файл XML</option>
-        <option value="url">🔗 URL посилання</option>
-        <option value="paste">📋 Вставити XML текст</option>
+    <div class="form-group"><label>Формат файлу</label>
+      <select id="m-xml-mode" onchange="toggleImportMode()">
+        <option value="xml">📄 XML (YML, CommerceML, Prom, тощо)</option>
+        <option value="csv">📊 CSV / TSV (таблиця через кому або крапку з комою)</option>
+        <option value="json">🔷 JSON (масив товарів)</option>
+        <option value="xlsx">📗 Excel / XLSX / XLS</option>
+        <option value="txt">📝 Текст вручну (назва; ціна; кількість; категорія)</option>
       </select>
     </div>
-    <div id="xml-file-wrap" class="form-group">
-      <div class="xml-drop" id="xml-drop" onclick="document.getElementById('xml-file-input').click()" ondrop="handleXMLDrop(event)" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
-        📂 Натисніть або перетягніть XML файл сюди
+
+    <!-- File drop zone — shown for xml/csv/json/xlsx -->
+    <div id="imp-file-wrap" class="form-group">
+      <div class="xml-drop" id="xml-drop"
+        onclick="document.getElementById('imp-file-input').click()"
+        ondrop="handleImportDrop(event)"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')">
+        📂 Натисніть або перетягніть файл сюди<br>
+        <span style="font-size:.75rem;color:var(--muted2)" id="imp-accept-hint">XML, YML, CSV, JSON, XLSX, XLS</span>
       </div>
-      <input type="file" id="xml-file-input" accept=".xml,text/xml" style="display:none" onchange="readXMLFile(this)">
+      <input type="file" id="imp-file-input" style="display:none" onchange="readImportFile(this)">
     </div>
-    <div id="xml-url-wrap" class="form-group" style="display:none"><label>URL файлу XML</label><input id="m-xml-url" placeholder="https://..."></div>
-    <div id="xml-paste-wrap" class="form-group" style="display:none"><label>XML текст</label><textarea id="m-xml-text" style="min-height:120px;font-family:monospace;font-size:.78rem" placeholder="<?xml version=..."></textarea></div>
-    <div id="xml-preview" style="font-size:.82rem;color:var(--muted);margin-top:8px"></div>
+
+    <!-- Manual text paste -->
+    <div id="imp-text-wrap" class="form-group" style="display:none">
+      <label>Кожен рядок = один товар: <code>Назва; Ціна; Кількість; Категорія</code></label>
+      <textarea id="imp-text-area" style="min-height:140px;font-family:monospace;font-size:.8rem"
+        placeholder="Футболка Nike; 450; 10; Одяг&#10;Кросівки Adidas; 1200; 5; Взуття&#10;..."></textarea>
+    </div>
+
+    <!-- Mapping helpers (shown after file parsed) -->
+    <div id="imp-mapping-wrap" style="display:none">
+      <div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Відповідність колонок</div>
+      <div id="imp-mapping-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.8rem"></div>
+    </div>
+
+    <div id="imp-options" class="form-group" style="margin-top:8px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="imp-update" checked> Оновлювати існуючі товари (за назвою/кодом)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:6px">
+        <input type="checkbox" id="imp-skip-zero"> Пропускати товари з нульовою ціною
+      </label>
+    </div>
+
+    <div id="xml-preview" style="font-size:.82rem;color:var(--muted);margin-top:8px;padding:8px;background:var(--surface);border-radius:6px;display:none"></div>
   `;
-  
-  openModal('📂 Імпорт XML каталогу', content, async () => {
-    const supId = document.getElementById('m-xml-sup').value;
-    if (!supId) { showToast('Оберіть постачальника', 'error'); return false; }
-    const mode = document.getElementById('m-xml-mode').value;
-    let xmlText = '';
-    
-    if (mode === 'file') {
-      xmlText = window._xmlContent || '';
-      if (!xmlText) { showToast('Завантажте XML файл', 'error'); return false; }
-    } else if (mode === 'url') {
-      const url = document.getElementById('m-xml-url').value.trim();
-      if (!url) { showToast('Введіть URL', 'error'); return false; }
-      try {
-        const r = await fetch(url);
-        xmlText = await r.text();
-      } catch(e) { showToast('Не вдалося завантажити XML за URL', 'error'); return false; }
+
+  openModal('📂 Імпорт товарів', content, async () => {
+    const supId  = document.getElementById('m-xml-sup').value;
+    const mode   = document.getElementById('m-xml-mode').value;
+    const update = document.getElementById('imp-update').checked;
+    const skipZ  = document.getElementById('imp-skip-zero').checked;
+
+    let rawData = null;
+
+    if (mode === 'txt') {
+      const text = document.getElementById('imp-text-area').value.trim();
+      if (!text) { showToast('Введіть товари', 'error'); return false; }
+      rawData = { type:'txt', content: text };
     } else {
-      xmlText = document.getElementById('m-xml-text').value.trim();
-      if (!xmlText) { showToast('Вставте XML текст', 'error'); return false; }
+      if (!window._importParsed) { showToast('Завантажте файл', 'error'); return false; }
+      rawData = window._importParsed;
     }
-    
-    const count = importXMLProducts(xmlText, supId);
-    if (count === 0) { showToast('Не знайдено товарів у XML. Перевірте формат.', 'error'); return false; }
-    
-    writeLog(`XML імпорт: ${count} товарів`);
+
+    const mapping = {};
+    document.querySelectorAll('.imp-map-sel').forEach(sel => { mapping[sel.dataset.field] = sel.value; });
+
+    const count = universalImport(rawData, supId, update, skipZ, mapping);
+    if (count === 0) { showToast('Не знайдено товарів. Перевірте формат файлу.', 'error'); return false; }
+
+    writeLog(`Імпорт товарів (${mode.toUpperCase()}): ${count} позицій`);
+    window._importParsed = null;
     window._xmlContent = null;
     renderAll();
     doBackup(true);
-    showToast(`✅ Імпортовано ${count} товарів з XML`, 'success');
+    showToast(`✅ Імпортовано ${count} товарів`, 'success');
     return true;
-  });
+  }, '📥 Імпортувати');
 }
 
-function toggleXMLMode() {
+function toggleImportMode() {
   const mode = document.getElementById('m-xml-mode').value;
-  document.getElementById('xml-file-wrap').style.display = mode==='file' ? 'block' : 'none';
-  document.getElementById('xml-url-wrap').style.display = mode==='url' ? 'block' : 'none';
-  document.getElementById('xml-paste-wrap').style.display = mode==='paste' ? 'block' : 'none';
+  const fileWrap = document.getElementById('imp-file-wrap');
+  const textWrap = document.getElementById('imp-text-wrap');
+  const hint     = document.getElementById('imp-accept-hint');
+  const input    = document.getElementById('imp-file-input');
+
+  fileWrap.style.display = mode === 'txt' ? 'none' : 'block';
+  textWrap.style.display = mode === 'txt' ? 'block' : 'none';
+
+  const acceptMap = { xml:'.xml,.yml,.yaml,text/xml', csv:'.csv,.tsv,text/csv', json:'.json,application/json', xlsx:'.xlsx,.xls' };
+  const hintMap   = { xml:'XML, YML, YAML', csv:'CSV, TSV', json:'JSON', xlsx:'XLSX, XLS' };
+  if (input && acceptMap[mode]) input.accept = acceptMap[mode];
+  if (hint && hintMap[mode])    hint.textContent = hintMap[mode];
+
+  window._importParsed = null;
+  document.getElementById('imp-mapping-wrap').style.display = 'none';
+  document.getElementById('xml-preview').style.display = 'none';
 }
 
-function handleXMLDrop(e) {
+function handleImportDrop(e) {
   e.preventDefault();
   document.getElementById('xml-drop').classList.remove('drag');
   const file = e.dataTransfer.files[0];
-  if (file) readXMLFile({files:[file]});
+  if (file) readImportFile({ files:[file] });
 }
 
-function readXMLFile(input) {
+function readImportFile(input) {
   const file = input.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    window._xmlContent = e.target.result;
-    document.getElementById('xml-drop').innerHTML = `✅ Завантажено: ${file.name}`;
-    try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(window._xmlContent, 'text/xml');
-      const items = doc.querySelectorAll('item,product,offer,товар,product_item');
-      document.getElementById('xml-preview').innerText = `Знайдено приблизно ${items.length} товарів`;
-    } catch(e) {}
+  const mode = document.getElementById('m-xml-mode').value;
+  const dropEl = document.getElementById('xml-drop');
+  const previewEl = document.getElementById('xml-preview');
+
+  const showPreview = (count, cols) => {
+    previewEl.style.display = 'block';
+    previewEl.innerHTML = `✅ <strong>${file.name}</strong> — знайдено ~<strong>${count}</strong> рядків${cols ? ' · Колонки: '+cols : ''}`;
   };
-  reader.readAsText(file);
+
+  if (mode === 'xlsx') {
+    // Excel via SheetJS from CDN
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        if (typeof XLSX === 'undefined') {
+          // Dynamically load SheetJS
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+          s.onload = () => processXLSX(ev.target.result, file.name, showPreview);
+          document.head.appendChild(s);
+        } else {
+          processXLSX(ev.target.result, file.name, showPreview);
+        }
+      } catch(e) { showToast('Помилка читання Excel файлу', 'error'); }
+    };
+    reader.readAsArrayBuffer(file);
+    dropEl.innerHTML = `⏳ Читання ${file.name}...`;
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const text = ev.target.result;
+    dropEl.innerHTML = `✅ ${file.name}`;
+    try {
+      if (mode === 'xml') {
+        window._xmlContent = text;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/xml');
+        const tags = ['offer','item','product','Product','Item','Offer','товар','позиція'];
+        let items = [];
+        for (const t of tags) { const f = doc.querySelectorAll(t); if (f.length) { items = Array.from(f); break; } }
+        if (!items.length && doc.documentElement?.children.length) {
+          items = Array.from(doc.querySelectorAll(doc.documentElement.children[0].tagName));
+        }
+        window._importParsed = { type:'xml', content: text, count: items.length };
+        showPreview(items.length, null);
+
+      } else if (mode === 'csv') {
+        const rows = parseCSV(text);
+        window._importParsed = { type:'csv', rows };
+        const headers = rows[0] || [];
+        showPreview(rows.length - 1, headers.slice(0,6).join(', '));
+        renderColumnMapping(headers);
+
+      } else if (mode === 'json') {
+        let arr = JSON.parse(text);
+        if (!Array.isArray(arr)) arr = arr.products || arr.items || arr.offers || Object.values(arr);
+        window._importParsed = { type:'json', rows: arr };
+        const headers = arr.length ? Object.keys(arr[0]) : [];
+        showPreview(arr.length, headers.slice(0,6).join(', '));
+        renderColumnMapping(headers);
+      }
+    } catch(e) { showToast('Помилка читання файлу: ' + e.message, 'error'); }
+  };
+  reader.readAsText(file, 'UTF-8');
 }
 
-function importXMLProducts(xmlText, supplierId) {
+function processXLSX(buffer, filename, showPreview) {
+  try {
+    const wb = XLSX.read(buffer, { type:'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+    const headers = (rows[0]||[]).map(String);
+    const dataRows = rows.slice(1).filter(r => r.some(c => c !== ''));
+    window._importParsed = { type:'xlsx', rows: [headers, ...dataRows] };
+    document.getElementById('xml-drop').innerHTML = `✅ ${filename}`;
+    showPreview(dataRows.length, headers.slice(0,6).join(', '));
+    renderColumnMapping(headers);
+  } catch(e) { showToast('Помилка Excel: ' + e.message, 'error'); }
+}
+
+function parseCSV(text) {
+  const sep = text.includes('\t') ? '\t' : text.includes(';') ? ';' : ',';
+  return text.trim().split(/\r?\n/).map(line => {
+    const cells = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; continue; }
+      if (c === sep && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    cells.push(cur.trim());
+    return cells;
+  });
+}
+
+const FIELD_LABELS = { name:'Назва *', price:'Ціна', cost:'Собівартість', qty:'Кількість', cat:'Категорія', code:'Код/SKU', description:'Опис', unit:'Одиниця' };
+
+function renderColumnMapping(headers) {
+  const wrap  = document.getElementById('imp-mapping-wrap');
+  const fields = document.getElementById('imp-mapping-fields');
+  if (!headers.length) return;
+  wrap.style.display = 'block';
+  const autoMatch = (fieldKey) => {
+    const aliases = {
+      name:        ['name','назва','найменування','наименование','title','product','товар','model'],
+      price:       ['price','ціна','цена','price_retail','retail_price','sale_price','прайс'],
+      cost:        ['cost','cost_price','purchase_price','wholesale','закупочная','собівартість'],
+      qty:         ['qty','quantity','stock','кількість','количество','залишок','in_stock','available'],
+      cat:         ['cat','category','категорія','категория','type','group'],
+      code:        ['code','sku','article','articul','id','код','артикул','product_id'],
+      description: ['description','опис','описание','desc','description_short'],
+      unit:        ['unit','одиниця','единица','units']
+    };
+    const lowers = headers.map(h => (h||'').toLowerCase().trim());
+    for (const alias of (aliases[fieldKey]||[])) {
+      const idx = lowers.findIndex(h => h.includes(alias.toLowerCase()));
+      if (idx >= 0) return headers[idx];
+    }
+    return '';
+  };
+  fields.innerHTML = Object.entries(FIELD_LABELS).map(([k,lbl]) => `
+    <div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:3px">${lbl}</div>
+      <select class="imp-map-sel" data-field="${k}" style="width:100%;padding:5px 8px;font-size:.78rem;border:1.5px solid var(--border);border-radius:6px">
+        <option value="">— не використовувати —</option>
+        ${headers.map(h=>`<option value="${h}" ${autoMatch(k)===h?'selected':''}>${h}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+}
+
+function universalImport(rawData, supplierId, doUpdate, skipZeroPrice, mapping) {
+  let rows = [];
+
+  if (rawData.type === 'xml') {
+    return importXMLProducts(rawData.content, supplierId, doUpdate, skipZeroPrice);
+  }
+
+  if (rawData.type === 'txt') {
+    rows = rawData.content.split(/\r?\n/).filter(Boolean).map(line => {
+      const parts = line.split(/[;,\t]/).map(p=>p.trim());
+      return { name:parts[0]||'', price:parts[1]||'0', qty:parts[2]||'0', cat:parts[3]||'', code:'', cost:'', description:'', unit:'' };
+    });
+  } else if (rawData.type === 'json') {
+    rows = rawData.rows;
+  } else if (rawData.type === 'csv' || rawData.type === 'xlsx') {
+    const [headers, ...dataRows] = rawData.rows;
+    rows = dataRows.map(r => {
+      const obj = {};
+      headers.forEach((h,i) => { obj[h] = r[i] !== undefined ? String(r[i]) : ''; });
+      return obj;
+    });
+  }
+
+  const getF = (row, fieldKey) => {
+    const col = mapping[fieldKey];
+    if (col && row[col] !== undefined) return String(row[col]).trim();
+    // fallback: try common aliases
+    const aliases = {
+      name:['name','назва','title','product','товар','найменування','model'],
+      price:['price','ціна','цена','retail_price','sale_price'],
+      cost:['cost','cost_price','purchase_price','wholesale'],
+      qty:['qty','quantity','stock','кількість','available','in_stock'],
+      cat:['cat','category','категорія','категория','type'],
+      code:['code','sku','article','id','articul'],
+      description:['description','опис','desc'],
+      unit:['unit','одиниця']
+    };
+    for (const alias of (aliases[fieldKey]||[])) {
+      const found = Object.keys(row).find(k => k.toLowerCase().trim() === alias);
+      if (found !== undefined) return String(row[found]||'').trim();
+    }
+    return '';
+  };
+
+  const existing = new Set((db.products||[]).map(p => p.name));
+  let count = 0;
+  for (const row of rows) {
+    const name = getF(row,'name');
+    if (!name) continue;
+    const price = parseFloat((getF(row,'price')||'0').replace(/[^\d.]/g,'')) || 0;
+    if (skipZeroPrice && price === 0) continue;
+    const cost  = parseFloat((getF(row,'cost')||'0').replace(/[^\d.]/g,'')) || 0;
+    const qty   = parseInt((getF(row,'qty')||'0').replace(/[^\d]/g,'')) || 0;
+    const cat   = getF(row,'cat');
+    const rawCode = getF(row,'code');
+    const desc  = getF(row,'description');
+    const unit  = getF(row,'unit') || 'pcs';
+
+    if (existing.has(name) && doUpdate) {
+      const idx = db.products.findIndex(p => p.name === name);
+      if (idx >= 0) {
+        db.products[idx] = { ...db.products[idx],
+          price: price || db.products[idx].price,
+          cost:  cost  || db.products[idx].cost,
+          qty, supplier: supplierId || db.products[idx].supplier,
+          ...(cat && { cat }),
+          ...(desc && { description: desc })
+        };
+      }
+    } else if (!existing.has(name)) {
+      const code = (rawCode && !(db.products||[]).find(p=>p.code===rawCode)) ? rawCode : generateSKU();
+      db.products.push({ code, name, cat, qty, price, cost, supplier: supplierId, ptype:'pcs', unit, sizes:'', sizeStock:{}, description: desc, photo:'' });
+      existing.add(name);
+    }
+    count++;
+  }
+  return count;
+}
+
+function toggleXMLMode() { toggleImportMode(); }
+function handleXMLDrop(e) { handleImportDrop(e); }
+function readXMLFile(inp) { readImportFile(inp); }
+
+function importXMLProducts(xmlText, supplierId, doUpdate=true, skipZeroPrice=false) {
   let count = 0;
   try {
     const parser = new DOMParser();
@@ -3900,19 +4168,21 @@ function importXMLProducts(xmlText, supplierId) {
       const name = getVal(item,'name','назва','title','productName','product_name','model','description_short') || getVal(item,'наименование');
       if (!name) continue;
       const price = parseFloat((getVal(item,'price','ціна','цена','Price','sale_price','retail_price','price_retail')||'0').replace(/[^\d.]/g,''))||0;
+      if (skipZeroPrice && price === 0) continue;
       const cost = parseFloat((getVal(item,'cost','cost_price','purchase_price','wholesale_price','price_wholesale','закупочная_цена')||'0').replace(/[^\d.]/g,''))||0;
       const qty = parseInt((getVal(item,'qty','quantity','stock','count','кількість','количество','in_stock','available')||'0').replace(/[^\d]/g,''))||0;
       const cat = getVal(item,'category','cat','categoryName','категорія','категория','type');
       const code = getVal(item,'id','code','sku','article','articul','productId','product_id') || generateSKU();
-      
-      if (existing.has(name)) {
+      const desc = getVal(item,'description','опис','описание','description_short','desc');
+
+      if (existing.has(name) && doUpdate) {
         const idx = db.products.findIndex(p=>p.name===name);
         if (idx>=0) {
-          db.products[idx] = {...db.products[idx], price: price||db.products[idx].price, qty, cost: cost||db.products[idx].cost, supplier: supplierId};
+          db.products[idx] = {...db.products[idx], price: price||db.products[idx].price, qty, cost: cost||db.products[idx].cost, supplier: supplierId, ...(desc&&{description:desc})};
         }
-      } else {
+      } else if (!existing.has(name)) {
         const skuCode = (db.products||[]).find(p=>p.code===code) ? generateSKU() : code;
-        db.products.push({code: skuCode, name, cat, qty, price, cost, supplier: supplierId});
+        db.products.push({code: skuCode, name, cat, qty, price, cost, supplier: supplierId, ptype:'pcs', unit:'pcs', sizes:'', sizeStock:{}, description: desc, photo:''});
         existing.add(name);
       }
       count++;
