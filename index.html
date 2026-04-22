@@ -355,7 +355,7 @@ tbody tr:last-child td{border-bottom:none}
   .topbar { margin-bottom: 20px; }
   .hide-text-mobile { display: none; }
   .form-row { grid-template-columns: 1fr; }
-  .card { padding: 16px; }
+  .card { padding: 14px; }
   .search-input { min-width: 100%; }
   .chat-sidebar { width: 220px; }
   .chat-layout { height: calc(100vh - 240px); }
@@ -365,14 +365,34 @@ tbody tr:last-child td{border-bottom:none}
   .chat-layout { height: calc(100vh - 200px); }
   .shop-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .shop-search { width: 140px; }
+  /* POS on small screens */
+  .pos-body { flex-direction: column; }
+  .pos-catalog { border-right: none; border-bottom: 1px solid rgba(255,255,255,.06); max-height: 55vh; }
+  .pos-checkout { width: 100%; min-height: 0; max-height: 45vh; overflow-y: auto; }
+  .pos-prod-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  #pos-overlay .pos-topbar-left .pos-topbar-info { display: none; }
+  .pos-pay-btns { padding: 6px 10px 4px; gap: 6px; }
+  .pos-pay-btn { padding: 10px 6px; }
+  .pos-pay-icon { font-size: 1.2rem; }
+  .pos-pay-label { font-size: .7rem; }
+  .pos-pay-btn-cod { margin: 4px 10px 10px; }
+  .pos-total-bar { margin: 6px 10px; padding: 8px 12px; font-size: 1rem; }
+  #pos-total-val { font-size: 1.1rem; }
 }
 @media(max-width:480px){
-  .stats-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
   #toast-container { bottom: 16px; right: 16px; left: 16px; }
   .toast { max-width: none; width: 100%; justify-content: center; }
   .page-header h2 { font-size: 1.3rem; }
-  .btn { width: 100%; justify-content: center; }
-  .page-header { flex-direction: column; gap: 12px; align-items: stretch; }
+  .page-header { flex-direction: column; gap: 10px; align-items: stretch; }
+  .page-header .btn { width: 100%; justify-content: center; }
+  /* Tables on mobile: horizontal scroll */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 500px; }
+  /* Modal full-screen on mobile */
+  .modal { max-height: 100vh; border-radius: 16px 16px 0 0; margin-bottom: 0; margin-top: auto; }
+  .modal-bg { align-items: flex-end; padding: 0; }
+  .search-bar { flex-direction: column; }
 }
 
 @media print {
@@ -564,14 +584,24 @@ tbody tr:last-child td{border-bottom:none}
       </div>
       <div class="card">
         <div class="search-bar">
-          <input class="search-input" placeholder="🔍 Пошук товарів..." id="stock-search" oninput="renderStock()">
+          <input class="search-input" placeholder="🔍 Пошук товарів (назва, SKU, категорія, постачальник, ціна)..." id="stock-search" oninput="renderStock()">
           <select class="search-input" style="max-width:200px" id="stock-cat-filter" onchange="renderStock()">
             <option value="">Всі категорії</option>
+          </select>
+          <select class="search-input" style="max-width:200px" id="stock-subcat-filter" onchange="renderStock()">
+            <option value="">Всі підкатегорії</option>
+          </select>
+          <select class="search-input" style="max-width:160px" id="stock-source-filter" onchange="renderStock()">
+            <option value="">Всі джерела</option>
+            <option value="own">🏪 Власний</option>
+            <option value="dropship">🚚 Дропшипінг</option>
+            <option value="consignment">🤝 Консигнація</option>
+            <option value="preorder">📋 Передзамовлення</option>
           </select>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>#</th><th>Фото</th><th>Код (SKU)</th><th>Назва</th><th>Категорія</th><th>Тип / Варіанти</th><th>Постачальник</th><th>К-сть</th><th>Собівартість</th><th>Ціна</th><th>Дії</th></tr></thead>
+            <thead><tr><th>#</th><th>Фото</th><th>Код (SKU)</th><th>Назва</th><th>Категорія / Підкатегорія</th><th>Тип / Варіанти</th><th>Постачальник / Джерело</th><th>К-сть</th><th>Собівартість</th><th>Ціна</th><th>Дії</th></tr></thead>
             <tbody id="t-stock"></tbody>
           </table>
         </div>
@@ -589,14 +619,23 @@ tbody tr:last-child td{border-bottom:none}
       </div>
       <div class="card">
         <div class="search-bar">
-          <input class="search-input" placeholder="🔍 Пошук по клієнту, товару, чеку..." id="order-search" oninput="renderOrders()">
+          <input class="search-input" placeholder="🔍 Пошук по клієнту, товару, чеку #, ТТН, телефону, місту..." id="order-search" oninput="renderOrders()">
           <select class="search-input" style="max-width:200px" id="order-manager-filter" onchange="renderOrders()">
             <option value="">Всі менеджери</option>
+          </select>
+          <select class="search-input" style="max-width:200px" id="order-status-filter" onchange="renderOrders()">
+            <option value="">Всі статуси</option>
+            <option value="new">🆕 Нове</option>
+            <option value="waiting_ttn">⏳ Очікує ТТН</option>
+            <option value="processing">⚙️ В процесі</option>
+            <option value="sent">🚚 Відправлено</option>
+            <option value="done">✅ Виконано</option>
+            <option value="cancelled">❌ Скасовано</option>
           </select>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>№ Чека</th><th>Дата</th><th>Клієнт</th><th>Телефон</th><th>Товар</th><th>К-сть</th><th>Сума</th><th>Оплата</th><th>ТТН</th><th>Менеджер</th><th id="orders-actions-th">Дії</th></tr></thead>
+            <thead><tr><th>№ Чека</th><th>Дата</th><th>Клієнт</th><th>Телефон</th><th>Товар</th><th>К-сть</th><th>Сума</th><th>Статус</th><th>Оплата</th><th>ТТН</th><th>Менеджер</th><th id="orders-actions-th">Дії</th></tr></thead>
             <tbody id="t-orders"></tbody>
           </table>
         </div>
@@ -1494,7 +1533,7 @@ tbody tr:last-child td{border-bottom:none}
 
 <script>
 // ===================== CONFIG =====================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzw9-IjLnfRiWMs42YNY1J_9o5zyCnMLzkINc8mmcPzKAgZM0OzYWUIOFvo6v_wzw5Ohg/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxlp2EyI44LQED-Pg9JcSgYdU9a0nNNFrVnJDdN3zI-1j7jBUqME-jN-hsirlC3M6GpYQ/exec";
 
 // ===================== STATE =====================
 let db = { users: [], orders: [], products: [], clients: [], logs: [], suppliers: [], expenses: [], chats: [], discounts: [] };
@@ -1978,6 +2017,14 @@ function generateSKU() {
   return code;
 }
 
+function updateSubcatList() {
+  const cat = document.getElementById('p-cat')?.value || '';
+  const subcatList = document.getElementById('subcat-list');
+  if (!subcatList) return;
+  const subcats = [...new Set(db.products.filter(p => !cat || p.cat === cat).map(p => p.subcat).filter(Boolean))];
+  subcatList.innerHTML = subcats.map(s => `<option value="${s}">`).join('');
+}
+
 // Повертає назву одиниці виміру за кодом
 function getUnitLabel(unit) {
   const map = { pcs:'шт.', kg:'кг', g:'г', l:'л', m:'м' };
@@ -1993,16 +2040,35 @@ function renderStock() {
   const tbody = document.getElementById('t-stock');
   const query = document.getElementById('stock-search').value.toLowerCase();
   const cat = document.getElementById('stock-cat-filter').value;
+  const subcat = document.getElementById('stock-subcat-filter')?.value || '';
+  const sourceF = document.getElementById('stock-source-filter')?.value || '';
 
   const cats = [...new Set(db.products.map(p => p.cat))].filter(Boolean);
   const filter = document.getElementById('stock-cat-filter');
   const oldVal = filter.value;
   filter.innerHTML = '<option value="">Всі категорії</option>' + cats.map(c => `<option value="${c}" ${c==oldVal?'selected':''}>${c}</option>`).join('');
 
+  // Update subcat list based on selected cat
+  const subcatFilter = document.getElementById('stock-subcat-filter');
+  if (subcatFilter) {
+    const subcats = [...new Set(db.products.filter(p => !cat || p.cat === cat).map(p => p.subcat).filter(Boolean))];
+    const oldSub = subcatFilter.value;
+    subcatFilter.innerHTML = '<option value="">Всі підкатегорії</option>' + subcats.map(s => `<option value="${s}" ${s==oldSub?'selected':''}>${s}</option>`).join('');
+  }
+
   const filtered = db.products.filter(p => {
-    const match = p.name.toLowerCase().includes(query) || (p.code||'').toLowerCase().includes(query);
+    const sup = (db.suppliers||[]).find(s=>s.id===p.supplier);
+    const match = !query ||
+      p.name.toLowerCase().includes(query) ||
+      (p.code||'').toLowerCase().includes(query) ||
+      (p.cat||'').toLowerCase().includes(query) ||
+      (p.description||'').toLowerCase().includes(query) ||
+      (sup?.name||'').toLowerCase().includes(query) ||
+      String(p.price||'').includes(query);
     const catMatch = !cat || p.cat === cat;
-    return match && catMatch;
+    const subcatMatch = !subcat || (p.subcat||'') === subcat;
+    const sourceMatch = !sourceF || (p.sourceType||'own') === sourceF;
+    return match && catMatch && subcatMatch && sourceMatch;
   });
 
   tbody.innerHTML = filtered.map((p, i) => {
@@ -2029,9 +2095,9 @@ function renderStock() {
       </td>
       <td><span class="sku-code">${p.code || '—'}</span></td>
       <td style="font-weight:600">${getPtypeEmoji(ptype)} ${p.name}${p.description?`<div style="font-size:.72rem;color:var(--muted);margin-top:2px">${p.description.substring(0,40)}${p.description.length>40?'…':''}</div>`:''}</td>
-      <td><span class="badge badge-gray">${p.cat || '—'}</span></td>
+      <td><span class="badge badge-gray">${p.cat || '—'}</span>${p.subcat?`<br><span style="font-size:.68rem;color:var(--muted);margin-top:2px;display:inline-block">${p.subcat}</span>`:''}</td>
       <td>${variantCell}</td>
-      <td>${sup ? `<span class="supplier-chip">🏭 ${sup.name}</span>` : '—'}</td>
+      <td>${sup ? `<span class="supplier-chip">🏭 ${sup.name}</span>` : '—'}${p.sourceType&&p.sourceType!=='own'?`<br><span class="badge ${p.sourceType==='dropship'?'badge-blue':p.sourceType==='preorder'?'badge-orange':'badge-purple'}" style="margin-top:2px">${p.sourceType==='dropship'?'🚚 Дропшип':p.sourceType==='consignment'?'🤝 Консигнація':'📋 Передзамовлення'}</span>`:''}</td>
       <td style="font-weight:700"><span class="badge ${p.qty <= 0 ? 'badge-red' : p.qty <= 5 ? 'badge-orange' : 'badge-green'}">${p.qty} ${unit}</span></td>
       <td>${(+p.cost || 0).toLocaleString()} ₴</td>
       <td style="font-weight:700;color:var(--accent)">${(+p.price || 0).toLocaleString()} ₴${ptype==='weight'?' / '+unit:''}</td>
@@ -2056,8 +2122,9 @@ function openStockModal(idx = -1) {
   const content = `
     <div class="form-row">
       <div class="form-group"><label>Код товару (SKU)</label><input type="text" id="p-code" value="${skuVal}" readonly style="background:var(--surface);font-family:monospace"></div>
-      <div class="form-group"><label>Категорія</label><input type="text" id="p-cat" value="${p.cat||''}" list="cat-list"><datalist id="cat-list">${[...new Set(db.products.map(x=>x.cat))].map(c=>`<option value="${c}">`).join('')}</datalist></div>
+      <div class="form-group"><label>Категорія</label><input type="text" id="p-cat" value="${p.cat||''}" list="cat-list" oninput="updateSubcatList()"><datalist id="cat-list">${[...new Set(db.products.map(x=>x.cat))].map(c=>`<option value="${c}">`).join('')}</datalist></div>
     </div>
+    <div class="form-group"><label>Підкатегорія (необов'язково)</label><input type="text" id="p-subcat" value="${p.subcat||''}" list="subcat-list" placeholder="напр. Жіночий одяг, Догляд за обличчям..."><datalist id="subcat-list">${[...new Set(db.products.map(x=>x.subcat).filter(Boolean))].map(c=>`<option value="${c}">`).join('')}</datalist></div>
     <div class="form-group"><label>Назва товару</label><input type="text" id="p-name" value="${p.name}"></div>
 
     <div class="form-group"><label>Тип товару</label>
@@ -2067,6 +2134,30 @@ function openStockModal(idx = -1) {
         <option value="weight"   ${ptype==='weight'  ?'selected':''}>⚖️ Ваговий (кг / г / л)</option>
         <option value="book"     ${ptype==='book'    ?'selected':''}>📚 Книга</option>
       </select>
+    </div>
+
+    <!-- SOURCE / DROPSHIP -->
+    <div style="background:var(--surface);border-radius:8px;padding:14px;margin-bottom:12px;border:1px solid var(--border)">
+      <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">📦 Джерело товару</div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label>Тип постачання</label>
+          <select id="p-source-type">
+            <option value="own" ${(p.sourceType||'own')==='own'?'selected':''}>🏪 Власний товар</option>
+            <option value="dropship" ${p.sourceType==='dropship'?'selected':''}>🚚 Дропшипінг</option>
+            <option value="consignment" ${p.sourceType==='consignment'?'selected':''}>🤝 Консигнація</option>
+            <option value="preorder" ${p.sourceType==='preorder'?'selected':''}>📋 Передзамовлення</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Постачальник</label>
+          <select id="p-supplier"><option value="">— Без постачальника —</option>${supOptions}</select>
+        </div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <div class="form-group" style="flex:1;margin-bottom:0"><label>Посилання постачальника</label><input type="text" id="p-supplier-url" value="${p.supplierUrl||''}" placeholder="https://supplier.ua/product/123"></div>
+        <div class="form-group" style="width:120px;margin-bottom:0"><label>Термін поставки</label><input type="text" id="p-delivery-days" value="${p.deliveryDays||''}" placeholder="3-5 днів"></div>
+      </div>
     </div>
 
     <div id="p-sizes-row" class="form-group" style="display:${ptype==='clothing'?'block':'none'}">
@@ -2086,9 +2177,6 @@ function openStockModal(idx = -1) {
       </select>
     </div>
 
-    <div class="form-group"><label>Постачальник</label>
-      <select id="p-supplier"><option value="">— Без постачальника —</option>${supOptions}</select>
-    </div>
     <div class="form-row">
       <div class="form-group"><label id="p-qty-lbl">Кількість / Залишок</label><input type="number" id="p-qty" value="${p.qty}" step="0.001" min="0"></div>
       <div class="form-group"><label>Собівартість (₴)</label><input type="number" id="p-cost" value="${p.cost||0}" step="0.01"></div>
@@ -2134,7 +2222,11 @@ function openStockModal(idx = -1) {
       code:        document.getElementById('p-code').value || generateSKU(),
       name:        document.getElementById('p-name').value.trim(),
       cat:         document.getElementById('p-cat').value.trim(),
+      subcat:      document.getElementById('p-subcat')?.value.trim() || '',
       supplier:    document.getElementById('p-supplier').value,
+      sourceType:  document.getElementById('p-source-type')?.value || 'own',
+      supplierUrl: document.getElementById('p-supplier-url')?.value.trim() || '',
+      deliveryDays:document.getElementById('p-delivery-days')?.value.trim() || '',
       ptype:       ptypeVal,
       unit:        unitVal,
       sizes:       ptypeVal === 'clothing' ? (document.getElementById('p-sizes')?.value.trim()||'') : '',
@@ -2241,10 +2333,25 @@ function deleteProduct(idx) {
 }
 
 // ===================== ORDERS =====================
+function getOrderStatusBadge(status, delivType) {
+  // Auto-determine status display
+  const s = status || (delivType === 'pickup' || delivType === undefined ? 'done' : 'new');
+  const map = {
+    new:       ['badge-orange',  '🆕 Нове'],
+    processing:['badge-blue',    '⚙️ В процесі'],
+    waiting_ttn:['badge-orange', '⏳ Очікує ТТН'],
+    sent:      ['badge-purple',  '🚚 Відправлено'],
+    done:      ['badge-green',   '✅ Виконано'],
+    cancelled: ['badge-red',     '❌ Скасовано']
+  };
+  return map[s] || ['badge-gray', s || 'Нове'];
+}
+
 function renderOrders() {
   const tbody = document.getElementById('t-orders');
   const query = document.getElementById('order-search').value.toLowerCase();
   const manFilter = document.getElementById('order-manager-filter').value;
+  const statusFilter = document.getElementById('order-status-filter')?.value || '';
 
   // Rebuild manager filter
   const managers = [...new Set(db.orders.map(o => o.manager))].filter(Boolean);
@@ -2254,11 +2361,19 @@ function renderOrders() {
   
   const filtered = db.orders.filter(o => {
     const rId = o.id || '';
-    const matchQ = (o.client||'').toLowerCase().includes(query) || 
-           (o.product||'').toLowerCase().includes(query) ||
-           rId.includes(query);
+    const matchQ = !query ||
+      (o.client||'').toLowerCase().includes(query) || 
+      (o.product||'').toLowerCase().includes(query) ||
+      rId.toLowerCase().includes(query) ||
+      (o.ttn||'').includes(query) ||
+      (o.phone||'').includes(query) ||
+      (o.city||'').toLowerCase().includes(query) ||
+      (o.address||'').toLowerCase().includes(query) ||
+      (o.comment||'').toLowerCase().includes(query) ||
+      String(o.total||'').includes(query);
     const matchM = !manFilter || o.manager === manFilter;
-    return matchQ && matchM;
+    const matchS = !statusFilter || (o.status||'new') === statusFilter;
+    return matchQ && matchM && matchS;
   });
 
   tbody.innerHTML = filtered.map(o => {
@@ -2266,24 +2381,30 @@ function renderOrders() {
     const unitLbl = getUnitLabel(o.unit);
     const payIcon = o.payMethod === 'card' ? '💳' : o.payMethod === 'cod' ? '📦' : '💵';
     const ttnBadge = o.ttn
-      ? `<span style="font-family:monospace;font-size:.72rem;background:var(--green-light);color:#15803d;padding:2px 6px;border-radius:4px">${o.ttn}</span>`
-      : '<span style="color:var(--muted2);font-size:.75rem">—</span>';
+      ? `<span style="font-family:monospace;font-size:.72rem;background:var(--green-light);color:#15803d;padding:2px 6px;border-radius:4px;cursor:pointer" onclick="openTTNModal(${db.orders.indexOf(o)})">${o.ttn}</span>`
+      : `<button class="btn-icon btn-sm" title="Додати ТТН" onclick="openTTNModal(${db.orders.indexOf(o)})" style="font-size:.75rem;padding:3px 8px;border:1px dashed var(--border);border-radius:5px;color:var(--muted)">+ ТТН</button>`;
+    const [statusCls, statusLabel] = getOrderStatusBadge(o.status, o.deliveryType);
+    const idx = db.orders.indexOf(o);
     return `
     <tr>
-      <td><span class="badge badge-gray">#${rId}</span></td>
+      <td><span class="badge badge-gray">#${rId}</span>${o.comment?`<div style="font-size:.65rem;color:var(--muted);margin-top:2px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.comment}">📝 ${o.comment}</div>`:''}</td>
       <td style="font-size:.75rem">${o.date}</td>
       <td style="font-weight:600">${o.client}</td>
-      <td>${o.phone||'—'}</td>
-      <td>${o.product}${o.variant ? ` <span class="badge badge-purple">${o.variant}</span>` : ''}</td>
+      <td>${o.phone||'—'}${o.city?`<br><small style="color:var(--muted)">${o.city}</small>`:''}</td>
+      <td style="max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px" title="${o.product}">${o.product}</div>${o.variant?`<span class="badge badge-purple">${o.variant}</span>`:''}</td>
       <td>${o.qty} ${unitLbl !== 'шт.' ? unitLbl : ''}</td>
       <td style="font-weight:700">${(+o.total || 0).toLocaleString()} ₴</td>
+      <td>
+        <span class="badge ${statusCls}" style="cursor:pointer;font-size:.65rem" onclick="cycleOrderStatus(${idx})" title="Клік — змінити статус">${statusLabel}</span>
+      </td>
       <td>${payIcon}</td>
       <td>${ttnBadge}</td>
       <td><span class="badge badge-purple">${o.manager}</span></td>
-      <td>
-        <button class="btn-icon" title="Друк чеку" onclick="openReceipt(${db.orders.indexOf(o)})">🧾</button>
-        <button class="btn-icon" title="Надіслати чек email" onclick="sendReceiptFromList(${db.orders.indexOf(o)})">📧</button>
-        ${currentUser.role === 'admin' ? `<button class="btn-icon" title="Видалити" style="color:var(--red)" onclick="deleteOrder(${db.orders.indexOf(o)})">🗑️</button>` : ''}
+      <td style="white-space:nowrap">
+        <button class="btn-icon" title="Друк чеку" onclick="openReceipt(${idx})">🧾</button>
+        <button class="btn-icon" title="Надіслати чек email" onclick="sendReceiptFromList(${idx})">📧</button>
+        <button class="btn-icon" title="Нотатка" onclick="openOrderNoteModal(${idx})">📝</button>
+        ${currentUser.role === 'admin' ? `<button class="btn-icon" title="Видалити" style="color:var(--red)" onclick="deleteOrder(${idx})">🗑️</button>` : ''}
       </td>
     </tr>`;
   }).join('');
@@ -2291,6 +2412,69 @@ function renderOrders() {
   const totalSum = filtered.reduce((s, o) => s + (+o.total || 0), 0);
   document.getElementById('orders-footer').innerText = `Всього: ${totalSum.toLocaleString()} ₴ за ${filtered.length} замовлень.`;
 }
+
+// Status cycle: new → waiting_ttn → processing → sent → done
+function cycleOrderStatus(idx) {
+  const o = db.orders[idx]; if (!o) return;
+  const cycle = ['new','waiting_ttn','processing','sent','done','cancelled'];
+  const cur = o.status || 'new';
+  const curIdx = cycle.indexOf(cur);
+  o.status = cycle[(curIdx + 1) % cycle.length];
+  renderOrders(); doBackup(true);
+  showToast(`Статус → ${getOrderStatusBadge(o.status)[1]}`, 'success');
+}
+
+function openTTNModal(idx) {
+  const o = db.orders[idx]; if (!o) return;
+  const c = db.clients.find(x => x.name === o.client) || {};
+  const content = `
+    <div class="form-group">
+      <label>ТТН Нової Пошти</label>
+      <input type="text" id="ttn-inp" value="${o.ttn||''}" placeholder="20400048799310" style="font-family:monospace;font-size:1rem;letter-spacing:.05em">
+    </div>
+    <div class="form-group">
+      <label>Статус замовлення</label>
+      <select id="ttn-status">
+        <option value="new" ${(o.status||'new')==='new'?'selected':''}>🆕 Нове</option>
+        <option value="waiting_ttn" ${o.status==='waiting_ttn'?'selected':''}>⏳ Очікує ТТН</option>
+        <option value="processing" ${o.status==='processing'?'selected':''}>⚙️ В процесі</option>
+        <option value="sent" ${o.status==='sent'?'selected':''}>🚚 Відправлено</option>
+        <option value="done" ${o.status==='done'?'selected':''}>✅ Виконано</option>
+        <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ Скасовано</option>
+      </select>
+    </div>
+    <div style="background:var(--surface);border-radius:8px;padding:12px;font-size:.8rem;color:var(--muted)">
+      <strong>Клієнт:</strong> ${o.client} · ${o.phone||c.phone||'—'}<br>
+      <strong>Адреса:</strong> ${o.city||c.city||'—'}, ${o.address||c.address||'—'}
+    </div>`;
+  openModal('📦 ТТН та статус замовлення', content, () => {
+    const ttn = document.getElementById('ttn-inp').value.trim();
+    const status = document.getElementById('ttn-status').value;
+    db.orders[idx].ttn = ttn;
+    db.orders[idx].status = status;
+    if (ttn) writeLog(`ТТН: ${ttn} для #${o.id}`);
+    renderOrders(); doBackup(true);
+    showToast('✅ Збережено', 'success'); return true;
+  });
+}
+
+function openOrderNoteModal(idx) {
+  const o = db.orders[idx]; if (!o) return;
+  const content = `
+    <div style="background:var(--surface);border-radius:8px;padding:12px;margin-bottom:12px;font-size:.85rem">
+      <strong>#${o.id}</strong> · ${o.client} · ${(+o.total).toLocaleString()} ₴
+    </div>
+    <div class="form-group">
+      <label>Нотатка до замовлення</label>
+      <textarea id="note-inp" style="min-height:100px" placeholder="Внутрішня нотатка...">${o.comment||''}</textarea>
+    </div>`;
+  openModal('📝 Нотатка', content, () => {
+    db.orders[idx].comment = document.getElementById('note-inp').value.trim();
+    renderOrders(); doBackup(true);
+    showToast('Нотатку збережено', 'success'); return true;
+  });
+}
+
 
 function openOrderModal() {
   const productOptions = db.products.map(p => {
@@ -2331,7 +2515,20 @@ function openOrderModal() {
       <div id="o-size-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
       <input type="hidden" id="o-variant">
     </div>
-    <div class="form-row">
+    <!-- Одиниця виміру для вагових товарів -->
+    <div id="o-weight-row" class="form-group" style="display:none">
+      <label>Кількість та одиниця</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="o-qty" value="1" step="0.001" min="0.001" oninput="updateOrderTotal()" style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+        <select id="o-weight-unit" onchange="updateOrderTotal()" style="padding:10px;border:1.5px solid var(--border);border-radius:8px;outline:none;font-size:.85rem">
+          <option value="kg">кг</option><option value="g">г</option>
+          <option value="l">л</option><option value="ml">мл</option>
+          <option value="m">м</option><option value="cm">см</option>
+        </select>
+      </div>
+      <div id="o-weight-calc" style="font-size:.78rem;color:var(--accent);margin-top:4px;font-weight:600"></div>
+    </div>
+    <div id="o-qty-row" class="form-row">
       <div class="form-group"><label id="o-qty-lbl">Кількість</label><input type="number" id="o-qty" value="1" step="0.001" min="0.001" oninput="updateOrderTotal()"></div>
       <div class="form-group"><label>До сплати (₴)</label><input type="number" id="o-total" value="0" step="0.01"></div>
     </div>
@@ -2413,11 +2610,15 @@ function openOrderModal() {
     }
 
     const orderId = String(Date.now()).slice(-6);
+    // Auto-status based on payment method
+    const autoStatus = payMethod === 'cod' ? 'waiting_ttn' : (payMethod === 'cash' || payMethod === 'card') ? 'done' : 'new';
     const order = {
       id: orderId, date: getFmtDate(), client: cName, phone: cPhone,
       product: pName, variant, qty, total,
       unit: prod?.unit || 'pcs', manager: currentUser.name,
-      ttn: ttnManual, payMethod, comment
+      ttn: ttnManual, payMethod, comment,
+      status: autoStatus,
+      deliveryType: payMethod === 'cod' ? 'nova_poshta' : 'pickup'
     };
     db.orders.unshift(order);
     writeLog(`Продаж: ${pName}${variant?' ('+variant+')':''} × ${qty}${getUnitLabel(prod?.unit)} клієнту ${cName} (#${orderId})`);
@@ -2475,7 +2676,23 @@ function onOrderProductChange() {
     if (variantInp) variantInp.value = '';
   }
 
-  // Підпис для кількості
+  // Weight row
+  const weightRow = document.getElementById('o-weight-row');
+  const qtyRow    = document.getElementById('o-qty-row');
+  if (ptype === 'weight') {
+    if (weightRow) weightRow.style.display = 'block';
+    if (qtyRow)    qtyRow.style.display = 'none';
+    const wUnitSel = document.getElementById('o-weight-unit');
+    if (wUnitSel) {
+      const subUnits = {kg:[['kg','кг'],['g','г']],l:[['l','л'],['ml','мл']],m:[['m','м'],['cm','см']]}[unit||'kg'] || [[unit||'kg','кг']];
+      wUnitSel.innerHTML = subUnits.map(([u,l])=>`<option value="${u}">${l}</option>`).join('');
+      wUnitSel.value = subUnits[subUnits.length-1][0];
+    }
+  } else {
+    if (weightRow) weightRow.style.display = 'none';
+    if (qtyRow)    qtyRow.style.display = '';
+  }
+
   const qtyLbl = document.getElementById('o-qty-lbl');
   if (qtyLbl) qtyLbl.innerText = ptype === 'weight' ? `Кількість (${getUnitLabel(unit)})` : 'Кількість (шт.)';
 
@@ -2500,9 +2717,35 @@ function updateOrderTotal() {
   const sel = document.getElementById('o-product');
   if (!sel || sel.selectedIndex < 0) return;
   const opt = sel.options[sel.selectedIndex];
-  const qty = +document.getElementById('o-qty').value || 0;
-  if (opt && opt.dataset.price) {
-    document.getElementById('o-total').value = ((+opt.dataset.price) * qty).toFixed(2);
+  const ptype = opt.dataset.ptype || 'pcs';
+  const baseUnit = opt.dataset.unit || 'pcs';
+  const basePrice = +(opt.dataset.price) || 0;
+  if (ptype === 'weight') {
+    // Weight product: qty in entered unit → calc line price
+    const qEl = document.getElementById('o-qty'); // hidden qty in weight row
+    const wqEl = document.querySelectorAll('#o-weight-row input[type=number]')[0];
+    const wuEl = document.getElementById('o-weight-unit');
+    const qty = parseFloat(wqEl?.value || qEl?.value) || 1;
+    const enteredUnit = wuEl?.value || baseUnit;
+    const km={kg:1,g:.001},lm={l:1,ml:.001},mm={m:1,cm:.01};
+    let r=1;
+    if(km[baseUnit]&&km[enteredUnit])r=km[enteredUnit]/km[baseUnit];
+    else if(lm[baseUnit]&&lm[enteredUnit])r=lm[enteredUnit]/lm[baseUnit];
+    else if(mm[baseUnit]&&mm[enteredUnit])r=mm[enteredUnit]/mm[baseUnit];
+    const linePrice = Math.round(basePrice*qty*r*100)/100;
+    const totalEl = document.getElementById('o-total');
+    if (totalEl) totalEl.value = linePrice.toFixed(2);
+    const calcEl = document.getElementById('o-weight-calc');
+    if (calcEl) calcEl.innerText = `= ${linePrice.toLocaleString()} ₴`;
+    // Update variant to display label
+    const variantInp = document.getElementById('o-variant');
+    if (variantInp) variantInp.value = `${qty} ${getUnitLabel(enteredUnit)}`;
+  } else {
+    const qty = +document.getElementById('o-qty')?.value || 0;
+    if (opt && basePrice) {
+      const totalEl = document.getElementById('o-total');
+      if (totalEl) totalEl.value = (basePrice * qty).toFixed(2);
+    }
   }
 }
 
@@ -2891,16 +3134,78 @@ function addToPOS(name, qty = 1) {
     selectPOSSize(prod);
     return;
   }
+  // Weight product — open qty/unit dialog
+  if (prod.ptype === 'weight') {
+    selectPOSWeight(prod);
+    return;
+  }
   const existing = posCart.find(c => c.name === name && !c.variant);
   if (existing) {
     if (existing.qty >= +prod.qty) { showToast('Максимальна кількість!', 'warning'); return; }
     existing.qty = Math.min(existing.qty + qty, +prod.qty);
   } else {
-    posCart.push({ name: prod.name, price: +prod.price, qty, maxQty: +prod.qty, unit: prod.unit||'pcs', variant:'', code: prod.code||'' });
+    posCart.push({ name: prod.name, price: +prod.price, qty, maxQty: +prod.qty, unit: prod.unit||'pcs', variant:'', code: prod.code||'', isWeighted:false });
   }
   renderPOSCart();
-  // Brief highlight
   showToast(`+ ${prod.name}`, 'success');
+}
+
+function selectPOSWeight(prod) {
+  const subUnits = {kg:[['kg','кг'],['g','г']],l:[['l','л'],['ml','мл']],m:[['m','м'],['cm','см']]}[prod.unit||'kg'] || [[prod.unit||'kg', prod.unit||'кг']];
+  const defUnit = subUnits[subUnits.length-1][0];
+  const defQty = defUnit==='g'?100:defUnit==='ml'?100:defUnit==='cm'?50:1;
+  const modal = document.createElement('div');
+  modal.id='pos-weight-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(4px)';
+  modal.innerHTML=`<div style="background:#1a1d27;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;max-width:360px;width:calc(100% - 32px)">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:1rem;margin-bottom:4px">⚖️ ${prod.name}</div>
+    <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:18px">Ціна: ${(+prod.price).toLocaleString()} ₴ / ${getUnitLabel(prod.unit)}</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+      <input type="number" id="pos-w-qty" value="${defQty}" min="0.001" step="any" style="flex:1;padding:12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;font-size:1.1rem;font-weight:700;outline:none;text-align:center">
+      <select id="pos-w-unit" style="padding:12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;font-size:.9rem;outline:none;cursor:pointer">
+        ${subUnits.map(([u,l])=>`<option value="${u}" ${u===defUnit?'selected':''}>${l}</option>`).join('')}
+      </select>
+    </div>
+    <div id="pos-w-total" style="text-align:center;color:var(--accent2);font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closePOSWeightModal()" style="flex:1;padding:11px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);cursor:pointer;font-weight:600">Скасувати</button>
+      <button onclick="confirmPOSWeight('${prod.name.replace(/'/g,"\\'")}',${prod.price},${prod.qty},'${prod.unit||'kg'}')" style="flex:2;padding:11px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-size:.9rem">Додати в кошик</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  const qInp=document.getElementById('pos-w-qty');
+  const uSel=document.getElementById('pos-w-unit');
+  const updateTotal=()=>{
+    const q=parseFloat(qInp.value)||0;
+    const uv=uSel.value;
+    const km={kg:1,g:.001},lm={l:1,ml:.001},mm={m:1,cm:.01};
+    let r=1;
+    const bu=prod.unit||'kg';
+    if(km[bu]&&km[uv])r=km[uv]/km[bu];
+    else if(lm[bu]&&lm[uv])r=lm[uv]/lm[bu];
+    else if(mm[bu]&&mm[uv])r=mm[uv]/mm[bu];
+    const lp=Math.round(prod.price*q*r*100)/100;
+    document.getElementById('pos-w-total').innerText=`${q} ${getUnitLabel(uv)} = ${lp.toLocaleString()} ₴`;
+  };
+  qInp.oninput=updateTotal;uSel.onchange=updateTotal;
+  updateTotal();
+  setTimeout(()=>qInp.select(),100);
+}
+function closePOSWeightModal(){document.getElementById('pos-weight-modal')?.remove();}
+function confirmPOSWeight(name,basePrice,maxQty,baseUnit){
+  const q=parseFloat(document.getElementById('pos-w-qty')?.value)||1;
+  const uv=document.getElementById('pos-w-unit')?.value||baseUnit;
+  const km={kg:1,g:.001},lm={l:1,ml:.001},mm={m:1,cm:.01};
+  let r=1;
+  if(km[baseUnit]&&km[uv])r=km[uv]/km[baseUnit];
+  else if(lm[baseUnit]&&lm[uv])r=lm[uv]/lm[baseUnit];
+  else if(mm[baseUnit]&&mm[uv])r=mm[uv]/mm[baseUnit];
+  const linePrice=Math.round(basePrice*q*r*100)/100;
+  const label=`${q} ${getUnitLabel(uv)}`;
+  posCart.push({name,price:linePrice,qty:1,maxQty:+maxQty||1000,unit:baseUnit,variant:label,code:'',isWeighted:true});
+  closePOSWeightModal();
+  renderPOSCart();
+  showToast(`+ ${name} (${label})`, 'success');
 }
 
 function selectPOSSize(prod) {
@@ -2997,13 +3302,13 @@ function renderPOSCart() {
     <div class="pos-cart-row">
       <div class="pos-cart-row-info">
         <div class="pos-cart-row-name">${item.name}${item.variant?`<span class="pos-cart-row-variant">${item.variant}</span>`:''}</div>
-        <div class="pos-cart-row-sub">${(+item.price).toLocaleString()} ₴ / шт.${item.code?' · '+item.code:''}</div>
+        <div class="pos-cart-row-sub">${item.isWeighted?(item.price).toLocaleString()+' ₴':`${(+item.price).toLocaleString()} ₴ / шт.${item.code?' · '+item.code:''}`}</div>
       </div>
-      <div class="pos-qty-ctrl">
+      ${!item.isWeighted?`<div class="pos-qty-ctrl">
         <button class="pos-qty-btn" onclick="changePOSQty(${i},-1)">−</button>
         <span class="pos-qty-num">${item.qty}</span>
         <button class="pos-qty-btn" onclick="changePOSQty(${i},1)">+</button>
-      </div>
+      </div>`:`<div style="min-width:80px;text-align:center;font-size:.75rem;color:rgba(255,255,255,.5)">${item.variant}</div>`}
       <div class="pos-cart-row-total">${(item.qty*item.price).toLocaleString()} ₴</div>
       <button class="pos-cart-del" onclick="removePOSItem(${i})" title="Видалити">✕</button>
     </div>
@@ -3060,40 +3365,58 @@ async function completePOS(payMethod) {
   // Validate stock
   for (const item of posCart) {
     const prod = db.products.find(p => p.name === item.name);
-    if (prod && +prod.qty < item.qty) { showToast(`Недостатньо на складі: ${item.name} (є ${prod.qty} шт.)`, 'error'); return; }
+    if (!item.isWeighted && prod && +prod.qty < item.qty) {
+      showToast(`Недостатньо на складі: ${item.name} (є ${prod.qty} шт.)`, 'error'); return;
+    }
   }
 
   const batchId = String(Date.now()).slice(-6);
-  const allOrderIds = [];
+  const subtotalRaw = posCart.reduce((s,i)=>s+i.qty*i.price, 0);
+  const discAmt = Math.round(subtotalRaw * discPct / 100);
+  const grandTotal = subtotalRaw - discAmt;
 
+  // Update stock for all items
   for (const item of posCart) {
     const prod = db.products.find(p => p.name === item.name);
     if (prod) {
-      prod.qty -= item.qty;
-      if (item.variant && prod.sizeStock && prod.sizeStock[item.variant] !== undefined) {
-        prod.sizeStock[item.variant] = Math.max(0, (prod.sizeStock[item.variant]||0) - item.qty);
+      if (item.isWeighted) {
+        prod.qty = Math.max(0, +prod.qty - 1); // deduct 1 unit for weighted
+      } else {
+        prod.qty -= item.qty;
+        // Per-size stock update
+        if (item.variant && prod.sizeStock && typeof prod.sizeStock === 'object' && prod.sizeStock[item.variant] !== undefined) {
+          prod.sizeStock[item.variant] = Math.max(0, (prod.sizeStock[item.variant]||0) - item.qty);
+        }
       }
-    }
-    const discountedPrice = item.price * (1 - discPct/100);
-    const orderId = batchId + '-' + posCart.indexOf(item);
-    const order = {
-      id: orderId, date: getFmtDate(), client: cName, phone: cPhone,
-      product: item.name, variant: item.variant||'', qty: item.qty,
-      total: Math.round(item.qty * discountedPrice),
-      unit: prod?.unit||'pcs',
-      manager: currentUser.name, payMethod, ttn: '',
-      comment: `Каса #${batchId}${discPct>0?' знижка '+discPct+'%':''}`
-    };
-    db.orders.unshift(order);
-    allOrderIds.push(orderId);
-    // Don't update client stats for anonymous buyer
-    if (cName !== 'Анонімний покупець') {
-      const cl = db.clients.find(c => c.name === cName);
-      if (cl) { cl.orders = (+cl.orders||0)+1; cl.sum = (+cl.sum||0)+order.total; cl.last = order.date; }
     }
   }
 
-  const grandTotal = posCart.reduce((s,i)=>s+i.qty*i.price,0) * (1 - discPct/100);
+  // ── Create ONE grouped order (single receipt) ──
+  const productsSummary = posCart.map(i => `${i.name}${i.variant?' ('+i.variant+')':''} × ${i.qty}`).join('; ');
+  const variantsSummary = posCart.map(i => i.variant||'').filter(Boolean).join('; ');
+  // Auto-status: cash/card in store = done; cod = waiting_ttn
+  const autoStatus = (payMethod === 'cod') ? 'waiting_ttn' : 'done';
+
+  const order = {
+    id: batchId, date: getFmtDate(), client: cName, phone: cPhone,
+    product: productsSummary,
+    variant: variantsSummary,
+    qty: posCart.reduce((s,i)=>s+i.qty, 0),
+    total: Math.round(grandTotal),
+    unit: 'шт.',
+    manager: currentUser.name, payMethod, ttn: '',
+    comment: `Каса${discPct>0?' знижка '+discPct+'%':''}`,
+    status: autoStatus,
+    deliveryType: payMethod === 'cod' ? 'nova_poshta' : 'pickup'
+  };
+  db.orders.unshift(order);
+
+  // Update client stats
+  if (cName !== 'Анонімний покупець') {
+    const cl = db.clients.find(c => c.name === cName);
+    if (cl) { cl.orders = (+cl.orders||0)+1; cl.sum = (+cl.sum||0)+order.total; cl.last = order.date; }
+  }
+
   writeLog(`Продаж через касу: ${posCart.length} товарів, сума: ${Math.round(grandTotal).toLocaleString()} ₴ (#${batchId})`);
 
   // Email receipt
@@ -3614,7 +3937,7 @@ function renderClients() {
   recalcClients(); // завжди синхронізуємо з реальними замовленнями
   const tbody = document.getElementById('t-clients');
   const query = document.getElementById('client-search').value.toLowerCase();
-  const filtered = db.clients.filter(c => (c.name||'').toLowerCase().includes(query) || (c.phone||'').includes(query));
+  const filtered = db.clients.filter(c => (c.name||'').toLowerCase().includes(query) || (c.phone||'').includes(query) || (c.email||'').toLowerCase().includes(query) || (c.city||'').toLowerCase().includes(query) || (c.address||'').toLowerCase().includes(query));
 
   tbody.innerHTML = filtered.map((c) => `
     <tr>
@@ -3814,8 +4137,26 @@ function openXMLModal() {
         <option value="csv">📊 CSV / TSV (таблиця через кому або крапку з комою)</option>
         <option value="json">🔷 JSON (масив товарів)</option>
         <option value="xlsx">📗 Excel / XLSX / XLS</option>
+        <option value="url">🌐 Імпорт за URL (сайт / XML / JSON / CSV)</option>
         <option value="txt">📝 Текст вручну (назва; ціна; кількість; категорія)</option>
       </select>
+    </div>
+
+    <!-- URL Import section -->
+    <div id="imp-url-wrap" class="form-group" style="display:none">
+      <label>Посилання на прайс або сайт з товарами</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input type="url" id="imp-url-input" placeholder="https://example.com/products.xml або https://supplier.ua/price.csv" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;outline:none">
+        <button class="btn btn-primary" onclick="fetchImportURL()">⬇️ Завантажити</button>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);padding:8px 12px;background:var(--surface);border-radius:6px;line-height:1.6">
+        💡 Підтримуються:
+        <strong>XML/YML</strong> прайс-листи (Prom.ua, Rozetka, власні),
+        <strong>CSV/JSON</strong> файли,
+        <strong>HTML-сторінки</strong> з таблицями товарів.
+        Система автоматично визначить формат.
+      </div>
+      <div id="imp-url-status" style="margin-top:8px;font-size:.82rem;display:none"></div>
     </div>
 
     <!-- File drop zone — shown for xml/csv/json/xlsx -->
@@ -3868,6 +4209,9 @@ function openXMLModal() {
       const text = document.getElementById('imp-text-area').value.trim();
       if (!text) { showToast('Введіть товари', 'error'); return false; }
       rawData = { type:'txt', content: text };
+    } else if (mode === 'url') {
+      if (!window._importParsed) { showToast('Спочатку завантажте URL', 'error'); return false; }
+      rawData = window._importParsed;
     } else {
       if (!window._importParsed) { showToast('Завантажте файл', 'error'); return false; }
       rawData = window._importParsed;
@@ -3889,15 +4233,123 @@ function openXMLModal() {
   }, '📥 Імпортувати');
 }
 
+// ===================== URL IMPORT =====================
+async function fetchImportURL() {
+  const urlEl = document.getElementById('imp-url-input');
+  const statusEl = document.getElementById('imp-url-status');
+  const url = urlEl?.value.trim();
+  if (!url) { showToast('Введіть URL', 'error'); return; }
+
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = '⏳ Завантаження...';
+
+  try {
+    // Use GAS proxy to fetch URL (bypasses CORS)
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'fetchUrl', url })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Помилка завантаження');
+
+    const content = data.content;
+    const code = data.code;
+
+    if (code !== 200) {
+      statusEl.innerHTML = `❌ Сервер відповів: ${code}. Перевірте URL.`;
+      return;
+    }
+
+    // Auto-detect format by content
+    let parsed = null;
+    let detectedType = 'unknown';
+
+    // Try XML
+    if (content.trimStart().startsWith('<') || url.match(/\.(xml|yml|yaml)/i)) {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/xml');
+        const tags = ['offer','item','product','Product','Item','Offer','товар','позиція'];
+        let items = [];
+        for (const t of tags) { const f = doc.querySelectorAll(t); if (f.length) { items = Array.from(f); break; } }
+        if (items.length) {
+          window._importParsed = { type: 'xml', content, count: items.length };
+          parsed = true; detectedType = 'XML';
+          statusEl.innerHTML = `✅ XML знайдено <strong>${items.length}</strong> товарів. Натисніть "Імпортувати".`;
+        }
+      } catch(e) {}
+    }
+
+    // Try JSON
+    if (!parsed && (content.trimStart().startsWith('{') || content.trimStart().startsWith('[') || url.match(/\.json/i))) {
+      try {
+        let arr = JSON.parse(content);
+        if (!Array.isArray(arr)) arr = arr.products || arr.items || arr.offers || arr.data || Object.values(arr);
+        if (Array.isArray(arr) && arr.length) {
+          const headers = arr.length ? Object.keys(arr[0]) : [];
+          window._importParsed = { type: 'json', rows: arr };
+          parsed = true; detectedType = 'JSON';
+          statusEl.innerHTML = `✅ JSON знайдено <strong>${arr.length}</strong> товарів. Натисніть "Імпортувати".`;
+          renderColumnMapping(headers);
+        }
+      } catch(e) {}
+    }
+
+    // Try CSV
+    if (!parsed && (url.match(/\.(csv|tsv)/i) || content.includes(',') || content.includes(';'))) {
+      try {
+        const rows = parseCSV(content);
+        if (rows.length > 1) {
+          const headers = rows[0] || [];
+          window._importParsed = { type: 'csv', rows };
+          parsed = true; detectedType = 'CSV';
+          statusEl.innerHTML = `✅ CSV знайдено <strong>${rows.length - 1}</strong> рядків. Натисніть "Імпортувати".`;
+          renderColumnMapping(headers);
+        }
+      } catch(e) {}
+    }
+
+    // Try HTML table parsing
+    if (!parsed) {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        const tables = doc.querySelectorAll('table');
+        if (tables.length) {
+          const bestTable = Array.from(tables).sort((a, b) => b.querySelectorAll('tr').length - a.querySelectorAll('tr').length)[0];
+          const rows = Array.from(bestTable.querySelectorAll('tr'));
+          if (rows.length > 1) {
+            const headers = Array.from(rows[0].querySelectorAll('th,td')).map(td => td.textContent.trim());
+            const dataRows = rows.slice(1).map(tr => Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim()));
+            window._importParsed = { type: 'csv', rows: [headers, ...dataRows] };
+            parsed = true; detectedType = 'HTML-таблиця';
+            statusEl.innerHTML = `✅ HTML-таблиця знайдено <strong>${dataRows.length}</strong> рядків. Натисніть "Імпортувати".`;
+            renderColumnMapping(headers);
+          }
+        }
+      } catch(e) {}
+    }
+
+    if (!parsed) {
+      statusEl.innerHTML = `⚠️ Не вдалось автоматично визначити формат. Спробуйте завантажити файл вручну або скопіювати вміст.`;
+    }
+
+  } catch(e) {
+    statusEl.innerHTML = `❌ Помилка: ${e.message}. Переконайтесь що GAS URL є правильним і сайт дозволяє зовнішній доступ.`;
+  }
+}
+
 function toggleImportMode() {
   const mode = document.getElementById('m-xml-mode').value;
   const fileWrap = document.getElementById('imp-file-wrap');
   const textWrap = document.getElementById('imp-text-wrap');
+  const urlWrap  = document.getElementById('imp-url-wrap');
   const hint     = document.getElementById('imp-accept-hint');
   const input    = document.getElementById('imp-file-input');
 
-  fileWrap.style.display = mode === 'txt' ? 'none' : 'block';
+  fileWrap.style.display = (mode === 'txt' || mode === 'url') ? 'none' : 'block';
   textWrap.style.display = mode === 'txt' ? 'block' : 'none';
+  urlWrap.style.display  = mode === 'url' ? 'block' : 'none';
 
   const acceptMap = { xml:'.xml,.yml,.yaml,text/xml', csv:'.csv,.tsv,text/csv', json:'.json,application/json', xlsx:'.xlsx,.xls' };
   const hintMap   = { xml:'XML, YML, YAML', csv:'CSV, TSV', json:'JSON', xlsx:'XLSX, XLS' };
@@ -3905,8 +4357,10 @@ function toggleImportMode() {
   if (hint && hintMap[mode])    hint.textContent = hintMap[mode];
 
   window._importParsed = null;
-  document.getElementById('imp-mapping-wrap').style.display = 'none';
-  document.getElementById('xml-preview').style.display = 'none';
+  const mw = document.getElementById('imp-mapping-wrap');
+  const pv = document.getElementById('xml-preview');
+  if (mw) mw.style.display = 'none';
+  if (pv) pv.style.display = 'none';
 }
 
 function handleImportDrop(e) {
