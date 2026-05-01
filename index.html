@@ -108,8 +108,12 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;line-height:1.2}
 .stat-sub{font-size:.78rem;color:var(--muted2);margin-top:6px}
 
 /* TABLE */
-.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;border-collapse:collapse; min-width: 600px;}
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative;}
+.table-wrap::-webkit-scrollbar{height:7px}
+.table-wrap::-webkit-scrollbar-track{background:var(--surface);border-radius:99px;margin:0 4px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.table-wrap::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
+table{width:100%;border-collapse:collapse;min-width:600px;}
 thead th{text-align:left;padding:10px 14px;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border);white-space:nowrap}
 tbody tr{transition:background .1s}
 tbody tr:hover{background:var(--surface)}
@@ -369,15 +373,20 @@ tbody tr:last-child td{border-bottom:none}
   .pos-body { flex-direction: column; }
   .pos-catalog { border-right: none; border-bottom: 1px solid rgba(255,255,255,.06); max-height: 55vh; }
   .pos-checkout { width: 100%; min-height: 0; max-height: 45vh; overflow-y: auto; }
-  .pos-prod-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .pos-prod-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; padding: 10px; }
   #pos-overlay .pos-topbar-left .pos-topbar-info { display: none; }
-  .pos-pay-btns { padding: 6px 10px 4px; gap: 6px; }
-  .pos-pay-btn { padding: 10px 6px; }
-  .pos-pay-icon { font-size: 1.2rem; }
-  .pos-pay-label { font-size: .7rem; }
-  .pos-pay-btn-cod { margin: 4px 10px 10px; }
-  .pos-total-bar { margin: 6px 10px; padding: 8px 12px; font-size: 1rem; }
-  #pos-total-val { font-size: 1.1rem; }
+  .pos-pay-btns { padding: 6px 12px 4px; gap: 8px; }
+  .pos-pay-btn { padding: 12px 8px; }
+  .pos-pay-icon { font-size: 1.4rem; }
+  .pos-pay-label { font-size: .75rem; }
+  .pos-pay-btn-cod { margin: 4px 12px 12px; }
+  .pos-total-bar { margin: 8px 12px; padding: 10px 14px; font-size: 1rem; }
+  #pos-total-val { font-size: 1.3rem; }
+  .pos-checkout { width: 100%; }
+  .pos-prod-card { min-height: 130px; padding: 14px 12px 12px; }
+  .pos-prod-card-emoji { font-size: 2rem; }
+  .pos-prod-card-name { font-size: .85rem; }
+  .pos-prod-card-price { font-size: 1rem; }
 }
 @media(max-width:480px){
   .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -579,8 +588,19 @@ tbody tr:last-child td{border-bottom:none}
         <div><h2>Склад</h2><p>Управління товарами та залишками</p></div>
         <div style="display:flex;gap:8px; flex-wrap:wrap;">
           <button class="btn btn-secondary" id="xml-import-btn" onclick="openXMLModal()" style="display:none">📂 Імпорт товарів</button>
+          <button class="btn btn-secondary" onclick="openPriceBulkModal()">💹 Масова ціна</button>
+          <button class="btn btn-secondary" onclick="openPurchaseList()">📋 Лист закупівлі</button>
           <button class="btn btn-primary" onclick="openStockModal()">+ Додати товар</button>
         </div>
+      </div>
+      <!-- BULK ACTION BAR -->
+      <div id="bulk-action-bar" style="display:none;background:var(--accent);color:#fff;border-radius:10px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="bulk-count-label" style="font-weight:700;font-size:.88rem">Обрано: 0</span>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="bulkChangeCategory()">📁 Категорія</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="bulkChangeSupplier()">🏭 Постачальник</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="bulkChangePrice()">💲 Ціна %</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2)" onclick="bulkDelete()">🗑️ Видалити</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);margin-left:auto" onclick="clearSelection()">✕ Скасувати</button>
       </div>
       <div class="card">
         <div class="search-bar">
@@ -598,10 +618,16 @@ tbody tr:last-child td{border-bottom:none}
             <option value="consignment">🤝 Консигнація</option>
             <option value="preorder">📋 Передзамовлення</option>
           </select>
+          <button id="out-of-stock-btn" class="btn btn-secondary btn-sm" onclick="toggleOutOfStock()" title="Показати тільки відсутні товари" style="white-space:nowrap">📦 Немає в наявності</button>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap" style="max-height:calc(100vh - 280px);overflow-y:auto;overflow-x:auto;">
           <table>
-            <thead><tr><th>#</th><th>Фото</th><th>Код (SKU)</th><th>Назва</th><th>Категорія / Підкатегорія</th><th>Тип / Варіанти</th><th>Постачальник / Джерело</th><th>К-сть</th><th>Собівартість</th><th>Ціна</th><th>Дії</th></tr></thead>
+            <thead style="position:sticky;top:0;z-index:2;background:var(--card)">
+              <tr>
+                <th style="width:36px"><input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this)" title="Вибрати все" style="cursor:pointer;width:15px;height:15px"></th>
+                <th>#</th><th>Фото</th><th>Код (SKU)</th><th>Назва</th><th>Категорія / Підкатегорія</th><th>Тип / Варіанти</th><th>Постачальник / Джерело</th><th>К-сть</th><th>Собівартість</th><th>Ціна</th><th>Дії</th>
+              </tr>
+            </thead>
             <tbody id="t-stock"></tbody>
           </table>
         </div>
@@ -996,7 +1022,109 @@ tbody tr:last-child td{border-bottom:none}
               <label>Email відправника (для листів клієнтам)</label>
               <input type="email" id="from-email" placeholder="your@gmail.com">
             </div>
-            <button class="btn btn-primary" onclick="saveNPSettings()">💾 Зберегти налаштування НП</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="saveNPSettings()">💾 Зберегти НП налаштування</button>
+              <button class="btn btn-secondary" onclick="checkNPTrackingAll()">🚚 Перевірити статуси ТТН зараз</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELEGRAM / VIBER BOT -->
+        <div class="card" style="margin-top:16px">
+          <div class="settings-section">
+            <h4>🤖 Telegram &amp; Viber Боти</h4>
+            <div style="font-size:.8rem;color:var(--muted);margin-bottom:14px">Бот для продажів підключений до вашої CRM через Google Apps Script. Клієнти можуть переглядати товари, оформлювати замовлення та отримувати підтвердження прямо в месенджері.</div>
+
+            <div style="background:var(--accent-light);border-radius:10px;padding:14px;margin-bottom:16px;border:1.5px solid var(--accent)">
+              <div style="font-weight:700;font-size:.88rem;color:var(--accent);margin-bottom:8px">📋 Інструкція: Як запустити Telegram бот</div>
+              <ol style="font-size:.78rem;color:var(--ink);line-height:1.8;padding-left:18px">
+                <li>Напишіть <a href="https://t.me/BotFather" target="_blank" style="color:var(--accent)">@BotFather</a> в Telegram → /newbot → введіть назву → отримайте TOKEN</li>
+                <li>Вставте TOKEN нижче і збережіть</li>
+                <li>Відкрийте GAS (script.google.com) → вставте оновлений GAS_updated.txt</li>
+                <li>В GAS: Розгорнути → Веб-додаток → скопіюйте URL</li>
+                <li>В GAS виконайте функцію <code>setupTelegramWebhook()</code> — вона автоматично зареєструє Webhook</li>
+                <li>Готово! Напишіть вашому боту /start</li>
+              </ol>
+            </div>
+
+            <div class="form-group">
+              <label>Telegram Bot Token</label>
+              <input type="text" id="tg-bot-token" placeholder="1234567890:ABCDefGhIJKlmNoPQRsTUVwxyZ" style="font-family:monospace;font-size:.82rem">
+              <div style="font-size:.7rem;color:var(--muted);margin-top:4px">Отримати у <a href="https://t.me/BotFather" target="_blank">@BotFather</a> → /newbot</div>
+            </div>
+            <div class="form-group">
+              <label>Telegram Bot Username (без @)</label>
+              <input type="text" id="tg-bot-username" placeholder="MyShopBot">
+            </div>
+
+            <div style="background:#f0fdf4;border-radius:10px;padding:14px;margin:16px 0;border:1.5px solid #86efac">
+              <div style="font-weight:700;font-size:.88rem;color:#15803d;margin-bottom:8px">📋 Інструкція: Як запустити Viber бот</div>
+              <ol style="font-size:.78rem;color:var(--ink);line-height:1.8;padding-left:18px">
+                <li>Зайдіть на <a href="https://partners.viber.com" target="_blank" style="color:#15803d">partners.viber.com</a> → Create Bot Account</li>
+                <li>Отримайте Authentication Token</li>
+                <li>Вставте TOKEN нижче і збережіть</li>
+                <li>В GAS виконайте функцію <code>setupViberWebhook()</code></li>
+                <li>Готово! Знайдіть бота в Viber за іменем</li>
+              </ol>
+            </div>
+
+            <div class="form-group">
+              <label>Viber Bot Token</label>
+              <input type="text" id="viber-bot-token" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx-xxxxxxxx" style="font-family:monospace;font-size:.75rem">
+              <div style="font-size:.7rem;color:var(--muted);margin-top:4px">Отримати на <a href="https://partners.viber.com" target="_blank">partners.viber.com</a></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveBotSettings()">💾 Зберегти налаштування ботів</button>
+          </div>
+        </div>
+
+        <!-- MONOBANK / PRIVAT24 -->
+        <div class="card" style="margin-top:16px">
+          <div class="settings-section">
+            <h4>💳 Monobank / Privat24 — Авто-підтвердження оплат</h4>
+            <div style="font-size:.8rem;color:var(--muted);margin-bottom:14px">Система зчитує виписку через API і автоматично підтверджує оплачені замовлення.</div>
+
+            <div style="background:#fef3c7;border-radius:10px;padding:14px;margin-bottom:16px;border:1.5px solid #fcd34d">
+              <div style="font-weight:700;font-size:.85rem;color:#92400e;margin-bottom:8px">📋 Як підключити Monobank</div>
+              <ol style="font-size:.78rem;color:var(--ink);line-height:1.8;padding-left:18px">
+                <li>Відкрийте додаток Monobank → Налаштування → Для розробників → Отримати токен</li>
+                <li>Вставте токен нижче і збережіть</li>
+                <li>В GAS додайте action <code>'monobankStatement'</code> (вже є в GAS_updated.txt)</li>
+                <li>Система кожні 30 хв перевіряє нові транзакції та зіставляє з замовленнями</li>
+                <li>Збіг: сума платежу = сума замовлення ±5 ₴ або в коментарі є номер замовлення</li>
+              </ol>
+            </div>
+
+            <div class="form-group">
+              <label>Monobank API Token</label>
+              <input type="text" id="mono-token" placeholder="u_..." style="font-family:monospace;font-size:.82rem">
+              <div style="font-size:.7rem;color:var(--muted);margin-top:4px">Monobank → Налаштування → Для розробників</div>
+            </div>
+
+            <div style="background:#eff6ff;border-radius:10px;padding:14px;margin:16px 0;border:1.5px solid #bfdbfe">
+              <div style="font-weight:700;font-size:.85rem;color:#1d4ed8;margin-bottom:8px">📋 Як підключити Privat24</div>
+              <ol style="font-size:.78rem;color:var(--ink);line-height:1.8;padding-left:18px">
+                <li>Зайдіть у кабінет <a href="https://business.privatbank.ua" target="_blank" style="color:#1d4ed8">Приват24 для бізнесу</a></li>
+                <li>API → Отримати Merchant ID та Password</li>
+                <li>Вставте нижче і збережіть</li>
+              </ol>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Privat24 Merchant ID</label>
+                <input type="text" id="privat-mid" placeholder="123456" style="font-family:monospace">
+              </div>
+              <div class="form-group">
+                <label>Privat24 Password</label>
+                <input type="password" id="privat-pass" placeholder="••••••••">
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="saveBankSettings()">💾 Зберегти налаштування банку</button>
+              <button class="btn btn-secondary" onclick="checkMonobankPayments()">💳 Перевірити оплати зараз</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1014,7 +1142,7 @@ tbody tr:last-child td{border-bottom:none}
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Назва</th><th>Контактна особа</th><th>Телефон</th><th>Email</th><th>Нотатки</th><th>Дії</th></tr></thead>
+            <thead><tr><th>Назва</th><th>Контактна особа</th><th>Телефон</th><th>Email</th><th>Джерела імпорту</th><th>Нотатки</th><th>Дії</th></tr></thead>
             <tbody id="t-suppliers"></tbody>
           </table>
         </div>
@@ -1133,7 +1261,7 @@ tbody tr:last-child td{border-bottom:none}
   display: none;
   position: fixed;
   inset: 0;
-  background: #0f1117;
+  background: #0a0d14;
   z-index: 2000;
   flex-direction: column;
   font-family: 'DM Sans', sans-serif;
@@ -1142,32 +1270,38 @@ tbody tr:last-child td{border-bottom:none}
 
 /* TOP BAR */
 .pos-topbar {
-  background: #1a1d27;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  padding: 0 20px;
-  height: 52px;
+  background: linear-gradient(90deg, #12141f, #1a1d2e);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: 0 24px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,.3);
 }
-.pos-topbar-left { display:flex;align-items:center;gap:20px; }
-.pos-logo { font-family:'Syne',sans-serif;font-weight:800;color:#fff;font-size:1.1rem; }
-.pos-topbar-info { font-size:.78rem;color:rgba(255,255,255,.4); }
-.pos-topbar-info strong { color:rgba(255,255,255,.7); }
+.pos-topbar-left { display:flex;align-items:center;gap:24px; }
+.pos-logo { font-family:'Syne',sans-serif;font-weight:800;color:#fff;font-size:1.25rem;letter-spacing:-.03em;display:flex;align-items:center;gap:8px; }
+.pos-logo::before { content:'🖥️';font-size:1.1rem; }
+.pos-topbar-info { font-size:.8rem;color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);padding:4px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.07); }
+.pos-topbar-info strong { color:rgba(255,255,255,.75); }
 .pos-topbar-right { display:flex;gap:8px; }
 .pos-topbar-btn {
-  background: rgba(255,255,255,.07);
+  background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.1);
-  color: rgba(255,255,255,.6);
-  padding: 6px 14px;
-  border-radius: 7px;
+  color: rgba(255,255,255,.55);
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: .8rem;
+  font-size: .82rem;
   font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
   transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
-.pos-topbar-btn:hover { background:rgba(255,255,255,.12);color:#fff; }
+.pos-topbar-btn:hover { background:rgba(255,255,255,.13);color:#fff;border-color:rgba(255,255,255,.2); }
 
 /* BODY */
 .pos-body {
@@ -1182,7 +1316,7 @@ tbody tr:last-child td{border-bottom:none}
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #0f1117;
+  background: #0f1219;
   border-right: 1px solid rgba(255,255,255,.06);
 }
 
@@ -1190,8 +1324,8 @@ tbody tr:last-child td{border-bottom:none}
 .pos-search-row {
   display: flex;
   gap: 10px;
-  padding: 12px 14px;
-  background: #1a1d27;
+  padding: 14px 16px;
+  background: #141720;
   border-bottom: 1px solid rgba(255,255,255,.06);
   flex-shrink: 0;
 }
@@ -1201,142 +1335,159 @@ tbody tr:last-child td{border-bottom:none}
 }
 .pos-input-icon {
   position: absolute;
-  left: 10px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: .9rem;
+  font-size: 1rem;
   pointer-events: none;
 }
 .pos-barcode-inp, .pos-search-inp {
   width: 100%;
-  padding: 9px 12px 9px 34px;
+  padding: 11px 14px 11px 38px;
   background: rgba(255,255,255,.06);
-  border: 1.5px solid rgba(255,255,255,.1);
-  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,.09);
+  border-radius: 10px;
   color: #fff;
-  font-size: .85rem;
+  font-size: .9rem;
   font-family: 'DM Sans', sans-serif;
   outline: none;
-  transition: border-color .15s;
+  transition: border-color .15s, background .15s;
 }
-.pos-barcode-inp:focus { border-color: var(--accent); }
-.pos-search-inp:focus { border-color: rgba(255,255,255,.3); }
-.pos-barcode-inp::placeholder, .pos-search-inp::placeholder { color:rgba(255,255,255,.25); }
+.pos-barcode-inp:focus { border-color: var(--accent); background: rgba(91,76,245,.08); }
+.pos-search-inp:focus { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.08); }
+.pos-barcode-inp::placeholder, .pos-search-inp::placeholder { color:rgba(255,255,255,.2); }
 
 /* Category tabs */
 .pos-cats {
   display: flex;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 8px;
+  padding: 10px 16px;
   overflow-x: auto;
   flex-shrink: 0;
-  background: #1a1d27;
+  background: #141720;
   border-bottom: 1px solid rgba(255,255,255,.06);
 }
 .pos-cats::-webkit-scrollbar { height: 3px; }
 .pos-cats::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15);border-radius:2px; }
 .pos-cat-tab {
-  padding: 5px 14px;
+  padding: 7px 18px;
   border-radius: 99px;
-  border: 1px solid rgba(255,255,255,.1);
-  background: rgba(255,255,255,.05);
+  border: 1.5px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
   color: rgba(255,255,255,.5);
-  font-size: .75rem;
+  font-size: .8rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: all .15s;
+  font-family: 'DM Sans', sans-serif;
 }
 .pos-cat-tab:hover { background:rgba(255,255,255,.1);color:#fff; }
-.pos-cat-tab.active { background:var(--accent);border-color:var(--accent);color:#fff; }
+.pos-cat-tab.active { background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(91,76,245,.35); }
 
 /* Product grid */
 .pos-prod-grid {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 14px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
   align-content: start;
 }
-.pos-prod-grid::-webkit-scrollbar { width: 4px; }
-.pos-prod-grid::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1);border-radius:2px; }
+.pos-prod-grid::-webkit-scrollbar { width: 5px; }
+.pos-prod-grid::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12);border-radius:2px; }
 .pos-prod-card {
-  background: #1a1d27;
-  border: 1.5px solid rgba(255,255,255,.07);
-  border-radius: 12px;
-  padding: 14px 12px;
+  background: linear-gradient(145deg, #1e2235, #181b28);
+  border: 1.5px solid rgba(255,255,255,.09);
+  border-radius: 16px;
+  padding: 18px 16px 14px;
   cursor: pointer;
-  transition: all .15s;
+  transition: all .18s cubic-bezier(.2,.8,.3,1);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   position: relative;
   overflow: hidden;
+  min-height: 160px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.3);
 }
-.pos-prod-card:hover { border-color:var(--accent);background:#1e2035;transform:translateY(-1px); }
-.pos-prod-card:active { transform:scale(.97); }
-.pos-prod-card-emoji { font-size: 2rem; line-height:1; }
+.pos-prod-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(91,76,245,.08) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .18s;
+}
+.pos-prod-card:hover { border-color:rgba(91,76,245,.6);background:linear-gradient(145deg,#232740,#1a1e30);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 0 1px rgba(91,76,245,.3); }
+.pos-prod-card:hover::after { opacity: 1; }
+.pos-prod-card:active { transform:scale(.97); box-shadow:0 2px 8px rgba(0,0,0,.3); }
+.pos-prod-card-emoji { font-size: 2.4rem; line-height:1; margin-bottom: 2px; }
 .pos-prod-card-name {
-  font-weight: 600;
-  font-size: .82rem;
+  font-weight: 700;
+  font-size: .95rem;
   color: #fff;
   line-height: 1.3;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  flex: 1;
 }
-.pos-prod-card-code { font-size:.68rem;color:rgba(255,255,255,.3);font-family:monospace; }
-.pos-prod-card-stock { font-size:.72rem;color:rgba(255,255,255,.35); }
+.pos-prod-card-code { font-size:.7rem;color:rgba(255,255,255,.3);font-family:monospace;letter-spacing:.03em; }
+.pos-prod-card-stock { font-size:.75rem;color:rgba(255,255,255,.4);font-weight:500; }
 .pos-prod-card-price {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 1.05rem;
-  color: var(--accent2);
+  font-size: 1.2rem;
+  color: #a5f3fc;
   margin-top: 2px;
+  letter-spacing: -.02em;
 }
 .pos-prod-card-add {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 22px;
-  height: 22px;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
   background: var(--accent);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: .85rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #fff;
   opacity: 0;
-  transition: opacity .15s;
+  transition: all .18s;
+  box-shadow: 0 2px 8px rgba(91,76,245,.5);
 }
-.pos-prod-card:hover .pos-prod-card-add { opacity: 1; }
-.pos-prod-card.out-of-stock { opacity: .4; cursor: not-allowed; pointer-events: none; }
+.pos-prod-card:hover .pos-prod-card-add { opacity: 1; transform: scale(1.1); }
+.pos-prod-card.out-of-stock { opacity: .35; cursor: not-allowed; pointer-events: none; }
 
 /* CHECKOUT PANEL (RIGHT) */
 .pos-checkout {
-  width: 380px;
+  width: 420px;
   flex-shrink: 0;
-  background: #13161f;
+  background: #0e111a;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-left: 1px solid rgba(255,255,255,.07);
 }
 
 .pos-cart-header {
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-bottom: 1px solid rgba(255,255,255,.07);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  background: #12151f;
 }
-.pos-cart-title { font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:.95rem; }
-.pos-cart-count { font-size:.75rem;color:rgba(255,255,255,.35);background:rgba(255,255,255,.07);padding:3px 10px;border-radius:99px; }
+.pos-cart-title { font-family:'Syne',sans-serif;font-weight:800;color:#fff;font-size:1.05rem;letter-spacing:-.02em; }
+.pos-cart-count { font-size:.78rem;color:rgba(255,255,255,.4);background:rgba(255,255,255,.07);padding:4px 12px;border-radius:99px;font-weight:600; }
 
 /* Cart items */
 .pos-cart-body {
@@ -1345,33 +1496,38 @@ tbody tr:last-child td{border-bottom:none}
   padding: 6px 0;
   min-height: 0;
 }
-.pos-cart-body::-webkit-scrollbar { width: 3px; }
+.pos-cart-body::-webkit-scrollbar { width: 4px; }
 .pos-cart-body::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1);border-radius:2px; }
 .pos-cart-empty {
-  padding: 40px 20px;
+  padding: 50px 20px;
   text-align: center;
-  color: rgba(255,255,255,.2);
-  font-size: .85rem;
+  color: rgba(255,255,255,.18);
+  font-size: .9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
+.pos-cart-empty::before { content: '🛒'; font-size: 2.5rem; opacity: .4; }
 .pos-cart-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 14px;
+  gap: 10px;
+  padding: 11px 18px;
   border-bottom: 1px solid rgba(255,255,255,.05);
   transition: background .1s;
 }
-.pos-cart-row:hover { background: rgba(255,255,255,.03); }
+.pos-cart-row:hover { background: rgba(255,255,255,.04); }
 .pos-cart-row-info { flex: 1; min-width: 0; }
 .pos-cart-row-name {
   font-weight: 600;
-  font-size: .82rem;
+  font-size: .88rem;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.pos-cart-row-sub { font-size:.7rem;color:rgba(255,255,255,.35);margin-top:1px; }
+.pos-cart-row-sub { font-size:.73rem;color:rgba(255,255,255,.35);margin-top:2px; }
 .pos-cart-row-variant {
   display: inline-block;
   background: var(--accent-light);
@@ -1382,64 +1538,67 @@ tbody tr:last-child td{border-bottom:none}
   border-radius: 4px;
   margin-left: 4px;
 }
-.pos-qty-ctrl { display:flex;align-items:center;gap:4px; }
+.pos-qty-ctrl { display:flex;align-items:center;gap:5px; }
 .pos-qty-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.06);
+  background: rgba(255,255,255,.07);
   color: #fff;
   cursor: pointer;
   font-weight: 700;
-  font-size: .9rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all .1s;
 }
 .pos-qty-btn:hover { background:var(--accent);border-color:var(--accent); }
-.pos-qty-num { min-width:24px;text-align:center;font-weight:700;font-size:.85rem;color:#fff; }
-.pos-cart-row-total { font-weight:700;font-size:.85rem;color:var(--accent2);min-width:62px;text-align:right; }
-.pos-cart-del { background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:.9rem;padding:2px;border-radius:4px;transition:color .1s;display:flex;align-items:center; }
+.pos-qty-num { min-width:26px;text-align:center;font-weight:700;font-size:.9rem;color:#fff; }
+.pos-cart-row-total { font-weight:800;font-size:.9rem;color:#a5f3fc;min-width:68px;text-align:right; }
+.pos-cart-del { background:none;border:none;color:rgba(255,255,255,.18);cursor:pointer;font-size:1rem;padding:4px;border-radius:6px;transition:color .1s;display:flex;align-items:center; }
 .pos-cart-del:hover { color:var(--red); }
 
 /* Subtotals */
 .pos-subtotals {
-  padding: 10px 14px 0;
+  padding: 12px 18px 0;
   border-top: 1px solid rgba(255,255,255,.07);
   flex-shrink: 0;
+  background: #0e111a;
 }
-.pos-sub-row { display:flex;justify-content:space-between;font-size:.78rem;color:rgba(255,255,255,.4);padding:2px 0; }
+.pos-sub-row { display:flex;justify-content:space-between;font-size:.8rem;color:rgba(255,255,255,.4);padding:3px 0; }
 .pos-sub-row.discount { color: #22c55e; }
 
 /* Client & Discount section */
 .pos-client-section {
-  padding: 10px 14px 6px;
+  padding: 10px 18px 6px;
   flex-shrink: 0;
 }
-.pos-discount-row { display:flex;align-items:center;gap:10px;padding:6px 14px;flex-shrink:0; }
-.pos-label { display:block;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px; }
+.pos-discount-row { display:flex;align-items:center;gap:10px;padding:6px 18px;flex-shrink:0; }
+.pos-label { display:block;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px; }
 .pos-select {
   width: 100%;
+  padding: 9px 12px;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 9px;
+  color: #fff;
+  font-size: .85rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color .15s;
+}
+.pos-select:focus { border-color: var(--accent); }
+.pos-select option { background:#1a1d27; }
+.pos-inp-sm {
+  flex: 1;
   padding: 8px 10px;
   background: rgba(255,255,255,.06);
   border: 1.5px solid rgba(255,255,255,.1);
   border-radius: 8px;
   color: #fff;
   font-size: .82rem;
-  font-family: 'DM Sans', sans-serif;
-  outline: none;
-}
-.pos-select option { background:#1a1d27; }
-.pos-inp-sm {
-  flex: 1;
-  padding: 7px 10px;
-  background: rgba(255,255,255,.06);
-  border: 1.5px solid rgba(255,255,255,.1);
-  border-radius: 7px;
-  color: #fff;
-  font-size: .8rem;
   font-family: 'DM Sans', sans-serif;
   outline: none;
 }
@@ -1450,61 +1609,64 @@ tbody tr:last-child td{border-bottom:none}
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(91,76,245,.15);
-  border: 1px solid rgba(91,76,245,.3);
-  border-radius: 10px;
-  margin: 8px 14px;
-  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(91,76,245,.2), rgba(124,109,247,.1));
+  border: 1.5px solid rgba(91,76,245,.4);
+  border-radius: 14px;
+  margin: 10px 18px;
+  padding: 14px 18px;
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 1.2rem;
-  color: #fff;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,.7);
   flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(91,76,245,.15);
 }
-#pos-total-val { color: var(--accent2); font-size:1.35rem; }
+#pos-total-val { color: #a5f3fc; font-size:1.6rem;letter-spacing:-.03em; }
 
 /* Payment buttons */
 .pos-pay-btns {
   display: flex;
-  gap: 8px;
-  padding: 6px 14px 4px;
+  gap: 10px;
+  padding: 8px 18px 6px;
   flex-shrink: 0;
 }
 .pos-pay-btn {
   flex: 1;
   border: none;
-  border-radius: 12px;
-  padding: 14px 10px;
+  border-radius: 14px;
+  padding: 18px 10px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  transition: all .15s;
+  gap: 5px;
+  transition: all .18s;
   font-family: 'Syne', sans-serif;
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
 }
-.pos-pay-btn:active { transform: scale(.96); }
-.pos-pay-icon { font-size: 1.5rem; }
-.pos-pay-label { font-weight: 800; font-size: .8rem; letter-spacing: .04em; }
-.pos-pay-cash { background: linear-gradient(135deg,#16a34a,#22c55e);color:#fff;box-shadow:0 4px 16px rgba(34,197,94,.25); }
-.pos-pay-cash:hover { box-shadow:0 6px 20px rgba(34,197,94,.4); }
-.pos-pay-card { background: linear-gradient(135deg,#3b4bdb,#5b4cf5);color:#fff;box-shadow:0 4px 16px rgba(91,76,245,.25); }
-.pos-pay-card:hover { box-shadow:0 6px 20px rgba(91,76,245,.4); }
+.pos-pay-btn:active { transform: scale(.95); box-shadow: none; }
+.pos-pay-icon { font-size: 1.8rem; }
+.pos-pay-label { font-weight: 800; font-size: .85rem; letter-spacing: .04em; }
+.pos-pay-cash { background: linear-gradient(135deg,#166534,#22c55e);color:#fff;box-shadow:0 4px 20px rgba(34,197,94,.3); }
+.pos-pay-cash:hover { box-shadow:0 6px 24px rgba(34,197,94,.5);transform:translateY(-1px); }
+.pos-pay-card { background: linear-gradient(135deg,#2d3eb0,#5b4cf5);color:#fff;box-shadow:0 4px 20px rgba(91,76,245,.3); }
+.pos-pay-card:hover { box-shadow:0 6px 24px rgba(91,76,245,.5);transform:translateY(-1px); }
 .pos-pay-btn-cod {
-  margin: 4px 14px 12px;
-  padding: 10px;
-  background: rgba(245,158,11,.12);
+  margin: 4px 18px 14px;
+  padding: 13px;
+  background: rgba(245,158,11,.1);
   border: 1.5px solid rgba(245,158,11,.3);
-  border-radius: 10px;
-  color: #f59e0b;
+  border-radius: 12px;
+  color: #fbbf24;
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
-  font-size: .82rem;
+  font-size: .88rem;
   cursor: pointer;
   transition: all .15s;
   flex-shrink: 0;
+  letter-spacing: .02em;
 }
-.pos-pay-btn-cod:hover { background:rgba(245,158,11,.2); }
+.pos-pay-btn-cod:hover { background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.5); }
 
 /* SUCCESS FLASH */
 @keyframes pos-flash { 0%{opacity:0;transform:scale(.9)} 30%{opacity:1;transform:scale(1.02)} 100%{opacity:0;transform:scale(1)} }
@@ -1533,7 +1695,7 @@ tbody tr:last-child td{border-bottom:none}
 
 <script>
 // ===================== CONFIG =====================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbx2qZJddu0uV82gVij_ExK8lQHqJh-E3UC4z3rAxPCbe0eMTcdNxRiHTKxbt3s8KceutA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz0tpIUd9Psj1-9h7AKOlBsqEHHHVe4KmLAvzcU7W0ghbOn-COw9ZtqXRawW47knF-AOw/exec";
 
 // ===================== STATE =====================
 let db = { users: [], orders: [], products: [], clients: [], logs: [], suppliers: [], expenses: [], chats: [], discounts: [] };
@@ -1554,6 +1716,28 @@ window.onload = async () => {
     const raw = await res.json();
     db = raw;
     ['users','orders','products','clients','logs','suppliers','expenses','chats','discounts'].forEach(k => { if(!db[k]) db[k] = []; });
+    // Нормалізуємо продукти: виправляємо поля які можуть прийти як рядки
+    db.products = (db.products||[]).filter(p => p && p.name).map(p => {
+      if (typeof p.sizeStock === 'string') { try { p.sizeStock = JSON.parse(p.sizeStock); } catch(e) { p.sizeStock = {}; } }
+      if (!p.sizeStock || typeof p.sizeStock !== 'object') p.sizeStock = {};
+      if (!p.name) return null;
+      p.price = +p.price || 0;
+      p.cost  = +p.cost  || 0;
+      p.qty   = +p.qty   || 0;
+      p.ptype = p.ptype  || 'pcs';
+      p.unit  = p.unit   || 'pcs';
+      // Очищаємо description від HTML-тегів (таблиці розмірів постачальника тощо)
+      if (typeof p.description === 'string' && p.description.includes('<')) {
+        p.description = p.description.replace(/<[^>]*>/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      }
+      return p;
+    }).filter(Boolean);
+    // Нормалізуємо importSources постачальників
+    db.suppliers = (db.suppliers||[]).map(s => {
+      if (typeof s.importSources === 'string') { try { s.importSources = JSON.parse(s.importSources); } catch(e) { s.importSources = []; } }
+      if (!Array.isArray(s.importSources)) s.importSources = [];
+      return s;
+    });
     if (!db.users.find(u => u.role === 'admin')) {
       db.users.unshift({name:'Власник',login:'admin',pass:'admin',role:'admin'});
     }
@@ -1893,6 +2077,14 @@ function loadShopSettings() {
   if (em) em.value = shopSettings.notifyEmail;
   // Populate NP + API keys UI
   loadAPISettingsUI();
+  // Bots
+  if (s.tgBotToken)     { const el=document.getElementById('tg-bot-token');     if(el) el.value=s.tgBotToken; }
+  if (s.tgBotUsername)  { const el=document.getElementById('tg-bot-username');  if(el) el.value=s.tgBotUsername; }
+  if (s.viberBotToken)  { const el=document.getElementById('viber-bot-token');  if(el) el.value=s.viberBotToken; }
+  // Bank
+  if (s.monobankToken)  { const el=document.getElementById('mono-token');       if(el) el.value=s.monobankToken; }
+  if (s.privatMid)      { const el=document.getElementById('privat-mid');       if(el) el.value=s.privatMid; }
+  if (s.privatPass)     { const el=document.getElementById('privat-pass');      if(el) el.value=s.privatPass; }
 }
 
 function saveShopSettings() {
@@ -1989,6 +2181,24 @@ function saveNPSettings() {
   showToast('✅ Налаштування Нової Пошти збережено!', 'success');
 }
 
+function saveBotSettings() {
+  if (!db.settings) db.settings = {};
+  db.settings.tgBotToken    = document.getElementById('tg-bot-token')?.value.trim() || '';
+  db.settings.tgBotUsername = document.getElementById('tg-bot-username')?.value.trim() || '';
+  db.settings.viberBotToken = document.getElementById('viber-bot-token')?.value.trim() || '';
+  doBackup(true);
+  showToast('✅ Налаштування ботів збережено! Не забудьте запустити setupTelegramWebhook() у GAS.', 'success');
+}
+
+function saveBankSettings() {
+  if (!db.settings) db.settings = {};
+  db.settings.monobankToken = document.getElementById('mono-token')?.value.trim() || '';
+  db.settings.privatMid     = document.getElementById('privat-mid')?.value.trim() || '';
+  db.settings.privatPass    = document.getElementById('privat-pass')?.value.trim() || '';
+  doBackup(true);
+  showToast('✅ Налаштування банку збережено!', 'success');
+}
+
 function loadAPISettingsUI() {
   if (!db.settings) return;
   const s = db.settings;
@@ -2036,6 +2246,144 @@ function getPtypeEmoji(ptype) {
   return map[ptype||'pcs'] || '📦';
 }
 
+let _selectedProducts = new Set();
+let _showOutOfStock = false;
+
+function toggleOutOfStock() {
+  _showOutOfStock = !_showOutOfStock;
+  const btn = document.getElementById('out-of-stock-btn');
+  if (btn) {
+    btn.style.background = _showOutOfStock ? 'var(--red)' : '';
+    btn.style.color = _showOutOfStock ? '#fff' : '';
+    btn.style.borderColor = _showOutOfStock ? 'var(--red)' : '';
+  }
+  renderStock();
+}
+
+function toggleSelectAll(cb) {
+  const checkboxes = document.querySelectorAll('.prod-row-cb');
+  checkboxes.forEach(c => {
+    c.checked = cb.checked;
+    const idx = +c.dataset.idx;
+    if (cb.checked) _selectedProducts.add(idx);
+    else _selectedProducts.delete(idx);
+  });
+  updateBulkBar();
+}
+
+function toggleRowSelect(cb) {
+  const idx = +cb.dataset.idx;
+  if (cb.checked) _selectedProducts.add(idx);
+  else _selectedProducts.delete(idx);
+  updateBulkBar();
+}
+
+function clearSelection() {
+  _selectedProducts.clear();
+  document.querySelectorAll('.prod-row-cb').forEach(c => c.checked = false);
+  const sa = document.getElementById('select-all-cb'); if (sa) sa.checked = false;
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-action-bar');
+  const lbl = document.getElementById('bulk-count-label');
+  if (!bar) return;
+  if (_selectedProducts.size > 0) {
+    bar.style.display = 'flex';
+    if (lbl) lbl.innerText = `Обрано: ${_selectedProducts.size} товарів`;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+// ── BULK ACTIONS ──
+function bulkChangeCategory() {
+  if (!_selectedProducts.size) return;
+  const cats = [...new Set(db.products.map(p=>p.cat).filter(Boolean))];
+  openModal('📁 Змінити категорію', `
+    <div class="form-group"><label>Нова категорія для ${_selectedProducts.size} товарів</label>
+      <input type="text" id="bulk-cat-inp" list="bulk-cat-list" placeholder="Введіть або оберіть">
+      <datalist id="bulk-cat-list">${cats.map(c=>`<option value="${c}">`).join('')}</datalist>
+    </div>`, () => {
+    const v = document.getElementById('bulk-cat-inp').value.trim();
+    if (!v) return false;
+    _selectedProducts.forEach(idx => { if (db.products[idx]) db.products[idx].cat = v; });
+    writeLog(`Групова зміна категорії (${_selectedProducts.size} товарів): ${v}`);
+    clearSelection(); renderAll(); doBackup(true);
+    showToast(`✅ Категорію змінено для ${_selectedProducts.size} товарів`,'success');
+    return true;
+  });
+}
+
+function bulkChangeSupplier() {
+  if (!_selectedProducts.size) return;
+  const opts = (db.suppliers||[]).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  openModal('🏭 Змінити постачальника', `
+    <div class="form-group"><label>Постачальник для ${_selectedProducts.size} товарів</label>
+      <select id="bulk-sup-sel"><option value="">— Без постачальника —</option>${opts}</select>
+    </div>`, () => {
+    const v = document.getElementById('bulk-sup-sel').value;
+    _selectedProducts.forEach(idx => { if (db.products[idx]) db.products[idx].supplier = v; });
+    writeLog(`Груповий постачальник (${_selectedProducts.size} товарів)`);
+    clearSelection(); renderAll(); doBackup(true);
+    showToast(`✅ Постачальника змінено`,'success');
+    return true;
+  });
+}
+
+function bulkChangePrice() {
+  if (!_selectedProducts.size) return;
+  openModal('💲 Масова зміна ціни', `
+    <div class="form-group"><label>Змінити ціну для ${_selectedProducts.size} товарів на</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="bulk-price-op" style="padding:8px;border:1.5px solid var(--border);border-radius:7px">
+          <option value="pct_plus">+% відсотків</option>
+          <option value="pct_minus">−% відсотків</option>
+          <option value="fixed_plus">+ фіксована сума ₴</option>
+          <option value="fixed_minus">− фіксована сума ₴</option>
+          <option value="set">= встановити ціну ₴</option>
+        </select>
+        <input type="number" id="bulk-price-val" value="5" min="0" step="0.01" style="width:100px;padding:8px;border:1.5px solid var(--border);border-radius:7px;font-size:.9rem">
+      </div>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="bulk-cost-too"> <label style="margin:0;font-weight:400">Також змінити собівартість</label>
+    </div>`, () => {
+    const op = document.getElementById('bulk-price-op').value;
+    const val = parseFloat(document.getElementById('bulk-price-val').value)||0;
+    const costToo = document.getElementById('bulk-cost-too').checked;
+    const applyOp = (cur) => {
+      if (op==='pct_plus')   return Math.round(cur*(1+val/100)*100)/100;
+      if (op==='pct_minus')  return Math.max(0,Math.round(cur*(1-val/100)*100)/100);
+      if (op==='fixed_plus') return Math.round((cur+val)*100)/100;
+      if (op==='fixed_minus')return Math.max(0,Math.round((cur-val)*100)/100);
+      if (op==='set')        return val;
+      return cur;
+    };
+    _selectedProducts.forEach(idx => {
+      if (!db.products[idx]) return;
+      db.products[idx].price = applyOp(+db.products[idx].price||0);
+      if (costToo) db.products[idx].cost = applyOp(+db.products[idx].cost||0);
+    });
+    writeLog(`Групова зміна ціни (${_selectedProducts.size} товарів, ${op} ${val})`);
+    clearSelection(); renderAll(); doBackup(true);
+    showToast('✅ Ціни оновлено','success');
+    return true;
+  });
+}
+
+function bulkDelete() {
+  if (!_selectedProducts.size) return;
+  if (currentUser.role !== 'admin') { showToast('Тільки адміністратор може видаляти','error'); return; }
+  if (!confirm(`Видалити ${_selectedProducts.size} товарів? Дію не можна скасувати.`)) return;
+  const sorted = [..._selectedProducts].sort((a,b)=>b-a);
+  sorted.forEach(idx => { if (db.products[idx]) db.products.splice(idx,1); });
+  writeLog(`Групове видалення ${sorted.length} товарів`);
+  clearSelection(); renderAll(); doBackup(true);
+  showToast(`🗑️ Видалено ${sorted.length} товарів`,'success');
+}
+
 function renderStock() {
   const tbody = document.getElementById('t-stock');
   const query = document.getElementById('stock-search').value.toLowerCase();
@@ -2048,7 +2396,6 @@ function renderStock() {
   const oldVal = filter.value;
   filter.innerHTML = '<option value="">Всі категорії</option>' + cats.map(c => `<option value="${c}" ${c==oldVal?'selected':''}>${c}</option>`).join('');
 
-  // Update subcat list based on selected cat
   const subcatFilter = document.getElementById('stock-subcat-filter');
   if (subcatFilter) {
     const subcats = [...new Set(db.products.filter(p => !cat || p.cat === cat).map(p => p.subcat).filter(Boolean))];
@@ -2057,12 +2404,15 @@ function renderStock() {
   }
 
   const filtered = db.products.filter(p => {
+    if (!p || !p.name) return false;
+    if (_showOutOfStock && +p.qty > 0) return false;
     const sup = (db.suppliers||[]).find(s=>s.id===p.supplier);
+    const descText = typeof p.description === 'string' ? p.description.replace(/<[^>]*>/g,'') : '';
     const match = !query ||
-      p.name.toLowerCase().includes(query) ||
+      (p.name||'').toLowerCase().includes(query) ||
       (p.code||'').toLowerCase().includes(query) ||
       (p.cat||'').toLowerCase().includes(query) ||
-      (p.description||'').toLowerCase().includes(query) ||
+      descText.toLowerCase().includes(query) ||
       (sup?.name||'').toLowerCase().includes(query) ||
       String(p.price||'').includes(query);
     const catMatch = !cat || p.cat === cat;
@@ -2072,10 +2422,11 @@ function renderStock() {
   });
 
   tbody.innerHTML = filtered.map((p, i) => {
+    const realIdx = db.products.indexOf(p);
     const sup = (db.suppliers||[]).find(s=>s.id===p.supplier);
     const unit = getUnitLabel(p.unit);
     const ptype = p.ptype || 'pcs';
-    // Інфо про варіанти (розміри)
+    const isSelected = _selectedProducts.has(realIdx);
     let variantCell = '—';
     if (ptype === 'clothing' && p.sizes) {
       variantCell = p.sizes.split(',').map(s=>`<span style="display:inline-block;padding:1px 6px;border:1px solid var(--border);border-radius:4px;font-size:.7rem;margin:1px">${s.trim()}</span>`).join('');
@@ -2084,36 +2435,38 @@ function renderStock() {
     } else if (ptype === 'book') {
       variantCell = '<span class="badge badge-purple">📚 Книга</span>';
     }
+    const descRaw = typeof p.description==='string'?p.description.replace(/<[^>]*>/g,''):String(p.description||'');
     return `
-    <tr>
+    <tr style="${+p.qty<=0?'background:rgba(220,38,38,.04)':''}${isSelected?';background:var(--accent-light)':''}">
+      <td><input type="checkbox" class="prod-row-cb" data-idx="${realIdx}" ${isSelected?'checked':''} onchange="toggleRowSelect(this)" style="cursor:pointer;width:15px;height:15px"></td>
       <td style="color:var(--muted)">${i + 1}</td>
       <td>
-        <div class="prod-photo-wrap" onclick="openPhotoUpload(${db.products.indexOf(p)})" title="Натисніть щоб змінити фото">
+        <div class="prod-photo-wrap" onclick="openPhotoUpload(${realIdx})" title="Натисніть щоб змінити фото">
           ${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : `<div class="photo-upload-label">📷</div>`}
           <div class="photo-overlay">Змінити</div>
         </div>
       </td>
       <td><span class="sku-code">${p.code || '—'}</span></td>
-      <td style="font-weight:600">${getPtypeEmoji(ptype)} ${p.name}${p.description?`<div style="font-size:.72rem;color:var(--muted);margin-top:2px">${p.description.substring(0,40)}${p.description.length>40?'…':''}</div>`:''}</td>
+      <td style="font-weight:600">${getPtypeEmoji(ptype)} ${p.name}${descRaw?`<div style="font-size:.72rem;color:var(--muted);margin-top:2px">${descRaw.substring(0,40)}${descRaw.length>40?'…':''}</div>`:''}</td>
       <td><span class="badge badge-gray">${p.cat || '—'}</span>${p.subcat?`<br><span style="font-size:.68rem;color:var(--muted);margin-top:2px;display:inline-block">${p.subcat}</span>`:''}</td>
       <td>${variantCell}</td>
       <td>${sup ? `<span class="supplier-chip">🏭 ${sup.name}</span>` : '—'}${p.sourceType&&p.sourceType!=='own'?`<br><span class="badge ${p.sourceType==='dropship'?'badge-blue':p.sourceType==='preorder'?'badge-orange':'badge-purple'}" style="margin-top:2px">${p.sourceType==='dropship'?'🚚 Дропшип':p.sourceType==='consignment'?'🤝 Консигнація':'📋 Передзамовлення'}</span>`:''}</td>
       <td style="font-weight:700"><span class="badge ${p.qty <= 0 ? 'badge-red' : p.qty <= 5 ? 'badge-orange' : 'badge-green'}">${p.qty} ${unit}</span></td>
       <td>${(+p.cost || 0).toLocaleString()} ₴</td>
       <td style="font-weight:700;color:var(--accent)">${(+p.price || 0).toLocaleString()} ₴${ptype==='weight'?' / '+unit:''}</td>
-      <td>
-        <button class="btn-icon" onclick="openStockModal(${db.products.indexOf(p)})">✏️</button>
-        <button class="btn-icon" title="Штрих-код" onclick="openBarcodeModal(${db.products.indexOf(p)})">🔖</button>
-        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteProduct(${db.products.indexOf(p)})" title="Видалити">🗑️</button>` : ''}
+      <td style="white-space:nowrap">
+        <button class="btn-icon" onclick="openStockModal(${realIdx})">✏️</button>
+        <button class="btn-icon" title="Штрих-код" onclick="openBarcodeModal(${realIdx})">🔖</button>
+        ${!p.photo?`<button class="btn-icon" title="Знайти фото в Google" onclick="searchProductPhoto(${realIdx})" style="color:var(--blue)">🔍</button>`:''}
+        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteProduct(${realIdx})" title="Видалити">🗑️</button>` : ''}
       </td>
     </tr>
   `}).join('');
 
   const sumCost = filtered.reduce((s, p) => s + ((+p.qty || 0) * (+p.cost || 0)), 0);
-  document.getElementById('stock-footer').innerText = `Показано ${filtered.length} товарів. Загальна собівартість: ${sumCost.toLocaleString()} ₴`;
-}
-
-function openStockModal(idx = -1) {
+  const outCount = filtered.filter(p=>+p.qty<=0).length;
+  document.getElementById('stock-footer').innerHTML = `Показано ${filtered.length} товарів. Загальна собівартість: ${sumCost.toLocaleString()} ₴${outCount?` · <span style="color:var(--red);font-weight:600">⚠️ Відсутніх: ${outCount}</span>`:''}`;
+}function openStockModal(idx = -1) {
   const p = idx > -1 ? db.products[idx] : { name:'', cat:'', qty:0, cost:0, price:0, code:'', supplier:'', ptype:'pcs', unit:'pcs', sizes:'', description:'' };
   const skuVal = idx > -1 ? (p.code || generateSKU()) : generateSKU();
   const supOptions = (db.suppliers||[]).map(s=>`<option value="${s.id}" ${p.supplier===s.id?'selected':''}>${s.name}</option>`).join('');
@@ -2452,7 +2805,11 @@ function openTTNModal(idx) {
     const status = document.getElementById('ttn-status').value;
     db.orders[idx].ttn = ttn;
     db.orders[idx].status = status;
-    if (ttn) writeLog(`ТТН: ${ttn} для #${o.id}`);
+    if (ttn) {
+      writeLog(`ТТН: ${ttn} для #${o.id}`);
+      // Надсилаємо клієнту Telegram сповіщення
+      sendTelegramOrderNotif(db.orders[idx], 'ttn');
+    }
     renderOrders(); doBackup(true);
     showToast('✅ Збережено', 'success'); return true;
   });
@@ -3070,14 +3427,15 @@ function renderPOSProducts(query) {
   const list = document.getElementById('pos-products-list');
   if (!list) return;
   let prods = db.products.filter(p => {
+    if (!p || !p.name) return false;
     const inStock = +p.qty > 0;
     const inCat = posActiveCat === 'all' || (p.cat||'Без категорії') === posActiveCat;
-    const matchQ = !q || p.name.toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q) || (p.cat||'').toLowerCase().includes(q);
+    const matchQ = !q || (p.name||'').toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q) || (p.cat||'').toLowerCase().includes(q);
     return inStock && inCat && matchQ;
   });
   // Also show out-of-stock when searching
   if (q) {
-    const outOfStock = db.products.filter(p => +p.qty <= 0 && (p.name.toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q)));
+    const outOfStock = db.products.filter(p => p && p.name && +p.qty <= 0 && ((p.name||'').toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q)));
     prods = [...prods, ...outOfStock];
   }
   if (!prods.length) {
@@ -3087,7 +3445,7 @@ function renderPOSProducts(query) {
   list.innerHTML = prods.map(p => {
     const outOfStock = +p.qty <= 0;
     const disc = getBestDiscountForProduct(p);
-    const discLabel = disc ? `<div style="position:absolute;top:6px;left:6px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:800;padding:2px 6px;border-radius:4px;letter-spacing:.03em">−${disc.value}%</div>` : '';
+    const discLabel = disc ? `<div style="position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.04em;box-shadow:0 2px 6px rgba(239,68,68,.4)">−${disc.value}%</div>` : '';
     const discPrice = disc ? `<div style="display:flex;align-items:center;gap:5px">
       <span style="text-decoration:line-through;color:rgba(255,255,255,.3);font-size:.75rem">${(+p.price).toLocaleString()}</span>
       <span class="pos-prod-card-price" style="color:#22c55e">${Math.round(+p.price*(1-disc.value/100)).toLocaleString()} ₴</span>
@@ -3118,9 +3476,9 @@ function renderPOSProducts(query) {
     return `<div class="pos-prod-card${outOfStock?' out-of-stock':''}" onclick="addToPOS('${p.name.replace(/'/g,"\\'")}')">
       ${discLabel}
       <div class="pos-prod-card-add">+</div>
-      <div class="pos-prod-card-emoji">${getPtypeEmoji(p.ptype)}</div>
+      <div class="pos-prod-card-emoji">${p.photo ? `<img src="${p.photo}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;display:block" onerror="this.outerHTML='${getPtypeEmoji(p.ptype)}'">` : getPtypeEmoji(p.ptype)}</div>
       <div class="pos-prod-card-name">${p.name}</div>
-      ${p.code?`<div class="pos-prod-card-code">${p.code}</div>`:''}
+      ${p.code?`<div class="pos-prod-card-code">#${p.code}</div>`:''}
       ${stockLine}
       ${discPrice}
     </div>`;
@@ -4069,18 +4427,36 @@ function renderSuppliers() {
   const filtered = (db.suppliers||[]).filter(s => !search || (s.name||'').toLowerCase().includes(search));
   
   tbody.innerHTML = filtered.map((s) => {
+    const realIdx = db.suppliers.indexOf(s);
+    const sources = s.importSources || [];
+    const sourcesHtml = sources.length
+      ? sources.map((src, si) => {
+          const shortUrl = src.url.length > 35 ? src.url.slice(0,35)+'…' : src.url;
+          const lastSync = src.lastSync ? `<br><span style="color:var(--muted2);font-size:.68rem">Оновл: ${src.lastSync}</span>` : '';
+          const autoLabel = src.autoInterval && src.autoInterval !== 'manual'
+            ? `<span style="background:var(--green-light);color:#15803d;border-radius:99px;padding:1px 7px;font-size:.65rem;margin-left:4px">⏱ авто</span>` : '';
+          return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+            <span style="font-size:.75rem;background:var(--blue-light);color:#1d4ed8;border-radius:6px;padding:2px 8px;cursor:pointer" title="${src.url}" onclick="runSupplierImport('${realIdx}',${si})" >🔗 ${shortUrl}</span>${autoLabel}
+            ${lastSync}
+          </div>`;
+        }).join('')
+      : '<span style="color:var(--muted2);font-size:.78rem">—</span>';
     return `<tr>
       <td style="font-weight:600">${s.name||''}</td>
       <td>${s.contact||'—'}</td>
       <td>${s.phone||'—'}</td>
       <td style="font-size:.82rem">${s.email||'—'}</td>
+      <td style="max-width:220px">${sourcesHtml}
+        ${sources.length ? `<button class="btn btn-secondary btn-sm" style="margin-top:4px;font-size:.7rem;padding:2px 8px" onclick="runAllSupplierImports('${realIdx}')">🔄 Оновити всі</button>` : ''}
+      </td>
       <td style="font-size:.82rem;color:var(--muted)">${s.note||'—'}</td>
-      <td style="display:flex;gap:6px">
-        <button class="btn-icon" onclick="openSupplierModal(${db.suppliers.indexOf(s)})" title="Редагувати">✏️</button>
-        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteSupplier(${db.suppliers.indexOf(s)})" title="Видалити">🗑️</button>` : ''}
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-icon" onclick="openSupplierModal(${realIdx})" title="Редагувати">✏️</button>
+        <button class="btn-icon" onclick="openSupplierImportSources(${realIdx})" title="Джерела імпорту" style="color:var(--blue)">🔗</button>
+        ${currentUser.role === 'admin' ? `<button class="btn-icon" style="color:var(--red)" onclick="deleteSupplier(${realIdx})" title="Видалити">🗑️</button>` : ''}
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Немає постачальників</td></tr>';
+  }).join('') || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Немає постачальників</td></tr>';
 }
 
 function openSupplierModal(idx = -1) {
@@ -4104,7 +4480,8 @@ function openSupplierModal(idx = -1) {
       contact: document.getElementById('m-sup-contact').value,
       phone: document.getElementById('m-sup-phone').value,
       email: document.getElementById('m-sup-email').value,
-      note: document.getElementById('m-sup-note').value
+      note: document.getElementById('m-sup-note').value,
+      importSources: s.importSources || []
     };
     if (idx > -1) db.suppliers[idx] = item; else db.suppliers.push(item);
     writeLog(`${idx > -1 ? 'Редагування' : 'Додавання'} постачальника: ${name}`);
@@ -4124,7 +4501,294 @@ function deleteSupplier(idx) {
   doBackup(true);
 }
 
-// ===================== UNIVERSAL PRODUCT IMPORT =====================
+// ===================== SUPPLIER IMPORT SOURCES (URL Auto-sync) =====================
+
+function openSupplierImportSources(idx) {
+  const s = db.suppliers[idx];
+  if (!s) return;
+  const sources = s.importSources || [];
+
+  const renderSourceRows = () => sources.map((src, si) => `
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px" id="src-row-${si}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="flex:1">
+          <div style="font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">URL ДЖЕРЕЛА ${si+1}</div>
+          <div style="font-size:.8rem;word-break:break-all;color:var(--blue)">${src.url}</div>
+          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:.72rem;background:var(--accent-light);color:var(--accent);border-radius:6px;padding:2px 8px">${src.format?.toUpperCase()||'AUTO'}</span>
+            <span style="font-size:.72rem;color:var(--muted)">Оновлення: <strong>${src.autoInterval==='manual'||!src.autoInterval?'Ручне':src.autoInterval==='6h'?'Кожні 6г':src.autoInterval==='12h'?'Кожні 12г':src.autoInterval==='daily'?'Щодня':src.autoInterval==='weekly'?'Щотижня':'?'}</strong></span>
+            ${src.lastSync ? `<span style="font-size:.72rem;color:var(--muted2)">Останнє: ${src.lastSync}</span>` : ''}
+            ${src.lastCount !== undefined ? `<span style="font-size:.72rem;color:var(--green)">✅ ${src.lastCount} товарів</span>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-primary btn-sm" onclick="runSupplierImportInModal(${idx},${si})" style="white-space:nowrap">🔄 Оновити</button>
+          <button class="btn btn-secondary btn-sm" style="color:var(--red)" onclick="removeImportSource(${idx},${si})">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  const content = `
+    <div id="imp-src-list">${renderSourceRows() || '<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:16px">Немає доданих джерел імпорту</div>'}</div>
+    <div style="margin-bottom:8px;font-family:\'Syne\',sans-serif;font-weight:700;font-size:.85rem;color:var(--ink)">➕ Додати нове джерело</div>
+    <div class="form-group">
+      <label>URL посилання на прайс (XML/YML/CSV/JSON)</label>
+      <input type="url" id="new-src-url" placeholder="https://supplier.ua/price.xml або https://ager.ua/yml_prom?code=uk&param=8355" style="font-size:.83rem">
+      <div style="font-size:.72rem;color:var(--muted);margin-top:4px">💡 Підтримується: YML/XML (Prom.ua, Rozetka, власний формат), CSV, JSON</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Формат (авто-визначення якщо не вказано)</label>
+        <select id="new-src-format">
+          <option value="auto">🔍 Авто</option>
+          <option value="xml">📄 XML / YML</option>
+          <option value="csv">📊 CSV</option>
+          <option value="json">🔷 JSON</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Автооновлення</label>
+        <select id="new-src-interval">
+          <option value="manual">🖐 Лише вручну</option>
+          <option value="6h">⏱ Кожні 6 годин</option>
+          <option value="12h">⏱ Кожні 12 годин</option>
+          <option value="daily" selected>📅 Щодня</option>
+          <option value="weekly">📆 Щотижня</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="new-src-update" checked> Оновлювати існуючі товари
+        </label>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="new-src-skipzero"> Пропускати товари з ціною 0
+        </label>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addImportSource(${idx})" style="width:100%;margin-top:4px">+ Додати джерело</button>
+    <div id="src-add-status" style="margin-top:8px;font-size:.82rem;display:none"></div>
+    <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span style="font-size:.78rem;color:var(--muted)">Всього джерел: <strong>${sources.length}</strong></span>
+      ${sources.length ? `<button class="btn btn-primary" onclick="runAllSupplierImports('${idx}');closeModal()" style="gap:6px">🔄 Оновити всі зараз</button>` : ''}
+    </div>
+  `;
+
+  openModal(`🔗 Джерела імпорту — ${s.name}`, content, () => true, 'Закрити');
+}
+
+async function addImportSource(supplierIdx) {
+  const url = document.getElementById('new-src-url')?.value.trim();
+  const format = document.getElementById('new-src-format')?.value || 'auto';
+  const interval = document.getElementById('new-src-interval')?.value || 'manual';
+  const doUpdate = document.getElementById('new-src-update')?.checked ?? true;
+  const skipZero = document.getElementById('new-src-skipzero')?.checked ?? false;
+  const statusEl = document.getElementById('src-add-status');
+
+  if (!url) { showToast('Введіть URL', 'error'); return; }
+  if (!url.startsWith('http')) { showToast('URL повинен починатись з http', 'error'); return; }
+
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = '⏳ Перевірка посилання...';
+
+  try {
+    const res = await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'fetchUrl', url }) });
+    const data = await res.json();
+
+    if (!data.ok || data.code !== 200) {
+      statusEl.innerHTML = `❌ Не вдалось завантажити. Код: ${data.code||'?'}. Перевірте URL.`;
+      return;
+    }
+
+    const content = data.content;
+    let detectedFormat = format;
+    let count = 0;
+
+    // Auto-detect format
+    if (detectedFormat === 'auto') {
+      if (content.trimStart().startsWith('<')) detectedFormat = 'xml';
+      else if (content.trimStart().startsWith('{') || content.trimStart().startsWith('[')) detectedFormat = 'json';
+      else detectedFormat = 'csv';
+    }
+
+    // Parse & count
+    if (detectedFormat === 'xml') {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(content, 'text/xml');
+      const tags = ['offer','item','product','Product','Item','Offer'];
+      for (const t of tags) { const f = doc.querySelectorAll(t); if (f.length) { count = f.length; break; } }
+    } else if (detectedFormat === 'json') {
+      try { let arr = JSON.parse(content); if (!Array.isArray(arr)) arr = arr.products||arr.items||arr.offers||[]; count = arr.length; } catch(e){}
+    } else {
+      const rows = content.trim().split(/\r?\n/);
+      count = Math.max(0, rows.length - 1);
+    }
+
+    if (!count) { statusEl.innerHTML = `⚠️ Посилання доступне, але товарів не знайдено. Перевірте формат.`; return; }
+
+    statusEl.innerHTML = `✅ Перевірено: знайдено <strong>${count}</strong> товарів (${detectedFormat.toUpperCase()})`;
+
+    const s = db.suppliers[supplierIdx];
+    if (!s.importSources) s.importSources = [];
+    // Prevent duplicate
+    if (s.importSources.find(src => src.url === url)) {
+      statusEl.innerHTML = `⚠️ Це джерело вже додане`; return;
+    }
+    s.importSources.push({ url, format: detectedFormat, autoInterval: interval, doUpdate, skipZero, lastSync: null, lastCount: null });
+    doBackup(true);
+    writeLog(`Додано джерело імпорту для постачальника ${s.name}: ${url}`);
+    showToast(`✅ Джерело додано (${count} товарів)`, 'success');
+    document.getElementById('new-src-url').value = '';
+
+    // Update the list in modal
+    const listEl = document.getElementById('imp-src-list');
+    if (listEl) {
+      const sources = s.importSources;
+      listEl.innerHTML = sources.map((src, si) => `
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div style="flex:1">
+              <div style="font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">URL ДЖЕРЕЛА ${si+1}</div>
+              <div style="font-size:.8rem;word-break:break-all;color:var(--blue)">${src.url}</div>
+              <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center">
+                <span style="font-size:.72rem;background:var(--accent-light);color:var(--accent);border-radius:6px;padding:2px 8px">${src.format?.toUpperCase()||'AUTO'}</span>
+                <span style="font-size:.72rem;color:var(--muted)">Оновлення: <strong>${src.autoInterval==='manual'||!src.autoInterval?'Ручне':src.autoInterval==='6h'?'Кожні 6г':src.autoInterval==='12h'?'Кожні 12г':src.autoInterval==='daily'?'Щодня':src.autoInterval==='weekly'?'Щотижня':'?'}</strong></span>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-primary btn-sm" onclick="runSupplierImportInModal(${supplierIdx},${si})" style="white-space:nowrap">🔄 Оновити</button>
+              <button class="btn btn-secondary btn-sm" style="color:var(--red)" onclick="removeImportSource(${supplierIdx},${si})">🗑</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    renderSuppliers();
+  } catch(err) {
+    statusEl.innerHTML = `❌ Помилка: ${err.message}`;
+  }
+}
+
+function removeImportSource(supplierIdx, sourceIdx) {
+  const s = db.suppliers[supplierIdx];
+  if (!s || !s.importSources) return;
+  if (!confirm(`Видалити це джерело?\n${s.importSources[sourceIdx]?.url}`)) return;
+  s.importSources.splice(sourceIdx, 1);
+  doBackup(true);
+  showToast('Джерело видалено', 'success');
+  openSupplierImportSources(supplierIdx); // re-open to refresh
+}
+
+async function runSupplierImport(supplierIdx, sourceIdx) {
+  const s = db.suppliers[supplierIdx];
+  if (!s || !s.importSources) return;
+  const src = s.importSources[sourceIdx];
+  if (!src) return;
+
+  showToast(`⏳ Завантаження від ${s.name}...`, 'info');
+  try {
+    const res = await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'fetchUrl', url: src.url }) });
+    const data = await res.json();
+    if (!data.ok || data.code !== 200) { showToast(`❌ Помилка завантаження: ${data.error||data.code}`, 'error'); return; }
+
+    const content = data.content;
+    let count = 0;
+
+    if (src.format === 'xml') {
+      count = importXMLProducts(content, s.id, src.doUpdate !== false, src.skipZero === true);
+    } else if (src.format === 'json') {
+      let arr = JSON.parse(content);
+      if (!Array.isArray(arr)) arr = arr.products||arr.items||arr.offers||arr.data||[];
+      count = universalImport({ type:'json', rows: arr }, s.id, src.doUpdate !== false, src.skipZero === true, {});
+    } else if (src.format === 'csv') {
+      const rows = parseCSV(content);
+      count = universalImport({ type:'csv', rows }, s.id, src.doUpdate !== false, src.skipZero === true, {});
+    } else {
+      // auto
+      if (content.trimStart().startsWith('<')) {
+        count = importXMLProducts(content, s.id, src.doUpdate !== false, src.skipZero === true);
+      } else {
+        try {
+          let arr = JSON.parse(content);
+          if (!Array.isArray(arr)) arr = arr.products||arr.items||arr.offers||[];
+          count = universalImport({ type:'json', rows: arr }, s.id, src.doUpdate !== false, src.skipZero === true, {});
+        } catch(e) {
+          const rows = parseCSV(content);
+          count = universalImport({ type:'csv', rows }, s.id, src.doUpdate !== false, src.skipZero === true, {});
+        }
+      }
+    }
+
+    const now = new Date().toLocaleString('uk-UA');
+    src.lastSync = now;
+    src.lastCount = count;
+    writeLog(`Автооновлення від ${s.name} (${src.url}): ${count} товарів`);
+    renderAll();
+    doBackup(true);
+    showToast(`✅ ${s.name}: оновлено ${count} товарів`, 'success');
+  } catch(err) {
+    showToast(`❌ Помилка: ${err.message}`, 'error');
+  }
+}
+
+async function runSupplierImportInModal(supplierIdx, sourceIdx) {
+  await runSupplierImport(supplierIdx, sourceIdx);
+  // refresh status in modal
+  const s = db.suppliers[supplierIdx];
+  const src = s?.importSources?.[sourceIdx];
+  if (!src) return;
+  const rowEl = document.getElementById(`src-row-${sourceIdx}`);
+  if (rowEl) {
+    rowEl.querySelectorAll('span').forEach(sp => {
+      if (sp.textContent.includes('Останнє:')) sp.remove();
+    });
+  }
+}
+
+async function runAllSupplierImports(supplierIdx) {
+  const s = db.suppliers[supplierIdx];
+  if (!s || !s.importSources?.length) { showToast('Немає джерел для оновлення', 'error'); return; }
+  let total = 0;
+  for (let si = 0; si < s.importSources.length; si++) {
+    await runSupplierImport(supplierIdx, si);
+  }
+  showToast(`✅ Оновлено всі джерела постачальника ${s.name}`, 'success');
+}
+
+// ---- AUTO-SYNC ENGINE (runs every 6h in browser tab) ----
+let _autoSyncTimer = null;
+function startAutoImportSync() {
+  if (_autoSyncTimer) clearInterval(_autoSyncTimer);
+  // Check every 30 min if any source needs sync
+  _autoSyncTimer = setInterval(checkAndRunAutoImports, 30 * 60 * 1000);
+  // Also run once on startup (after 10 sec delay)
+  setTimeout(checkAndRunAutoImports, 10000);
+}
+
+async function checkAndRunAutoImports() {
+  const now = Date.now();
+  const intervalMs = { '6h': 6*3600000, '12h': 12*3600000, 'daily': 24*3600000, 'weekly': 7*24*3600000 };
+  for (let si = 0; si < db.suppliers.length; si++) {
+    const s = db.suppliers[si];
+    const sources = s.importSources || [];
+    for (let sri = 0; sri < sources.length; sri++) {
+      const src = sources[sri];
+      if (!src.autoInterval || src.autoInterval === 'manual') continue;
+      const ms = intervalMs[src.autoInterval];
+      if (!ms) continue;
+      const lastMs = src.lastSync ? new Date(src.lastSync).getTime() : 0;
+      if (now - lastMs >= ms) {
+        console.log(`[AutoSync] Оновлення: ${s.name} → ${src.url}`);
+        await runSupplierImport(si, sri);
+      }
+    }
+  }
+}
 function openXMLModal() {
   const supOptions = (db.suppliers||[]).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
   const content = `
@@ -4508,6 +5172,376 @@ function renderColumnMapping(headers) {
 }
 
 function universalImport(rawData, supplierId, doUpdate, skipZeroPrice, mapping) {
+  // Redirects to smart import (see SMART_FIELD_DETECTOR below)
+  return _smartUniversalImport(rawData, supplierId, doUpdate, skipZeroPrice);
+}
+function toggleXMLMode() { toggleImportMode(); }
+function handleXMLDrop(e) { handleImportDrop(e); }
+function readXMLFile(inp) { readImportFile(inp); }
+
+// ============================================================
+//  🧠 SMART FIELD DETECTOR — розпізнає поля з будь-якого джерела
+// ============================================================
+const SMART_FIELD_ALIASES = {
+  name: [
+    'name','назва','назва_товару','наименование','title','product_name','productname',
+    'model','товар','product','найменування','item_name','itemname','label',
+    'description_short','short_description','заголовок','заголовок_оголошення',
+    'nom','artikel','bezeichnung','nome'
+  ],
+  price: [
+    'price','ціна','цена','price_retail','retail_price','sale_price','price_sale',
+    'price_uah','priceretail','uah','price1','price_outlet','selling_price',
+    'price_with_discount','our_price','final_price','preis','prix','prezzo',
+    'price_b2c','price_ron','priceUSD','priceEUR','priceUAH'
+  ],
+  price_usd: ['price_usd','priceusd','price$','usd_price'],
+  price_eur: ['price_eur','priceeur','eur_price','€'],
+  cost: [
+    'cost','cost_price','purchase_price','wholesale_price','price_wholesale',
+    'закупочная_цена','оптовая_цена','price_opt','price2','opt_price',
+    'buying_price','wholesale','zakup','einkaufspreis'
+  ],
+  qty: [
+    'qty','quantity','stock','count','кількість','количество','залишок','залишки',
+    'in_stock','instock','available','available_quantity','total_stock','balance',
+    'остаток','остатки','наличие','наявність','кількість_залишку','amount',
+    'warehouse_quantity','qty_available','stock_qty','stock_count',
+    'total_quantity','reserve','unreserved_quantity','quantity_in_stock',
+    'stock_balance','on_hand','menge','quantité','quantita','voorraad',
+    'dostupnoe_kolichestvo','v_nalichii','presence','left','remains',
+    'stock_level','inventory','inventaire','bestand','quantidad'
+  ],
+  available: [
+    'available','is_available','in_stock','instock','наявний','є_в_наявності',
+    'активний','active','enabled','visible','published','present','presence'
+  ],
+  cat: [
+    'category','cat','categoryname','category_name','категорія','категория',
+    'type','product_type','group','productgroup','group_name','class',
+    'раздел','розділ','section','rubric','abteilung','catégorie','categoria'
+  ],
+  subcat: [
+    'subcategory','subcat','sub_category','підкатегорія','подкатегория',
+    'category2','cat2','sub_type','subcategoryname'
+  ],
+  code: [
+    'code','sku','article','articul','id','product_id','productid','item_id',
+    'vendor_code','vendorcode','article_number','ref','reference','barcode',
+    'gtin','ean','mpn','model_code','part_number','арт','артикул',
+    'article_code','manufacturer_sku','asin','isbn'
+  ],
+  description: [
+    'description','описание','опис','desc','full_description','long_description',
+    'description_ua','description_ru','body','content','details','info',
+    'product_description','item_description','text','body_html',
+    'beschreibung','description_fr','descrizione'
+  ],
+  photo: [
+    'photo','picture','image','img','image_url','photo_url','picture_url',
+    'main_image','thumbnail','preview','cover','картинка','зображення','фото',
+    'image_link','product_image','images','img_url','pic','avatar',
+    'photo1','image1','main_photo','cover_image','media'
+  ],
+  unit: [
+    'unit','одиниця','unit_of_measure','uom','measure','од_виміру',
+    'units','measurement','einheit','unité'
+  ],
+  sizes: [
+    'sizes','size','розміри','розмір','size_list','available_sizes',
+    'variants','варіанти','options'
+  ],
+  brand: [
+    'brand','vendor','manufacturer','виробник','бренд','марка',
+    'make','producer','fabrikant'
+  ],
+  weight_val: [
+    'weight','вага','weight_kg','weight_g','mass','вес','weight_net',
+    'shipping_weight','net_weight'
+  ]
+};
+
+// Знаходить найкращий ключ рядка для поля (нечітке зіставлення)
+function smartDetectField(rowKeys, fieldName) {
+  const aliases = SMART_FIELD_ALIASES[fieldName] || [];
+  const keysLower = rowKeys.map(k => ({ orig: k, low: k.toLowerCase().trim().replace(/[\s\-]/g,'_') }));
+
+  // Точний збіг
+  for (const alias of aliases) {
+    const found = keysLower.find(k => k.low === alias.toLowerCase().replace(/[\s\-]/g,'_'));
+    if (found) return found.orig;
+  }
+  // Частковий збіг (alias міститься в ключі або навпаки)
+  for (const alias of aliases) {
+    const al = alias.toLowerCase().replace(/[\s\-]/g,'_');
+    const found = keysLower.find(k => k.low.includes(al) || al.includes(k.low));
+    if (found) return found.orig;
+  }
+  return null;
+}
+
+// Будує повну карту полів для набору рядків
+function buildFieldMap(sampleRow) {
+  const keys = Object.keys(sampleRow);
+  const map = {};
+  for (const field of Object.keys(SMART_FIELD_ALIASES)) {
+    const found = smartDetectField(keys, field);
+    if (found) map[field] = found;
+  }
+  return map;
+}
+
+// Розумне читання значення з рядка
+function smartGet(row, field, fieldMap) {
+  const col = fieldMap[field];
+  if (col !== undefined && row[col] !== undefined) return String(row[col]||'').trim();
+  return '';
+}
+
+// Витягує числове значення ціни (підтримує "1 234,56 грн", "$12.5", "12.50€")
+function parseSmartPrice(raw) {
+  if (!raw) return 0;
+  const s = String(raw).replace(/[^\d.,]/g,'').replace(/,(\d{2})$/,'.').replace(/,/g,'');
+  return parseFloat(s) || 0;
+}
+
+// Розумний парсинг кількості — ключова функція
+function parseSmartQty(raw, availableRaw) {
+  // Якщо є пряме числове значення
+  if (raw !== undefined && raw !== null && raw !== '') {
+    const s = String(raw).trim().toLowerCase();
+    // Текстові значення наявності
+    if (['true','yes','1','є','так','in stock','instock','available','є в наявності',
+         'є_в_наявності','in_stock','наявний','активний','є наявність','в наявності',
+         'на складі','присутній','є','є!','√','ok','✓','✅'].includes(s)) return 999;
+    if (['false','no','0','немає','ні','out of stock','outofstock','unavailable',
+         'відсутній','закінчився','sold out','soldout','немає в наявності','–','—',
+         '-','×','❌','x'].includes(s)) return 0;
+    // Числове значення
+    const num = parseInt(s.replace(/[^\d]/g,''));
+    if (!isNaN(num)) return num;
+  }
+  // Fallback: перевіряємо поле available
+  if (availableRaw !== undefined && availableRaw !== null && availableRaw !== '') {
+    const a = String(availableRaw).trim().toLowerCase();
+    if (['true','yes','1','є','так','available','in_stock','instock','є в наявності',
+         'available','present','active','enabled','наявний'].includes(a)) return 999;
+    if (['false','no','0','немає','unavailable','out_of_stock'].includes(a)) return 0;
+    const num = parseInt(a.replace(/[^\d]/g,''));
+    if (!isNaN(num) && num > 0) return num;
+  }
+  return 0;
+}
+
+// Нормалізація URL фото
+function normalizePhotoUrl(raw, baseUrl) {
+  if (!raw) return '';
+  const s = String(raw).trim();
+  if (!s) return '';
+  // Якщо вже повний URL
+  if (s.startsWith('http://') || s.startsWith('https://')) return s;
+  // Відносний шлях + base
+  if (baseUrl && s.startsWith('/')) {
+    try { return new URL(s, baseUrl).href; } catch(e) {}
+  }
+  // Може бути список фото через кому — беремо перше
+  if (s.includes(',')) return normalizePhotoUrl(s.split(',')[0].trim(), baseUrl);
+  if (s.includes('|')) return normalizePhotoUrl(s.split('|')[0].trim(), baseUrl);
+  return s;
+}
+
+// Розумне визначення типу товару
+function detectPtype(name, cat, sizes, unit) {
+  const n = (name||'').toLowerCase();
+  const c = (cat||'').toLowerCase();
+  const hasSize = sizes && sizes.trim();
+  if (hasSize) return 'clothing';
+  const clothingKws = ['одяг','плаття','сукня','джинси','штани','куртка','кофта','пальто',
+    'костюм','блузка','сорочка','взуття','кросівки','туфлі','чоботи','шкарпетки',
+    'шорти','футболка','худі','толстовка','светр','жилет','спідниця','dress',
+    'jacket','pants','shirt','shoes','boots','sneakers','coat'];
+  if (clothingKws.some(kw => n.includes(kw)||c.includes(kw))) return 'clothing';
+  const weightUnits = ['kg','г','g','л','l','ml','мл','кг'];
+  if (weightUnits.includes((unit||'').toLowerCase())) return 'weight';
+  return 'pcs';
+}
+
+// ============================================================
+//  🔄 SMART XML/YML IMPORT (Prom.ua, Rozetka, власний формат)
+// ============================================================
+function importXMLProducts(xmlText, supplierId, doUpdate=true, skipZeroPrice=false) {
+  let count = 0;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'text/xml');
+
+    // Визначаємо базовий URL постачальника (для відносних фото)
+    const supplier = (db.suppliers||[]).find(s=>s.id===supplierId);
+    let baseUrl = '';
+    if (supplier?.importSources?.length) baseUrl = supplier.importSources[0]?.url||'';
+    try { baseUrl = new URL(baseUrl).origin; } catch(e) { baseUrl=''; }
+
+    // Шукаємо теги товарів (Prom.ua YML → <offer>, Rozetka → <offer>, власний → будь-який)
+    const tagCandidates = ['offer','item','product','Product','Item','Offer','товар','позиція','good','goods'];
+    let items = [];
+    for (const tag of tagCandidates) {
+      const found = Array.from(doc.querySelectorAll(tag));
+      if (found.length > 0) { items = found; break; }
+    }
+    if (items.length === 0) {
+      // Останній шанс — перший дочірній тег кореня
+      const root = doc.documentElement;
+      const firstChildTag = root.children[0]?.tagName;
+      if (firstChildTag) items = Array.from(doc.querySelectorAll(firstChildTag));
+    }
+    if (items.length === 0) return 0;
+
+    // Парсинг категорій з YML (id → назва)
+    const catMap = {};
+    doc.querySelectorAll('category,Category').forEach(c => {
+      const id = c.getAttribute('id')||c.getAttribute('Id');
+      if (id) catMap[id] = c.textContent.trim();
+    });
+
+    // Допоміжна функція — витягує значення з XML елемента
+    const getXmlVal = (el, ...names) => {
+      for (const n of names) {
+        // Пряме дочірнє поле
+        const child = el.querySelector(n);
+        if (child && child.textContent.trim()) return child.textContent.trim();
+        // Атрибут
+        const attr = el.getAttribute(n);
+        if (attr) return attr;
+        // case-insensitive пошук
+        const childLow = Array.from(el.children).find(c=>c.tagName.toLowerCase()===n.toLowerCase());
+        if (childLow && childLow.textContent.trim()) return childLow.textContent.trim();
+      }
+      return '';
+    };
+
+    // Кількість — спеціальна логіка для YML
+    const getXmlQty = (el) => {
+      // Prom.ua: available="true/false" або <available>
+      const availAttr = el.getAttribute('available') || el.getAttribute('instock') || el.getAttribute('in_stock');
+      const availChild = getXmlVal(el,'available','instock','in_stock','наявність','наличие','presence');
+      // Кількість напряму
+      const qtyRaw = getXmlVal(el,'quantity','qty','stock','count','кількість','количество',
+        'залишок','залишки','остаток','остатки','amount','balance','stock_quantity',
+        'warehouse_quantity','quantity_in_stock','remains');
+      return parseSmartQty(qtyRaw || availAttr, availChild || availAttr);
+    };
+
+    // Фото з YML — може бути кілька <picture>
+    const getXmlPhoto = (el) => {
+      const pics = el.querySelectorAll('picture,image,img,photo,Picture,Image');
+      for (const pic of pics) {
+        const url = normalizePhotoUrl(pic.textContent.trim() || pic.getAttribute('url') || pic.getAttribute('src'), baseUrl);
+        if (url) return url;
+      }
+      // Атрибут
+      for (const attr of ['picture','image','photo','img','image_url','photo_url']) {
+        const v = el.getAttribute(attr);
+        if (v) return normalizePhotoUrl(v, baseUrl);
+      }
+      return '';
+    };
+
+    const existing = new Set((db.products||[]).map(p=>p.name));
+
+    for (const item of items) {
+      // ── Назва ──
+      const name = getXmlVal(item,
+        'name','назва','title','productName','product_name','model',
+        'наименование','header','заголовок','label'
+      );
+      if (!name) continue;
+
+      // ── Ціна ──
+      const priceRaw = getXmlVal(item,
+        'price','ціна','цена','price_retail','retail_price','sale_price',
+        'price_uah','price1','our_price','final_price'
+      );
+      const price = parseSmartPrice(priceRaw);
+      if (skipZeroPrice && price === 0) continue;
+
+      // ── Собівартість ──
+      const costRaw = getXmlVal(item,
+        'cost','cost_price','purchase_price','wholesale_price','price_wholesale',
+        'price2','price_opt','opt_price','закупочная_цена','оптовая_цена'
+      );
+      const cost = parseSmartPrice(costRaw);
+
+      // ── Кількість / Наявність (головна задача) ──
+      const qty = getXmlQty(item);
+
+      // ── Категорія (YML categoryId або текст) ──
+      const catIdRaw = getXmlVal(item,'categoryId','category_id','cat_id','CategoryId');
+      const catText  = getXmlVal(item,'category','cat','categoryName','категорія','категория','type','group');
+      const cat = catIdRaw && catMap[catIdRaw] ? catMap[catIdRaw] : (catText || '');
+
+      // ── Код / SKU ──
+      const codeRaw = getXmlVal(item,
+        'id','code','sku','article','articul','productId','product_id',
+        'vendorCode','vendor_code','ref','barcode','ean','gtin'
+      ) || item.getAttribute('id') || '';
+
+      // ── Опис ──
+      const descRaw = getXmlVal(item,
+        'description','опис','описание','description_ua','full_description',
+        'long_description','body','details'
+      );
+      // Очищаємо HTML-теги (таблиці розмірів тощо) з опису
+      const desc = descRaw && descRaw.includes('<')
+        ? descRaw.replace(/<[^>]*>/g,' ').replace(/\s{2,}/g,' ').trim()
+        : descRaw;
+
+      // ── Фото ──
+      const photo = getXmlPhoto(item);
+
+      // ── Розміри ──
+      const sizesRaw = getXmlVal(item,'sizes','size','розміри','розмір','available_sizes');
+
+      // ── Одиниця виміру ──
+      const unitRaw = getXmlVal(item,'unit','одиниця','unit_of_measure','measure') || 'pcs';
+      const unit = unitRaw.toLowerCase().includes('кг')||unitRaw.toLowerCase()==='kg'?'kg':
+                   unitRaw.toLowerCase().includes('г')||unitRaw.toLowerCase()==='g'?'g':
+                   unitRaw.toLowerCase().includes('л')||unitRaw.toLowerCase()==='l'?'l':'pcs';
+
+      // ── Тип товару ──
+      const ptype = detectPtype(name, cat, sizesRaw, unit);
+
+      if (existing.has(name) && doUpdate) {
+        const idx = db.products.findIndex(p=>p.name===name);
+        if (idx >= 0) {
+          if (price > 0) db.products[idx].price = price;
+          if (cost > 0)  db.products[idx].cost  = cost;
+          db.products[idx].qty = qty;
+          if (supplierId) db.products[idx].supplier = supplierId;
+          if (cat && !db.products[idx].cat) db.products[idx].cat = cat;
+          if (desc) db.products[idx].description = desc;
+          if (photo && !db.products[idx].photo) db.products[idx].photo = photo;
+        }
+      } else if (!existing.has(name)) {
+        const code = (codeRaw && !(db.products||[]).find(p=>p.code===codeRaw)) ? codeRaw : generateSKU();
+        db.products.push({
+          code, name, cat, qty, price, cost,
+          supplier: supplierId, ptype, unit,
+          sizes: sizesRaw||'', sizeStock:{},
+          description: desc, photo: photo||''
+        });
+        existing.add(name);
+      }
+      count++;
+    }
+  } catch(e) { console.error('XML import error:', e); }
+  return count;
+}
+
+// ============================================================
+// _smartUniversalImport — розумний імпорт CSV / JSON / TXT
+// (викликається через universalImport → redirect)
+// ============================================================
+function _smartUniversalImport(rawData, supplierId, doUpdate, skipZeroPrice) {
   let rows = [];
 
   if (rawData.type === 'xml') {
@@ -4516,11 +5550,12 @@ function universalImport(rawData, supplierId, doUpdate, skipZeroPrice, mapping) 
 
   if (rawData.type === 'txt') {
     rows = rawData.content.split(/\r?\n/).filter(Boolean).map(line => {
-      const parts = line.split(/[;,\t]/).map(p=>p.trim());
+      const parts = line.split(/[;\t]/).map(p=>p.trim());
       return { name:parts[0]||'', price:parts[1]||'0', qty:parts[2]||'0', cat:parts[3]||'', code:'', cost:'', description:'', unit:'' };
     });
   } else if (rawData.type === 'json') {
-    rows = rawData.rows;
+    rows = Array.isArray(rawData.rows) ? rawData.rows :
+           (rawData.rows?.products || rawData.rows?.items || rawData.rows?.offers || []);
   } else if (rawData.type === 'csv' || rawData.type === 'xlsx') {
     const [headers, ...dataRows] = rawData.rows;
     rows = dataRows.map(r => {
@@ -4530,118 +5565,64 @@ function universalImport(rawData, supplierId, doUpdate, skipZeroPrice, mapping) 
     });
   }
 
-  const getF = (row, fieldKey) => {
-    const col = mapping[fieldKey];
-    if (col && row[col] !== undefined) return String(row[col]).trim();
-    // fallback: try common aliases
-    const aliases = {
-      name:['name','назва','title','product','товар','найменування','model'],
-      price:['price','ціна','цена','retail_price','sale_price'],
-      cost:['cost','cost_price','purchase_price','wholesale'],
-      qty:['qty','quantity','stock','кількість','available','in_stock'],
-      cat:['cat','category','категорія','категория','type'],
-      code:['code','sku','article','id','articul'],
-      description:['description','опис','desc'],
-      unit:['unit','одиниця']
-    };
-    for (const alias of (aliases[fieldKey]||[])) {
-      const found = Object.keys(row).find(k => k.toLowerCase().trim() === alias);
-      if (found !== undefined) return String(row[found]||'').trim();
-    }
-    return '';
-  };
+  if (!rows.length) return 0;
+
+  // 🧠 Будуємо smart field map по першому непустому рядку
+  const sampleRow = rows.find(r => Object.keys(r).length > 0) || rows[0];
+  const fieldMap = buildFieldMap(sampleRow);
+  console.log('[SmartImport] Field map:', fieldMap);
+
+  const supplier = (db.suppliers||[]).find(s=>s.id===supplierId);
+  let baseUrl = '';
+  if (supplier?.importSources?.length) baseUrl = supplier.importSources[0]?.url||'';
+  try { baseUrl = new URL(baseUrl).origin; } catch(e) { baseUrl=''; }
 
   const existing = new Set((db.products||[]).map(p => p.name));
   let count = 0;
+
   for (const row of rows) {
-    const name = getF(row,'name');
+    const name = smartGet(row,'name',fieldMap);
     if (!name) continue;
-    const price = parseFloat((getF(row,'price')||'0').replace(/[^\d.]/g,'')) || 0;
+
+    const price = parseSmartPrice(smartGet(row,'price',fieldMap));
     if (skipZeroPrice && price === 0) continue;
-    const cost  = parseFloat((getF(row,'cost')||'0').replace(/[^\d.]/g,'')) || 0;
-    const qty   = parseInt((getF(row,'qty')||'0').replace(/[^\d]/g,'')) || 0;
-    const cat   = getF(row,'cat');
-    const rawCode = getF(row,'code');
-    const desc  = getF(row,'description');
-    const unit  = getF(row,'unit') || 'pcs';
+
+    const cost  = parseSmartPrice(smartGet(row,'cost',fieldMap));
+    const qty   = parseSmartQty(smartGet(row,'qty',fieldMap), smartGet(row,'available',fieldMap));
+    const cat   = smartGet(row,'cat',fieldMap);
+    const subcat= smartGet(row,'subcat',fieldMap);
+    const rawCode = smartGet(row,'code',fieldMap);
+    const descRaw2 = smartGet(row,'description',fieldMap);
+    const desc = descRaw2 && descRaw2.includes('<') ? descRaw2.replace(/<[^>]*>/g,' ').replace(/\s{2,}/g,' ').trim() : descRaw2;
+    const photo = normalizePhotoUrl(smartGet(row,'photo',fieldMap), baseUrl);
+    const unitRaw = smartGet(row,'unit',fieldMap)||'pcs';
+    const unit  = unitRaw.toLowerCase().includes('кг')||unitRaw.toLowerCase()==='kg'?'kg':
+                  unitRaw.toLowerCase().includes('г')||unitRaw.toLowerCase()==='g'?'g':
+                  unitRaw.toLowerCase().includes('л')||unitRaw.toLowerCase()==='l'?'l':'pcs';
+    const sizesRaw = smartGet(row,'sizes',fieldMap);
+    const ptype = detectPtype(name, cat, sizesRaw, unit);
 
     if (existing.has(name) && doUpdate) {
       const idx = db.products.findIndex(p => p.name === name);
       if (idx >= 0) {
-        db.products[idx] = { ...db.products[idx],
-          price: price || db.products[idx].price,
-          cost:  cost  || db.products[idx].cost,
-          qty, supplier: supplierId || db.products[idx].supplier,
-          ...(cat && { cat }),
-          ...(desc && { description: desc })
-        };
+        if (price > 0) db.products[idx].price = price;
+        if (cost  > 0) db.products[idx].cost  = cost;
+        db.products[idx].qty = qty;
+        if (supplierId) db.products[idx].supplier = supplierId;
+        if (cat && !db.products[idx].cat) db.products[idx].cat = cat;
+        if (subcat) db.products[idx].subcat = subcat;
+        if (desc) db.products[idx].description = desc;
+        if (photo && !db.products[idx].photo) db.products[idx].photo = photo;
       }
     } else if (!existing.has(name)) {
       const code = (rawCode && !(db.products||[]).find(p=>p.code===rawCode)) ? rawCode : generateSKU();
-      db.products.push({ code, name, cat, qty, price, cost, supplier: supplierId, ptype:'pcs', unit, sizes:'', sizeStock:{}, description: desc, photo:'' });
+      db.products.push({ code, name, cat, subcat, qty, price, cost,
+        supplier: supplierId, ptype, unit,
+        sizes: sizesRaw||'', sizeStock:{}, description: desc, photo: photo||'' });
       existing.add(name);
     }
     count++;
   }
-  return count;
-}
-
-function toggleXMLMode() { toggleImportMode(); }
-function handleXMLDrop(e) { handleImportDrop(e); }
-function readXMLFile(inp) { readImportFile(inp); }
-
-function importXMLProducts(xmlText, supplierId, doUpdate=true, skipZeroPrice=false) {
-  let count = 0;
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlText, 'text/xml');
-    const tagNames = ['item','product','offer','Product','Item','Offer','товар','позиція'];
-    let items = [];
-    for (const tag of tagNames) {
-      const found = Array.from(doc.querySelectorAll(tag));
-      if (found.length > 0) { items = found; break; }
-    }
-    if (items.length === 0) {
-      const root = doc.documentElement;
-      if (root.children.length > 0) {
-        const firstTag = root.children[0].tagName;
-        items = Array.from(doc.querySelectorAll(firstTag));
-      }
-    }
-    const getVal = (el, ...names) => {
-      for (const n of names) {
-        const child = el.querySelector(n) || el.querySelector(n.toLowerCase());
-        if (child && child.textContent.trim()) return child.textContent.trim();
-        const attr = el.getAttribute(n) || el.getAttribute(n.toLowerCase());
-        if (attr) return attr;
-      }
-      return '';
-    };
-    const existing = new Set((db.products||[]).map(p=>p.name));
-    for (const item of items) {
-      const name = getVal(item,'name','назва','title','productName','product_name','model','description_short') || getVal(item,'наименование');
-      if (!name) continue;
-      const price = parseFloat((getVal(item,'price','ціна','цена','Price','sale_price','retail_price','price_retail')||'0').replace(/[^\d.]/g,''))||0;
-      if (skipZeroPrice && price === 0) continue;
-      const cost = parseFloat((getVal(item,'cost','cost_price','purchase_price','wholesale_price','price_wholesale','закупочная_цена')||'0').replace(/[^\d.]/g,''))||0;
-      const qty = parseInt((getVal(item,'qty','quantity','stock','count','кількість','количество','in_stock','available')||'0').replace(/[^\d]/g,''))||0;
-      const cat = getVal(item,'category','cat','categoryName','категорія','категория','type');
-      const code = getVal(item,'id','code','sku','article','articul','productId','product_id') || generateSKU();
-      const desc = getVal(item,'description','опис','описание','description_short','desc');
-
-      if (existing.has(name) && doUpdate) {
-        const idx = db.products.findIndex(p=>p.name===name);
-        if (idx>=0) {
-          db.products[idx] = {...db.products[idx], price: price||db.products[idx].price, qty, cost: cost||db.products[idx].cost, supplier: supplierId, ...(desc&&{description:desc})};
-        }
-      } else if (!existing.has(name)) {
-        const skuCode = (db.products||[]).find(p=>p.code===code) ? generateSKU() : code;
-        db.products.push({code: skuCode, name, cat, qty, price, cost, supplier: supplierId, ptype:'pcs', unit:'pcs', sizes:'', sizeStock:{}, description: desc, photo:''});
-        existing.add(name);
-      }
-      count++;
-    }
-  } catch(e) { console.error('XML parse error:', e); }
   return count;
 }
 
@@ -5438,52 +6419,436 @@ function refreshData() {
 }
 
 // ===================== PHOTO UPLOAD =====================
+// ================================================================
+// 📸 PHOTO EDITOR — обрізка + водяний знак
+// ================================================================
 function openPhotoUpload(idx) {
   if (currentUser.role !== 'admin' && currentUser.role !== 'administrator') {
     showToast('Тільки адміністратор може змінювати фото', 'error'); return;
   }
   const p = db.products[idx];
+  window._photoEditIdx = idx;
+  window._photoBase64 = null;
   const content = `
     <div style="text-align:center;margin-bottom:16px">
       <div id="photo-preview" style="width:160px;height:160px;border-radius:12px;background:var(--surface);border:2px dashed var(--border);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:3rem">
-        ${p.photo ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">` : '📷'}
+        ${p.photo ? `<img id="preview-img" src="${p.photo}" style="width:100%;height:100%;object-fit:cover">` : '📷'}
       </div>
-      <div style="font-size:.8rem;color:var(--muted)">Натисніть нижче щоб обрати фото</div>
     </div>
     <div class="form-group">
       <label>📁 Завантажити з пристрою</label>
-      <input type="file" id="photo-file" accept="image/*" onchange="previewPhoto(this)" style="padding:8px;border:1.5px solid var(--border);border-radius:8px">
+      <input type="file" id="photo-file" accept="image/*" onchange="previewAndEditPhoto(this,${idx})" style="padding:8px;border:1.5px solid var(--border);border-radius:8px">
     </div>
     <div class="form-group">
       <label>🔗 Або вставити URL зображення</label>
       <input type="text" id="photo-url" placeholder="https://example.com/image.jpg" value="${p.photo&&p.photo.startsWith('http')?p.photo:''}" oninput="previewPhotoUrl(this.value)">
     </div>
-    ${p.photo ? `<div style="margin-top:8px"><button class="btn btn-danger btn-sm" onclick="removePhoto(${idx})">🗑️ Видалити фото</button></div>` : ''}
+    <div id="photo-editor-wrap" style="display:none;margin-top:12px;padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+      <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">✂️ Редактор фото</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <button class="btn btn-secondary btn-sm" onclick="cropPhotoSquare()">✂️ Обрізати 1:1</button>
+        <button class="btn btn-secondary btn-sm" onclick="addWatermarkToPhoto()">💧 Водяний знак</button>
+        <button class="btn btn-secondary btn-sm" onclick="rotatePhoto90()">🔄 Повернути</button>
+      </div>
+      <canvas id="photo-canvas" style="max-width:100%;border-radius:8px;display:none;border:1px solid var(--border)"></canvas>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+        <label style="font-size:.75rem;color:var(--muted)">Текст знаку:</label>
+        <input id="wm-text" type="text" placeholder="${p.name||'LaVok'}" style="flex:1;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem">
+      </div>
+    </div>
+    ${p.photo ? `<div style="margin-top:10px"><button class="btn btn-danger btn-sm" onclick="removePhoto(${idx})">🗑️ Видалити фото</button></div>` : ''}
   `;
   openModal('🖼️ Фото товару: ' + p.name, content, () => {
     const urlVal = document.getElementById('photo-url').value.trim();
-    const fileInput = document.getElementById('photo-file');
     if (urlVal) {
       db.products[idx].photo = urlVal;
       writeLog(`Фото товару: ${p.name} (URL)`);
-      renderStock(); doBackup(true);
-      return true;
+      renderStock(); doBackup(true); return true;
     }
-    if (fileInput.files && fileInput.files[0]) {
-      // Already handled by previewPhoto — photo is in window._photoBase64
-      if (window._photoBase64) {
-        db.products[idx].photo = window._photoBase64;
-        window._photoBase64 = null;
-        writeLog(`Фото товару: ${p.name} (файл)`);
-        renderStock(); doBackup(true);
-        return true;
-      }
+    if (window._photoBase64) {
+      db.products[idx].photo = window._photoBase64;
+      window._photoBase64 = null;
+      writeLog(`Фото товару: ${p.name} (файл/редактор)`);
+      renderStock(); doBackup(true); return true;
     }
-    // No changes
     return true;
   });
 }
 
+function previewAndEditPhoto(input, idx) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    window._photoBase64 = e.target.result;
+    const prev = document.getElementById('photo-preview');
+    if (prev) prev.innerHTML = `<img id="preview-img" src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+    const wrap = document.getElementById('photo-editor-wrap');
+    if (wrap) wrap.style.display = 'block';
+    const canvas = document.getElementById('photo-canvas');
+    if (canvas) {
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width; canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img,0,0);
+        canvas.style.display = 'block';
+        window._editorImg = img;
+      };
+      img.src = e.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function cropPhotoSquare() {
+  const img = window._editorImg; if (!img) { showToast('Спочатку завантажте фото','error'); return; }
+  const canvas = document.getElementById('photo-canvas'); if (!canvas) return;
+  const size = Math.min(img.width, img.height);
+  const ox = (img.width - size) / 2, oy = (img.height - size) / 2;
+  canvas.width = size; canvas.height = size;
+  canvas.getContext('2d').drawImage(img, ox, oy, size, size, 0, 0, size, size);
+  window._photoBase64 = canvas.toDataURL('image/jpeg', 0.92);
+  const prev = document.getElementById('photo-preview');
+  if (prev) prev.innerHTML = `<img src="${window._photoBase64}" style="width:100%;height:100%;object-fit:cover">`;
+  showToast('✅ Обрізано до квадрату','success');
+}
+
+function rotatePhoto90() {
+  const img = window._editorImg; if (!img) { showToast('Спочатку завантажте фото','error'); return; }
+  const canvas = document.getElementById('photo-canvas'); if (!canvas) return;
+  const tmp = document.createElement('canvas');
+  tmp.width = img.height; tmp.height = img.width;
+  const ctx = tmp.getContext('2d');
+  ctx.translate(tmp.width/2, tmp.height/2);
+  ctx.rotate(Math.PI/2);
+  ctx.drawImage(img, -img.width/2, -img.height/2);
+  canvas.width = tmp.width; canvas.height = tmp.height;
+  canvas.getContext('2d').drawImage(tmp,0,0);
+  window._photoBase64 = canvas.toDataURL('image/jpeg', 0.92);
+  const newImg = new Image(); newImg.onload = () => window._editorImg = newImg;
+  newImg.src = window._photoBase64;
+  const prev = document.getElementById('photo-preview');
+  if (prev) prev.innerHTML = `<img src="${window._photoBase64}" style="width:100%;height:100%;object-fit:cover">`;
+}
+
+function addWatermarkToPhoto() {
+  const img = window._editorImg; if (!img) { showToast('Спочатку завантажте фото','error'); return; }
+  const canvas = document.getElementById('photo-canvas'); if (!canvas) return;
+  const wmText = document.getElementById('wm-text')?.value || 'LaVok';
+  canvas.width = img.width; canvas.height = img.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img,0,0);
+  const fs = Math.max(18, Math.floor(img.width * 0.04));
+  ctx.font = `bold ${fs}px Arial`;
+  ctx.globalAlpha = 0.45;
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(0,0,0,.6)';
+  ctx.shadowBlur = 4;
+  const tw = ctx.measureText(wmText).width;
+  ctx.fillText(wmText, img.width - tw - 18, img.height - 18);
+  ctx.globalAlpha = 1;
+  window._photoBase64 = canvas.toDataURL('image/jpeg', 0.92);
+  const prev = document.getElementById('photo-preview');
+  if (prev) prev.innerHTML = `<img src="${window._photoBase64}" style="width:100%;height:100%;object-fit:cover">`;
+  showToast('💧 Водяний знак додано','success');
+}
+
+// ================================================================
+// 🔍 ПОШУК ФОТО В GOOGLE
+// ================================================================
+function searchProductPhoto(idx) {
+  const p = db.products[idx]; if (!p) return;
+  const query = encodeURIComponent(p.name + ' ' + (p.cat||''));
+  openModal('🔍 Знайти фото: ' + p.name, `
+    <div style="margin-bottom:10px;font-size:.82rem;color:var(--muted)">
+      Оберіть URL зображення з Google Images, або завантажте за прямим посиланням нижче:
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-secondary" onclick="window.open('https://www.google.com/search?tbm=isch&q=${query}','_blank')">🌐 Google Images</button>
+      <button class="btn btn-secondary" onclick="window.open('https://www.bing.com/images/search?q=${query}','_blank')">🔎 Bing Images</button>
+    </div>
+    <div class="form-group">
+      <label>Вставити URL зображення</label>
+      <input type="text" id="found-photo-url" placeholder="https://..." oninput="previewFoundPhoto(this.value)">
+    </div>
+    <div id="found-photo-preview" style="margin-top:8px;display:none">
+      <img id="found-photo-img" style="max-width:100%;border-radius:8px;border:1px solid var(--border)">
+    </div>
+  `, () => {
+    const url = document.getElementById('found-photo-url').value.trim();
+    if (!url) return false;
+    db.products[idx].photo = url;
+    writeLog(`Фото товару знайдено: ${p.name}`);
+    renderStock(); doBackup(true);
+    showToast('✅ Фото збережено','success');
+    return true;
+  });
+}
+
+function previewFoundPhoto(url) {
+  if (!url) return;
+  const wrap = document.getElementById('found-photo-preview');
+  const img = document.getElementById('found-photo-img');
+  if (wrap && img) { img.src = url; wrap.style.display = 'block'; }
+}
+
+// ================================================================
+// 💹 МАСОВА ЗМІНА ЦІН ПОСТАЧАЛЬНИКА
+// ================================================================
+function openPriceBulkModal() {
+  const supOpts = (db.suppliers||[]).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  openModal('💹 Масове керування цінами', `
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:14px">Змінити ціни для товарів певного постачальника (наприклад, +5% при зміні курсу)</div>
+    <div class="form-group">
+      <label>Постачальник</label>
+      <select id="bp-supplier"><option value="">— Всі товари —</option>${supOpts}</select>
+    </div>
+    <div class="form-group">
+      <label>Дія</label>
+      <select id="bp-op">
+        <option value="pct_plus">+% відсотків до ціни</option>
+        <option value="pct_minus">−% відсотків від ціни</option>
+        <option value="fixed_plus">+ фіксована сума ₴</option>
+        <option value="fixed_minus">− фіксована сума ₴</option>
+        <option value="multiply">× множник (напр. 1.05)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Значення</label>
+      <input type="number" id="bp-val" value="5" min="0" step="0.01" style="font-size:.95rem">
+    </div>
+    <div class="form-group" style="display:flex;flex-direction:column;gap:6px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="bp-cost-too"> Також змінити собівартість</label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="bp-round"> Округлити до цілих ₴</label>
+    </div>
+    <div id="bp-preview" style="margin-top:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:.82rem;color:var(--muted)">Оберіть параметри...</div>
+  `, () => {
+    const supId = document.getElementById('bp-supplier').value;
+    const op = document.getElementById('bp-op').value;
+    const val = parseFloat(document.getElementById('bp-val').value)||0;
+    const costToo = document.getElementById('bp-cost-too').checked;
+    const doRound = document.getElementById('bp-round').checked;
+    const applyOp = (cur) => {
+      let r;
+      if (op==='pct_plus')   r = cur*(1+val/100);
+      else if (op==='pct_minus')  r = Math.max(0,cur*(1-val/100));
+      else if (op==='fixed_plus') r = cur+val;
+      else if (op==='fixed_minus')r = Math.max(0,cur-val);
+      else if (op==='multiply')   r = cur*val;
+      else r = cur;
+      return doRound ? Math.round(r) : Math.round(r*100)/100;
+    };
+    let count = 0;
+    db.products.forEach(p => {
+      if (!p) return;
+      if (supId && p.supplier !== supId) return;
+      p.price = applyOp(+p.price||0);
+      if (costToo) p.cost = applyOp(+p.cost||0);
+      count++;
+    });
+    writeLog(`Масова зміна цін (${count} товарів, ${op} ${val})`);
+    renderAll(); doBackup(true);
+    showToast(`✅ Ціни оновлено для ${count} товарів`,'success');
+    return true;
+  });
+  // Live preview on change
+  setTimeout(()=>{
+    ['bp-supplier','bp-op','bp-val'].forEach(id=>{
+      document.getElementById(id)?.addEventListener('input',updateBpPreview);
+      document.getElementById(id)?.addEventListener('change',updateBpPreview);
+    });
+  },100);
+}
+
+function updateBpPreview() {
+  const supId = document.getElementById('bp-supplier')?.value;
+  const op    = document.getElementById('bp-op')?.value||'pct_plus';
+  const val   = parseFloat(document.getElementById('bp-val')?.value)||0;
+  const matched = db.products.filter(p=>p&&(!supId||p.supplier===supId));
+  const prev = document.getElementById('bp-preview');
+  if (prev) prev.innerHTML = `Буде змінено: <strong>${matched.length}</strong> товарів · Операція: <strong>${op}</strong> ${val}`;
+}
+
+// ================================================================
+// 📋 ЛИСТ ЗАКУПІВЛІ (швидко закінчуються)
+// ================================================================
+function openPurchaseList() {
+  // Аналізуємо темп продажів за останній тиждень
+  const weekAgo = new Date(Date.now() - 7*24*3600000);
+  const weekOrders = (db.orders||[]).filter(o => {
+    const d = parseOrderDate(o.date); return d >= weekAgo && o.status !== 'cancelled';
+  });
+  // Підраховуємо продажі по товарах
+  const salesMap = {};
+  weekOrders.forEach(o => {
+    const names = (o.product||'').split(';').map(s=>s.trim());
+    names.forEach(name => { salesMap[name] = (salesMap[name]||0) + (+o.qty||1); });
+  });
+  // Знаходимо товари що потребують поповнення
+  const threshold = +(document.getElementById('low-stock-threshold')?.value)||5;
+  const needReorder = db.products.filter(p => {
+    if (!p||!p.name) return false;
+    const weekSales = salesMap[p.name]||0;
+    const daysLeft = weekSales > 0 ? Math.floor((+p.qty / weekSales) * 7) : 999;
+    return +p.qty <= threshold || daysLeft <= 14;
+  }).sort((a,b)=>{
+    const da = salesMap[a.name]>0 ? (+a.qty/salesMap[a.name]*7) : 999;
+    const db_ = salesMap[b.name]>0 ? (+b.qty/salesMap[b.name]*7) : 999;
+    return da - db_;
+  });
+
+  if (!needReorder.length) { showToast('🎉 Всі товари в нормі! Поповнення не потрібне.','success'); return; }
+
+  const rows = needReorder.map(p => {
+    const sup = (db.suppliers||[]).find(s=>s.id===p.supplier);
+    const weekSales = salesMap[p.name]||0;
+    const daysLeft = weekSales > 0 ? Math.floor((+p.qty/weekSales)*7) : '∞';
+    const urgency = typeof daysLeft==='number'&&daysLeft<=7 ? '🔴' : typeof daysLeft==='number'&&daysLeft<=14?'🟡':'🟢';
+    return `<tr>
+      <td style="font-weight:600">${urgency} ${p.name}</td>
+      <td><span class="badge badge-${+p.qty<=0?'red':+p.qty<=3?'orange':'gray'}">${p.qty}</span></td>
+      <td style="color:var(--accent)">${weekSales}</td>
+      <td>${typeof daysLeft==='number'?daysLeft+' д':'—'}</td>
+      <td>${sup?.name||'—'}</td>
+      <td><input type="number" class="pl-order-qty" data-name="${p.name}" value="${Math.max(10,weekSales*2)}" min="1" style="width:65px;padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;font-size:.8rem"></td>
+    </tr>`;
+  }).join('');
+
+  openModal('📋 Лист закупівлі', `
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px">
+      🔴 Критично (до 7 днів) · 🟡 Попередження (до 14 днів) · на основі продажів за тиждень
+    </div>
+    <div class="table-wrap" style="max-height:360px;overflow-y:auto">
+      <table>
+        <thead><tr><th>Товар</th><th>Залишок</th><th>Прод./тиж</th><th>Хватить</th><th>Постачальник</th><th>Замовити</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="exportPurchaseListCSV()">📊 Експорт CSV</button>
+      <button class="btn btn-secondary" onclick="sendPurchaseListEmail()">📧 Надіслати email</button>
+    </div>
+  `, ()=>true, 'Закрити');
+}
+
+function exportPurchaseListCSV() {
+  const rows = document.querySelectorAll('.pl-order-qty');
+  let csv = 'Товар,Замовити\n';
+  rows.forEach(inp => { csv += `"${inp.dataset.name}",${inp.value}\n`; });
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = `purchase_list_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+async function sendPurchaseListEmail() {
+  const rows = document.querySelectorAll('.pl-order-qty');
+  let body = 'Лист закупівлі:\n\n';
+  rows.forEach(inp => { body += `• ${inp.dataset.name}: ${inp.value} шт.\n`; });
+  const email = db.settings?.notifyEmail || shopSettings.notifyEmail;
+  if (!email) { showToast('Вкажіть email у налаштуваннях','error'); return; }
+  await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'sendEmail', to:email, subject:'📋 Лист закупівлі LaVok CRM', body }) });
+  showToast('📧 Список надіслано на '+email,'success');
+}
+
+// ================================================================
+// 🚚 НП ТРЕКІНГ — автоматичне оновлення статусів ТТН
+// ================================================================
+async function checkNPTrackingAll() {
+  const npKey = db.settings?.npApiKey;
+  if (!npKey) { showToast('Вкажіть NP API ключ у налаштуваннях','error'); return; }
+  const sentOrders = db.orders.filter(o => o.ttn && (o.status==='sent'||o.status==='waiting_ttn'||o.status==='processing'));
+  if (!sentOrders.length) { showToast('Немає відправлених замовлень з ТТН','info'); return; }
+  let updated = 0;
+  for (const order of sentOrders) {
+    try {
+      const res = await fetch(GAS_URL, { method:'POST', body: JSON.stringify({
+        action: 'npTrack', apiKey: npKey, ttn: order.ttn
+      })});
+      const data = await res.json();
+      if (data.ok && data.statusCode) {
+        const idx = db.orders.indexOf(order);
+        // Статуси НП: 7=отримано, 9=відмова, 10=відмова при отриманні
+        if (['7','9','10','11','14','102','103','108'].includes(String(data.statusCode))) {
+          db.orders[idx].status = data.statusCode==='7' ? 'done' : 'cancelled';
+          updated++;
+          writeLog(`НП трекінг: замовлення ${order.id} → ${db.orders[idx].status} (ТТН ${order.ttn})`);
+        }
+      }
+    } catch(e) {}
+  }
+  if (updated) { doBackup(true); renderAll(); showToast(`✅ Оновлено ${updated} замовлень з НП`,'success'); }
+  else showToast('ℹ️ Змін статусів немає','info');
+}
+
+// ================================================================
+// 📱 TELEGRAM BOT — відправка повідомлень клієнту
+// ================================================================
+async function sendTelegramOrderNotif(order, type='confirm') {
+  const tgToken = db.settings?.tgBotToken;
+  if (!tgToken) return;
+  // Для цієї функції потрібен chatId клієнта — якщо є в базі
+  const client = (db.clients||[]).find(c=>c.phone===order.phone||c.name===order.client);
+  const chatId = client?.tgChatId;
+  if (!chatId) return;
+  let text = '';
+  if (type==='confirm') {
+    text = `✅ *Замовлення прийнято!*\n\nДякуємо, ${order.client}!\nВаше замовлення *#${order.id}* на суму *${(+order.total).toLocaleString()} ₴* прийнято в обробку.\n\nТовар: ${order.product}\nДоставка: ${order.city||''} ${order.address||''}`;
+  } else if (type==='ttn') {
+    text = `📦 *Ваша посилка відправлена!*\n\nЗамовлення #${order.id}\nТТН Нової Пошти: \`${order.ttn}\`\n\nВідстежуйте: https://novaposhta.ua/tracking/?cargo_number=${order.ttn}`;
+  }
+  try {
+    await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode:'Markdown' })
+    });
+  } catch(e) {}
+}
+
+// ================================================================
+// 💳 MONOBANK — перевірка оплат
+// ================================================================
+async function checkMonobankPayments() {
+  const monoToken = db.settings?.monobankToken;
+  if (!monoToken) { showToast('Вкажіть Monobank Token у налаштуваннях','error'); return; }
+  const from = Math.floor((Date.now() - 24*3600000) / 1000);
+  try {
+    const res = await fetch(GAS_URL, { method:'POST', body: JSON.stringify({
+      action: 'monobankStatement', token: monoToken, from
+    })});
+    const data = await res.json();
+    if (!data.ok || !data.statements?.length) { showToast('ℹ️ Нових транзакцій не знайдено','info'); return; }
+    let matched = 0;
+    data.statements.forEach(tx => {
+      const amount = Math.abs(tx.amount / 100);
+      const comment = (tx.comment||'').toLowerCase();
+      db.orders.forEach((o,i) => {
+        if (o.payStatus==='paid') return;
+        const total = +o.total;
+        const orderIdMatch = comment.includes(String(o.id).toLowerCase());
+        const amountMatch = Math.abs(total - amount) < 5;
+        if (orderIdMatch || amountMatch) {
+          db.orders[i].payStatus = 'paid';
+          db.orders[i].status = db.orders[i].status==='new'?'processing':db.orders[i].status;
+          writeLog(`Monobank: оплата замовлення #${o.id} (${amount} ₴)`);
+          matched++;
+        }
+      });
+    });
+    if (matched) { doBackup(true); renderAll(); showToast(`✅ Підтверджено ${matched} оплат з Monobank`,'success'); }
+    else showToast('ℹ️ Нових оплат не знайдено','info');
+  } catch(e) { showToast('❌ Помилка Monobank: '+e.message,'error'); }
+}
+
+// Авто-запуск трекінгу кожні 30 хв
+let _trackingTimer = null;
+function startAutoTracking() {
+  if (_trackingTimer) clearInterval(_trackingTimer);
+  _trackingTimer = setInterval(()=>{
+    if (!currentUser) return;
+    checkNPTrackingAll();
+  }, 30*60*1000);
+}
 function previewPhoto(input) {
   const file = input.files[0];
   if (!file) return;
@@ -5612,6 +6977,22 @@ async function silentRefresh() {
     ['orders','products','clients','logs','suppliers','expenses','chats','discounts'].forEach(k => {
       if (fresh[k]) db[k] = fresh[k];
     });
+    // Нормалізуємо після тихого оновлення
+    db.products = (db.products||[]).filter(p => p && p.name).map(p => {
+      if (typeof p.sizeStock === 'string') { try { p.sizeStock = JSON.parse(p.sizeStock); } catch(e) { p.sizeStock = {}; } }
+      if (!p.sizeStock || typeof p.sizeStock !== 'object') p.sizeStock = {};
+      p.price = +p.price || 0; p.cost = +p.cost || 0; p.qty = +p.qty || 0;
+      p.ptype = p.ptype || 'pcs'; p.unit = p.unit || 'pcs';
+      if (typeof p.description === 'string' && p.description.includes('<')) {
+        p.description = p.description.replace(/<[^>]*>/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      }
+      return p;
+    }).filter(Boolean);
+    db.suppliers = (db.suppliers||[]).map(s => {
+      if (typeof s.importSources === 'string') { try { s.importSources = JSON.parse(s.importSources); } catch(e) { s.importSources = []; } }
+      if (!Array.isArray(s.importSources)) s.importSources = [];
+      return s;
+    });
     // Нормалізуємо дати після отримання
     normalizeAllDates();
     // Оновлюємо інтерфейс тихо (без спалаху)
@@ -5713,6 +7094,8 @@ function startBackupTimer() {
   _lastOrderCount = db.orders.length; // ініціалізуємо лічильник
 
   startSiteChatPolling(); // polling чату з сайту
+  startAutoImportSync();  // авто-синк прайсів постачальників за URL
+  startAutoTracking();    // авто-трекінг ТТН Нової Пошти
 }
 </script>
 </body>
